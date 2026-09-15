@@ -1,5 +1,11 @@
 # Plan de migración a GitHub (Windows / Linux / macOS)
 
+> **Estado: Fases 1–5 completas, Fase 6 completa, commit inicial hecho
+> (`bb2b25b`).** Identidad configurada localmente
+> (`jlincovilc-pe` / email noreply de GitHub). Autenticado en GitHub como
+> `jlincovilc-pe` vía `gh auth login`. Falta ejecutar Fase 7 (crear el
+> repo remoto y hacer push) — ver sección 4.
+
 Este documento define el plan para convertir el directorio actual (todavía sin
 `git init`) en un repositorio de GitHub que, al clonarse en cualquiera de las
 tres plataformas, funcione siguiendo el [`README.md`](README.md) tal como está
@@ -127,9 +133,10 @@ no son el PDF final). En `Forecasting_monograph/` solo quedan versionados:
 
 ### Fase 0 — Decisiones previas
 
-1. **Nombre y visibilidad del repo en GitHub** — **decidido**: nombre
+1. **Nombre, owner y visibilidad del repo en GitHub** — **decidido**: nombre
    `repositorio_pronostico_series_temporales_estudiante` (igual que la
-   carpeta local, sin renombrar), visibilidad **pública**.
+   carpeta local, sin renombrar), owner `jlincovilc-pe`
+   (https://github.com/jlincovilc-pe), visibilidad **pública**.
 2. **Manejo de los dos CSV >100 MB** — **decidido**: se excluyen del repo
    (`data/05_electricity/electricity_long.csv`,
    `data/07_traffic_pems/traffic_pems.csv`). No se usa Git LFS: para un
@@ -265,9 +272,9 @@ documenta la excepción en `docs/TROUBLESHOOTING.md`.
 ### Fase 7 — Crear el repo remoto y publicar
 
 ```bash
-gh repo create <owner>/repositorio_pronostico_series_temporales_estudiante \
+gh repo create jlincovilc-pe/repositorio_pronostico_series_temporales_estudiante \
   --public --source=. --remote=origin
-git push -u origin main
+git push -u origin master
 ```
 
 (Requiere confirmación explícita antes de ejecutarse — es una acción visible
@@ -287,6 +294,76 @@ y no trivialmente reversible.)
   antes de ejecutar los notebooks de las semanas 5 y 7, y que
   `validate_repository.py`/`pytest` siguen pasando con esos archivos
   regenerados (no solo con los que estaban versionados).
+
+---
+
+## 4. Registro de ejecución
+
+Ejecutado en esta sesión, en orden:
+
+1. **Fase 1–2 (limpieza + `.gitignore`/`.gitattributes`):** creados en la
+   raíz. `.venv/`, cachés, los 2 CSV grandes, las fuentes `.typ` y archivos
+   editoriales asociados, y el `.bak.html` quedan fuera del control de
+   versiones (no se borraron del disco, solo se excluyeron).
+2. **Fase 3 (contenido):** corregidos los enlaces rotos del README raíz
+   (`Silabo/`→`silabo/`, `output.pdf`→nombre real, `html_presentations/
+   html_1/1.html`→`html_presentation/monografia_interactiva.html`, ancla del
+   TOC), eliminado `Forecasting_monograph/CONFIGURACION_TYPST.md`,
+   reescritas las tablas de `Forecasting_monograph/README.md` y las
+   secciones correspondientes del README raíz para no listar archivos que
+   ya no se publican, y añadido el matiz sobre los 2 CSV grandes en el
+   README raíz y en `forecasting-for-data-science/README.md`.
+3. **Hallazgo adicional no previsto en el plan original:** el "contrato de
+   autocontenido" no era solo texto de README — estaba codificado como
+   `assert` duro en `scripts/validate_repository.py` y en
+   `tests/test_repository.py` (exigían los 9 CSV siempre presentes). Se
+   confirmó con el autor y se modificaron ambos archivos (más
+   `scripts/build_manifest.py` y una constante compartida
+   `OPTIONAL_LARGE_DATASETS` en `scripts/_common.py`) para que los dos
+   datasets grandes sean opcionales y regenerables sin romper `make
+   validate` / `pytest -q` en un clon nuevo. Verificado localmente
+   simulando su ausencia (se movieron a `/tmp`, se corrió la suite, se
+   restauraron).
+4. **Bug adicional encontrado y corregido:** `build_manifest.py` no excluía
+   `.venv/` de su barrido (`ROOT.rglob("*")`), así que el primer
+   `MANIFEST.sha256` regenerado tenía 39,131 entradas (39,067 del `.venv`
+   local). Corregido para excluir también `.venv`, `.benchmarks` y
+   `.ipynb_checkpoints`; el manifest regenerado quedó en 63 archivos.
+5. **Fase 4 (licencia):** creado `LICENSE` (MIT) en la raíz, README raíz
+   actualizado para apuntar ahí.
+6. **Fase 5 (git init):** revisados y eliminados los tres `.git` anidados
+   (ver 1.5), `git init` en la raíz, `git add -A`. Verificado que no hay
+   gitlinks/submódulos rotos, que ningún archivo excluido quedó incluido
+   (`git ls-files` no devuelve `.venv/`, los 2 CSV grandes, `.typ`, JSON
+   editoriales, cachés ni el `.bak.html`), y que el total a commitear es
+   ~49 MB con el archivo individual más grande en 15 MB (`germany_energy.csv`)
+   — muy por debajo del límite de 100 MB de GitHub.
+7. **Fase 6 (CI):** creado `.github/workflows/ci.yml` en la raíz (matriz
+   `ubuntu-latest` / `windows-latest` / `macos-latest`, Python 3.11,
+   `pip install -r requirements.txt` → `validate_repository.py` → `pytest
+   -q`, todo dentro de `forecasting-for-data-science/`). Se corrigió
+   `tests/test_documentation.py::test_operational_helpers_exist`, que
+   comprobaba la existencia de `.github/workflows/ci.yml` **dentro** de
+   `forecasting-for-data-science/` (herencia de cuando esa carpeta era su
+   propio repo con `.git` — hallazgo 1.5); ahora comprueba la ruta real en
+   la raíz del monorepo, que es la única que GitHub Actions ejecuta.
+8. **Verificación local final:** `python scripts/validate_repository.py` y
+   `python -m pytest -q` (13 tests) pasan limpio con los 9 CSV presentes en
+   disco y con los 2 grandes ausentes (simulado). `git status` queda limpio
+   tras el `add -A` salvo el commit pendiente.
+
+9. **Commit inicial:** identidad configurada localmente
+   (`git config user.name "jlincovilc-pe"`, email noreply de GitHub
+   `260700074+jlincovilc-pe@users.noreply.github.com`, decidido con el
+   autor). Commit `bb2b25b` creado.
+10. **Autenticación GitHub:** `gh` CLI instalado y autenticado como
+    `jlincovilc-pe` (scopes `repo`, `read:org`, `gist`) vía
+    `gh auth login --web` (flujo de device code, confirmado por el autor en
+    el navegador).
+
+**Pendiente:** Fase 7 (crear el repo remoto bajo `jlincovilc-pe` y hacer
+`git push`), confirmada por el autor ("subimos lo que se puede para que el
+repositorio no tenga problemas").
 
 ---
 
