@@ -1,0 +1,105 @@
+version: 1.0.0
+generated_data_included: true
+max_source_mib: 500
+datasets:
+- id: 01_traffic_metro
+  week: 1
+  title: Metro Interstate Traffic Volume
+  files:
+  - data/01_traffic_metro/traffic.csv
+  rows: 48204
+  frequency: hourly
+  target: y
+  covariates:
+  - holiday
+  - temp
+  - rain_1h
+  - snow_1h
+  - clouds_all
+  - weather_main
+  - weather_description
+- id: 02_energy
+  week: 2
+  title: Appliances Energy Prediction
+  files:
+  - data/02_energy/energy.csv
+  rows: 19735
+  frequency: 10min
+  target: y
+  covariates: 27 indoor/outdoor, weather and control variables
+- id: 03_beijing
+  week: 3
+  title: Beijing PM2.5
+  files:
+  - data/03_beijing/beijing_pm25.csv
+  rows: 43800
+  frequency: hourly
+  target: pm2.5
+  covariates:
+  - DEWP
+  - TEMP
+  - PRES
+  - cbwd
+  - Iws
+  - Is
+  - Ir
+- id: 04_bike
+  week: 4
+  title: Bike Sharing
+  files:
+  - data/04_bike/bike_hour.csv
+  - data/04_bike/bike_day.csv
+  rows:
+    hourly: 17379
+    daily: 731
+  frequency:
+  - hourly
+  - daily
+  target: cnt
+  covariates: calendar, weather and normalized meteorology
+- id: 05_electricity
+  week: 5
+  title: Electricity Load Diagrams 2011-2014
+  files:
+  - data/05_electricity/electricity_long.csv
+  rows: 9732480
+  series: 370
+  timestamps: 26304
+  frequency: hourly
+  target: y
+  covariates: series identity; multi-series cross-learning
+- id: 06_opsd
+  week: 6
+  title: Open Power System Data Germany
+  files:
+  - data/06_opsd/germany_energy.csv
+  rows: 50401
+  columns: 43
+  frequency: hourly
+  target: DE_load_actual_entsoe_transparency
+  covariates: load forecasts, prices, solar/wind generation, profiles and capacities
+- id: 07_traffic_pems
+  week: 7
+  title: PeMS-SF
+  files:
+  - data/07_traffic_pems/traffic_pems.csv
+  rows: 63360
+  days: 440
+  series: 963
+  frequency: 10min within day
+  target: sensor occupancy vector
+  covariates:
+  - weekday_label
+  - split
+  - day_id
+  - slot_10min
+- id: 08_m3
+  week: 8
+  title: M3 Competition Monthly
+  files:
+  - data/08_m3/m3_monthly.csv
+  rows: 167562
+  series: 1428
+  frequency: monthly
+  target: y
+  covariates: multi-series benchmark; no exogenous variables

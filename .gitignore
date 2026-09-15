@@ -1,0 +1,43 @@
+# Entornos virtuales
+.venv/
+venv/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.benchmarks/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Editores
+*.swp
+*.swo
+
+# Datos crudos temporales (regenerables con `make download`)
+forecasting-for-data-science/raw/
+
+# Datasets >100 MiB: superan el límite de archivo de GitHub.
+# Se regeneran con `make download && make clean` (ver forecasting-for-data-science/README.md).
+forecasting-for-data-science/data/05_electricity/electricity_long.csv
+forecasting-for-data-science/data/07_traffic_pems/traffic_pems.csv
+
+# Fuentes Typst y material editorial de trabajo (no publicados; solo se
+# distribuyen los PDF compilados).
+silabo/*.typ
+Forecasting_monograph/*.typ
+Forecasting_monograph/assets/*.py
+Forecasting_monograph/edit_mon.json
+Forecasting_monograph/edit_presentation.json
+Forecasting_monograph/CONFIGURACION_TYPST.md
+Forecasting_monograph/monografia_timeseries_benchmarks.html
+Forecasting_monograph/monografia_timeseries_benchmarks.txt
+
+# Backups sueltos
+html_presentation/*.bak.html

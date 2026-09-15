@@ -1,0 +1,433 @@
+{
+  "directed": true,
+  "multigraph": false,
+  "graph": {
+    "title": "Semana 6: Deep Learning con LSTM",
+    "chapter": "06",
+    "course": "Forecasting de Series Temporales",
+    "format": "node-link",
+    "description": "Objeto pedagógico del Capítulo 6: Evaluación de Deep Learning (LSTM) frente a modelos tabulares y baselines en el dataset OPSD Germany."
+  },
+  "nodes": [
+    {
+      "id": "capitulo_06",
+      "label": "Capítulo 6: Deep Learning con LSTM",
+      "type": "chapter",
+      "group": 0,
+      "level": 0,
+      "chapter_number": 6,
+      "topic": "Redes secuenciales y justificación de coste computacional",
+      "cct": {
+        "ontologico": {
+          "nivel": "carga eléctrica nacional agregada (MW/hora)",
+          "unidad_de_analisis": "sistema eléctrico nacional",
+          "limites_de_inferencia": [
+            "No modela consumo de hogares individuales ni despacho de plantas específicas.",
+            "La dinámica está condicionada por la penetración de renovables (eólica/solar) y covariables macro."
+          ]
+        },
+        "epistemico": {
+          "rrl_actual": 4,
+          "rrl_esperado": 4,
+          "estado_evidencia": "ejecutado",
+          "protocolo": "Ventanas móviles de 3 folds: train 365 días, test 168h, orígenes a 7 días; normalización solo con train.",
+          "incertidumbre": [
+            "La evaluación one-step actualizada no equivale a forecast recursivo puro de 168 horas."
+          ]
+        },
+        "pragmatico": {
+          "stakeholder": "operador de red (TSO/DSO)",
+          "decision": "si adoptar LSTM o mantener LightGBM como modelo de producción",
+          "traduccion_operativa": "Mejoras marginales en MASE deben traducirse a MW de reserva evitados para justificar la complejidad de DL."
+        }
+      },
+      "evidence": [
+        {
+          "claim": "LightGBM supera a LSTM, SeasonalNaive y ARIMA bajo el protocolo de validación temporal con covariables ex-ante.",
+          "value": {
+            "LightGBM_MASE": 0.234,
+            "SeasonalNaive_MASE": 0.495,
+            "LSTM_MASE": 0.576,
+            "ARIMA_MASE": 3.263,
+            "LSTM_parametros": 5153
+          },
+          "source_ref": "notebook:06:nb_cell_07",
+          "status": "ejecutado",
+          "metric_comparability_scope": "solo_capitulo_6",
+          "oracle": false,
+          "epistemic_warning": "La victoria de LightGBM está condicionada a la disponibilidad de DE_load_forecast (atribución abierta, ver Cap. 10 §10.7-10.8)."
+        }
+      ],
+      "integrity": {
+        "leakage_controls": [
+          "scaler_solo_train",
+          "ventanas_moviles_sin_fuga",
+          "normalizacion_por_fold"
+        ],
+        "data_statement": "Open Power System Data - Germany, licencia documentada.",
+        "ai_use": "no declarado",
+        "conflicts": "ninguno",
+        "limitations": [
+          "Early stopping y scheduler reducen sobreajuste, pero no garantizan superioridad arquitectónica.",
+          "ARIMA (MASE 3.263) sirve aquí como piso de referencia para demostrar la necesidad de covariables, no como modelo candidato.",
+          "El resultado no se extrapola a otros países u horizontes sin validación local."
+        ]
+      },
+      "quality": {
+        "gates": {
+          "G1_problema": "pass",
+          "G2_nivel_analisis": "pass",
+          "G3_evidencia": "pass",
+          "G4_audiencia": "pass",
+          "G5_metodo": "pass",
+          "G6_integridad": "pass",
+          "G7_trazabilidad": "pass",
+          "G8_no_sobreventa": "pass"
+        },
+        "decision": "aprobado"
+      },
+      "sources": [
+        {
+          "source_type": "monografia",
+          "locator": "monografia_timeseries_benchmarks.typ:capitulo=7"
+        },
+        {
+          "source_type": "presentacion",
+          "locator": "presentacion_monografia.typ:capitulo=7"
+        },
+        {
+          "source_type": "notebook",
+          "locator": "06_semana_6_deep_learning_lstm.ipynb"
+        }
+      ],
+      "decision_ejecutiva": "No usar LSTM por defecto; justificar el costo (entrenamiento, memoria, complejidad operativa) con una ganancia de precisión demostrada sobre los mismos folds.",
+      "limitations": [
+        "Early stopping y scheduler reducen sobreajuste, pero no garantizan superioridad arquitectónica.",
+        "ARIMA (MASE 3.263) sirve aquí como piso de referencia para demostrar la necesidad de covariables, no como modelo candidato.",
+        "El resultado no se extrapola a otros países u horizontes sin validación local."
+      ],
+      "oracle": false
+    },
+    {
+      "id": "clase_capitulo_06",
+      "label": "Clase del Capítulo 6",
+      "type": "class_plan",
+      "group": 1,
+      "level": 1,
+      "duration_minutes": 80,
+      "objective": "Determinar si una LSTM justifica su coste frente a LightGBM y baselines estacionales.",
+      "business_case": "Operador del sistema eléctrico alemán (OPSD Germany)",
+      "agenda": [
+        {
+          "start": 0,
+          "end": 10,
+          "duration": 10,
+          "type": "apertura",
+          "activity": "Caso de negocio: operador del sistema eléctrico alemán y coste del error",
+          "resource_refs": [],
+          "product": null
+        },
+        {
+          "start": 10,
+          "end": 20,
+          "duration": 10,
+          "type": "contexto_negocio",
+          "activity": "Contrato de datos y EDA: STL semanal, estacionariedad",
+          "resource_refs": [],
+          "product": null
+        },
+        {
+          "start": 20,
+          "end": 35,
+          "duration": 15,
+          "type": "metodo_validacion",
+          "activity": "Estrategia de validación: ventanas móviles de 3 folds",
+          "resource_refs": [],
+          "product": null
+        },
+        {
+          "start": 35,
+          "end": 60,
+          "duration": 25,
+          "type": "demo_practica",
+          "activity": "Modelado: LSTM (tensor 3D) vs. LightGBM vs. ARIMA vs. baseline",
+          "resource_refs": [],
+          "product": null
+        },
+        {
+          "start": 60,
+          "end": 70,
+          "duration": 10,
+          "type": "discusion_limites",
+          "activity": "Diagnóstico de residuos y costo-beneficio de la LSTM",
+          "resource_refs": [],
+          "product": null
+        },
+        {
+          "start": 70,
+          "end": 80,
+          "duration": 10,
+          "type": "cierre_decision",
+          "activity": "Decisión ejecutiva y ejercicios",
+          "resource_refs": [],
+          "product": null
+        }
+      ],
+      "decision_ejecutiva": "No usar LSTM por defecto; justificar el costo (entrenamiento, memoria, complejidad operativa) con una ganancia de precisión demostrada sobre los mismos folds."
+    },
+    {
+      "id": "diapositivas_capitulo_06",
+      "label": "Diapositivas del Capítulo 6 (sincronizado con presentacion_monografia.typ)",
+      "type": "slide_deck",
+      "group": 2,
+      "level": 1,
+      "slide_count": 2,
+      "format": "slides",
+      "synced_with_source": "presentacion_monografia.typ"
+    },
+    {
+      "id": "notebook_capitulo_06",
+      "label": "Notebook del Capítulo 6",
+      "type": "notebook",
+      "group": 3,
+      "level": 1,
+      "file": "06_semana_6_deep_learning_lstm.ipynb",
+      "dataset": "OPSD Germany (germany_energy.csv)",
+      "kernel": "Python 3 (PyTorch / CPU)",
+      "purpose": "Entrenar LSTM con controles de generalización y comparar contra ARIMA, LightGBM y baseline estacional."
+    },
+    {
+      "id": "nb_cell_01",
+      "label": "Celda 1: Contrato de Datos",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "purpose": "Lectura, aserción de shape (50401, 43) y selección de covariables nacionales.",
+      "code_summary": "raw=pd.read_csv(...); assert raw.shape==(50_401,43)",
+      "expected_output": "Schema verificado, sin gaps temporales en la rejilla horaria."
+    },
+    {
+      "id": "nb_cell_02",
+      "label": "Celda 2: EDA y Estacionalidad",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "purpose": "Descomposición STL semanal (periodo 168) y perfil horario.",
+      "code_summary": "STL(eda, period=168, robust=True).fit()",
+      "expected_output": "Gráficos de tendencia, estacionalidad semanal y residuo."
+    },
+    {
+      "id": "nb_cell_03",
+      "label": "Celda 3: Estrategia de Validación",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "purpose": "Ventanas móviles: 3 folds, cada uno entrena con los 365 días previos (8,760 horas) y valida los 7 días siguientes (168 horas), con orígenes separados 7 días entre sí (ciclo de reentrenamiento semanal incremental).",
+      "code_summary": "Generación de bloques train/test contiguos en el tiempo (365 días train / 168 horas test, 3 folds).",
+      "expected_output": "Diagrama de bloques temporales (Train azul, Test rojo); 3 folds con train=8,760h, test=168h."
+    },
+    {
+      "id": "nb_cell_04",
+      "label": "Celda 4: Tensores Secuenciales",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "purpose": "Construcción de ventanas deslizantes (Lookback=168, Stride=3).",
+      "code_summary": "def sequences(values, lookback=168, stride=3): ...",
+      "expected_output": "Tensores de forma (N, 168, 6) listos para PyTorch."
+    },
+    {
+      "id": "nb_cell_05",
+      "label": "Celda 5: Modelado (LSTM vs Boosting)",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "purpose": "Entrenamiento de LoadLSTM con early stopping y comparación con LightGBM.",
+      "code_summary": "model=LoadLSTM(...); train_lstm(...)",
+      "expected_output": "Historial de pérdidas (train/val loss) y predicciones por fold."
+    },
+    {
+      "id": "nb_cell_06",
+      "label": "Celda 6: Análisis Posterior",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "purpose": "Diagnóstico de residuos (Ljung-Box, Jarque-Bera, ARCH).",
+      "code_summary": "acorr_ljungbox(residuals); jarque_bera(residuals)",
+      "expected_output": "Tablas de tests estadísticos rechazando H0 (autocorrelación y no normalidad presentes)."
+    },
+    {
+      "id": "nb_cell_07",
+      "label": "Celda 7: Lecciones y Decisión",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "purpose": "Tabla resumen de Precisión vs Complejidad y conclusión ejecutiva.",
+      "code_summary": "decision=pd.DataFrame({'model':..., 'MASE_mean':..., 'requires_sequence_tensor':...})",
+      "expected_output": "LightGBM MASE 0.234, LSTM MASE 0.576. Decisión: Mantener LightGBM."
+    },
+    {
+      "id": "evaluacion_capitulo_06",
+      "label": "Ejercicios Propuestos: Semana 6",
+      "type": "assessment",
+      "group": 4,
+      "level": 1,
+      "exercises": [
+        "Cambie lookback a 24, 336 y 672.",
+        "Evalúe forecast recursivo sin observaciones del test.",
+        "Añada embeddings calendario.",
+        "Compare GRU y LSTM con igual número de parámetros.",
+        "Mida energía/latencia de entrenamiento y serving."
+      ]
+    },
+    {
+      "id": "slide_resultados_capitulo_06",
+      "label": "Slide - Capítulo 7 — Semana 6 · OPSD Germany · Resultados",
+      "type": "slide",
+      "group": 2,
+      "level": 2,
+      "title": "El asterisco del 0.234: atribución abierta",
+      "kicker": "Capítulo 7 — Semana 6 · OPSD Germany · Resultados",
+      "content": [
+        "Headline: MASE 0.234 — LightGBM; la LSTM (0.576) pierde hasta contra el naive (0.495).",
+        "Ficha: Dominio energía nacional; Decisión despacho/capacidad; Horizonte 168h; Baseline SeasonalNaive; Riesgo elegir LSTM por moda; Métrica MASE.",
+        "Tabla: LightGBM 0.234; SeasonalNaive 0.495; LSTM 0.576; ARIMA(2,1,2) 3.263."
+      ],
+      "source_document": "presentacion_monografia.typ"
+    },
+    {
+      "id": "slide_metodo_capitulo_06",
+      "label": "Slide - Capítulo 7 — Semana 6 · OPSD Germany · Método y lección",
+      "type": "slide",
+      "group": 2,
+      "level": 2,
+      "title": "Precisión vs. costo: el argumento completo",
+      "kicker": "Capítulo 7 — Semana 6 · OPSD Germany · Método y lección",
+      "content": [
+        "LSTM: tensor 3D, hidden=32, 5,153 parámetros, normalización solo con train; ajuste total 23.3s.",
+        "Ventanas móviles de 3 folds: train 365 días, test 168h, orígenes a 7 días.",
+        "Sesgo de la LSTM: +314/+299/+252 MW — sub-pronóstico sistemático.",
+        "Decisión: no usar LSTM por defecto; justificar el costo con mejora medible bajo el mismo protocolo."
+      ],
+      "source_document": "presentacion_monografia.typ"
+    }
+  ],
+  "links": [
+    {
+      "source": "capitulo_06",
+      "target": "clase_capitulo_06",
+      "relation": "contains"
+    },
+    {
+      "source": "capitulo_06",
+      "target": "diapositivas_capitulo_06",
+      "relation": "contains"
+    },
+    {
+      "source": "capitulo_06",
+      "target": "notebook_capitulo_06",
+      "relation": "contains"
+    },
+    {
+      "source": "clase_capitulo_06",
+      "target": "diapositivas_capitulo_06",
+      "relation": "uses"
+    },
+    {
+      "source": "clase_capitulo_06",
+      "target": "notebook_capitulo_06",
+      "relation": "executes"
+    },
+    {
+      "source": "notebook_capitulo_06",
+      "target": "nb_cell_01",
+      "relation": "contains"
+    },
+    {
+      "source": "nb_cell_01",
+      "target": "nb_cell_02",
+      "relation": "next_cell"
+    },
+    {
+      "source": "nb_cell_02",
+      "target": "nb_cell_03",
+      "relation": "next_cell"
+    },
+    {
+      "source": "nb_cell_03",
+      "target": "nb_cell_04",
+      "relation": "next_cell"
+    },
+    {
+      "source": "nb_cell_04",
+      "target": "nb_cell_05",
+      "relation": "next_cell"
+    },
+    {
+      "source": "nb_cell_05",
+      "target": "nb_cell_06",
+      "relation": "next_cell"
+    },
+    {
+      "source": "nb_cell_06",
+      "target": "nb_cell_07",
+      "relation": "next_cell"
+    },
+    {
+      "source": "nb_cell_05",
+      "target": "nb_cell_06",
+      "relation": "verifies"
+    },
+    {
+      "source": "nb_cell_06",
+      "target": "nb_cell_07",
+      "relation": "supports"
+    },
+    {
+      "source": "evaluacion_capitulo_06",
+      "target": "clase_capitulo_06",
+      "relation": "assesses"
+    },
+    {
+      "source": "diapositivas_capitulo_06",
+      "target": "slide_resultados_capitulo_06",
+      "relation": "contains"
+    },
+    {
+      "source": "clase_capitulo_06",
+      "target": "slide_resultados_capitulo_06",
+      "relation": "uses"
+    },
+    {
+      "source": "diapositivas_capitulo_06",
+      "target": "slide_metodo_capitulo_06",
+      "relation": "contains"
+    },
+    {
+      "source": "clase_capitulo_06",
+      "target": "slide_metodo_capitulo_06",
+      "relation": "uses"
+    }
+  ],
+  "relation_vocabulary": [
+    "contains",
+    "executes",
+    "verifies",
+    "assesses",
+    "next_cell",
+    "supports",
+    "conditions",
+    "limits",
+    "contradicts",
+    "uses",
+    "presented_in",
+    "displays",
+    "backs_up",
+    "summarizes",
+    "cited_from",
+    "precedes",
+    "references",
+    "followed_by"
+  ],
+  "cct_schema_version": "1.0"
+}

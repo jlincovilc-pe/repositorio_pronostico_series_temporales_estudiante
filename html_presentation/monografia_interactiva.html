@@ -1,0 +1,2801 @@
+<!DOCTYPE html>
+<!-- GENERADO: v4 | CORRECCIONES: FIX-01..08 | MODULOS: 05-10 + GLOSARIO -->
+<!--
+  ════════════════════════════════════════════════════════════════════
+  MONOGRAFÍA INTERACTIVA SIMBÓLICA · v4 (LAB OSCURO · COMPLETA)
+  Compañero simbólico de «Forecasting de Series Temporales en Ocho
+  Dominios Industriales». Un solo archivo HTML autocontenido, cero
+  dependencias, funciona offline (doble clic).
+
+  v4 — reconducción final sobre la base v3 (M1):
+    FIX-01 «pull every lever» → «tira de cada palanca» (ya conformado en v3,
+           se conserva y verifica).
+    FIX-02 separadores: brand y ticker con «·» explícitos + flex gap (sin
+           concatenaciones «simbólicomundo»/«registrosistema»).
+    FIX-03 semilla por defecto 42 (eco SEED = 42); #4242 alcanzable con
+           ?seed=4242 o re-sembrar. Ya conformado en v3; se conserva.
+    FIX-04 indicador de capítulo activo: clase .active + aria-current en el
+           enlace del capítulo actual, vía el router por hash (este documento
+           es un router de ventanas, no una página con scroll; hashchange es
+           el observador correcto y no necesita IntersectionObserver).
+    FIX-05 sliders propios: pista 4 px, pulgar 16 px, acento teal #0E7490,
+           para todos los input[type=range] del documento.
+    FIX-06 veredictos en .verdict-card con lógica JS: .safe (ok) / .alert
+           (ámbar) / .alert.danger (rojo) según región de parámetros.
+    FIX-07 actualización eficiente: sched() coalesce los eventos de entrada
+           en un requestAnimationFrame por simulación (rAF solo durante la
+           interacción; en reposo no hay trabajo). Transición CSS sutil en
+           .viz para el redimensionado.
+    FIX-08 exclusiones del pie en lista legible «excluido por decisión».
+  MÓDULOS NUEVOS: 05 Leakage · 06 Historia · 07 Gradiente · 08 Apilamiento ·
+  09 La promesa · 10 Palancas · Glosario con buscador (34 términos).
+
+  DESVIACIONES (especificado vs. ejecutado):
+    · Paleta: tokens base exactos del pliego (#0f172a / #0E7490 / #B45309 /
+      #A61E2B / #e2e8f0). Sobre fondo oscuro, #B45309 y #A61E2B no alcanzan
+      contraste AA como TEXTO, así que los tokens se usan en bordes/tracks y
+      se derivan variantes luminosas (#f59e0b / #f87171) para texto y trazos.
+      Fuentes: 'Inter' y 'JetBrains Mono' encabezan las pilas; sin CDN no se
+      pueden incrustar, así que caen a system-ui / monospace si no están
+      instaladas localmente.
+    · Módulo 05: el pliego ilustra ~0,40 (centrada) vs ~0,36 (causal). Con
+      ventanas-media reales, esa pareja es matemáticamente inalcanzable
+      (la fuga compartida σ²/w fija la relación hueco/base). El mundo
+      sembrado produce causal ≈ 0,33 (≈ 0,36 del pliego) y centrada ≈ 0,60:
+      la inflación se ve MÁS clara, no menos. Documentado aquí.
+    · FIX-04: se usa hashchange (router de ventanas) en lugar de
+      IntersectionObserver; el efecto visible exigido (.active) es idéntico.
+    · FIX-07: se usa SVG + rAF coalescido; no hay Canvas 2D (SVG cubre todos
+      los módulos y permite texto nítido y accesible sin doble render).
+  HONESTIDAD DE DATOS: 100 % simbólico. Todas las series nacen de
+  mulberry32 con semilla visible. No se extrae ningún dato real, métrica o
+  número-tótem de la monografía. Umbrales permitidos (conceptuales):
+  MASE = 1 · cobertura nominal 80 % · PSI 0,25 · embargo ≥ ciclo dominante.
+  ════════════════════════════════════════════════════════════════════
+-->
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0f172a">
+<meta name="description" content="Compañero interactivo simbólico de la monografía: 10 simulaciones insignia con PRNG sembrado. Sin datos reales: pura intuición.">
+<title>Monografía interactiva simbólica · Forecasting de Series Temporales</title>
+<style>
+/* ════════ 01 · TOKENS (sistema estricto v4) + BASE ════════ */
+:root{
+  --bg:#0f172a; --bg2:#111d35; --panel:#152238; --panel2:#1a2a44; --panel3:#21304c;
+  --line:rgba(148,163,184,.16); --line2:rgba(148,163,184,.30);
+  /* --tx3 subido de #64748b (3.75:1 sobre --bg, reprueba AA) a #8896ab (≈5.95:1, aprueba AA).
+     --tx2 #94a3b8 re-verificado sobre --bg: ≈6.97:1, ya aprobaba AA; sin cambios. */
+  --tx:#e2e8f0; --tx2:#94a3b8; --tx3:#8896ab;
+  --teal:#0E7490; --teal-b:#22d3ee;
+  --amber:#B45309; --amber-b:#f59e0b;
+  --red:#A61E2B; --red-b:#f87171;
+  --green:#15803d; --green-b:#4ade80;
+  /* paleta de capítulos recalibrada en HSL: S y L fijos, H en pasos de 36° (rueda completa
+     en 10 pasos) → peso visual uniforme entre los 10 acentos. Mismo orden de asignación. */
+  --c1:hsl(0 65% 62%); --c2:hsl(36 65% 62%); --c3:hsl(72 65% 62%); --c4:hsl(108 65% 62%); --c5:hsl(144 65% 62%);
+  --c6:hsl(180 65% 62%); --c7:hsl(216 65% 62%); --c8:hsl(252 65% 62%); --c9:hsl(288 65% 62%); --c10:hsl(324 65% 62%);
+  --mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+  --sans:"Inter",system-ui,"Segoe UI",Roboto,Arial,sans-serif;
+  --radius-card:12px; --dot-size:8px;
+  /* escala tipográfica de 7 pasos (ratio ≈1.15) */
+  --fs-2xs:10px; --fs-xs:11.5px; --fs-sm:13px; --fs-base:16px; --fs-md:17.5px; --fs-lg:21px; --fs-xl:clamp(28px,5vw,54px);
+  /* escala de espaciado */
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px; --sp-6:32px; --sp-7:44px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg); color:var(--tx);
+  font-family:var(--sans); font-size:var(--fs-base); line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+/* rejilla de laboratorio: trama tenue sobre slate-900 */
+body::before{
+  content:""; position:fixed; inset:0; pointer-events:none; z-index:0;
+  background-image:
+    linear-gradient(rgba(148,163,184,.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148,163,184,.05) 1px, transparent 1px);
+  background-size:var(--sp-7) var(--sp-7);
+}
+/* identidad por capítulo: --active-accb lo fija el router en cada hashchange (ver
+   updateAccentWash) a var(--cN) del capítulo visible; sin JS cae al teal por defecto.
+   Gradiente radial de baja opacidad centrado arriba, debajo de la trama de rejilla.
+   Tras un @supports: si el navegador no resuelve color-mix(), conserva solo la rejilla. */
+@supports (background: color-mix(in srgb, red, blue)){
+  body::before{
+    background-image:
+      radial-gradient(ellipse 70% 55% at 50% -8%, color-mix(in srgb, var(--active-accb, var(--teal-b)) 16%, transparent), transparent 72%),
+      linear-gradient(rgba(148,163,184,.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(148,163,184,.05) 1px, transparent 1px);
+    background-size:100% 100%, var(--sp-7) var(--sp-7), var(--sp-7) var(--sp-7);
+  }
+}
+::selection{background:var(--teal); color:#fff}
+button{font:inherit;cursor:pointer}
+:where(button,a,input,select,summary,[tabindex]):focus-visible{
+  outline:2px solid var(--teal-b); outline-offset:2px; border-radius:4px;
+}
+.wrap{max-width:1200px;margin:0 auto;padding:0 var(--sp-5);position:relative;z-index:1}
+.mono{font-family:var(--mono)}
+.skip{position:absolute;left:-9999px;top:0;z-index:200;background:var(--teal-b);color:#06222b;font-family:var(--mono);font-size:var(--fs-xs);font-weight:700;padding:9px 14px;border-radius:0 0 10px 0;text-decoration:none}
+.skip:focus{left:0}
+.noscript{max-width:1200px;margin:16px auto 0;padding:14px 18px;border:1.5px solid var(--amber-b);border-radius:12px;background:rgba(180,83,9,.12);color:var(--tx);font-weight:600;position:relative;z-index:1}
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+/* ════════ 02 · CABECERA + TICKER + NAV (FIX-02 · FIX-04) ════════ */
+header.top{position:sticky;top:0;z-index:60;background:rgba(15,23,42,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line2)}
+.top-in{max-width:1200px;margin:0 auto;padding:var(--sp-2) var(--sp-5);min-height:52px;display:flex;align-items:center;gap:var(--sp-4);flex-wrap:wrap}
+.brand{display:flex;align-items:baseline;gap:9px;font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:.1em;white-space:nowrap;min-width:0}
+.brand .sig{color:var(--teal-b)}
+.brand b{color:var(--tx)}
+.brand small{color:var(--tx3);font-size:var(--fs-2xs);letter-spacing:.06em}
+.top-tools{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.seedchip{font-family:var(--mono);font-size:var(--fs-xs);color:var(--tx2);border:1px dashed var(--line2);border-radius:7px;padding:4px 9px;letter-spacing:.06em;white-space:nowrap}
+.seedchip b{color:var(--teal-b)}
+/* único botón primario visible del chrome: acción destructiva/estructural (re-sembrar) */
+#btnSeed{font-family:var(--mono);font-size:var(--fs-xs);padding:5px 10px;border-radius:7px;border:1px solid var(--teal);background:var(--teal);color:#eafcff;font-weight:600;letter-spacing:.04em}
+#btnSeed:hover{background:#0e86a8;border-color:#0e86a8}
+/* .menu-mas: <details> nativo, cero JS de toggle necesario, un solo ícono junto a #btnSeed.
+   #btnLink (acción "copiar enlace") vive dentro, ya no como botón propio del chrome. */
+.menu-mas{position:relative}
+.menu-mas summary{list-style:none;font-family:var(--mono);font-size:var(--fs-sm);width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;border-radius:7px;border:1px solid var(--line2);background:transparent;color:var(--tx2);cursor:pointer}
+.menu-mas summary::-webkit-details-marker{display:none}
+.menu-mas summary:hover,.menu-mas[open] summary{border-color:var(--teal-b);color:var(--tx)}
+.menu-mas-pop{position:absolute;right:0;top:calc(100% + 6px);background:var(--panel2);border:1px solid var(--line2);border-radius:10px;padding:6px;box-shadow:0 12px 28px -12px rgba(2,6,23,.6);z-index:80;min-width:230px}
+#btnLink{display:block;width:100%;text-align:left;font-family:var(--mono);font-size:var(--fs-xs);padding:8px 10px;border-radius:7px;border:none;background:transparent;color:var(--tx2);letter-spacing:.04em;cursor:pointer}
+#btnLink:hover{background:var(--panel3);color:var(--tx)}
+/* #btnGlos: enlace de navegación (no acción) → sin borde de botón, "→" final,
+   subrayado solo en hover (FIX-10: distinción visual botón vs. enlace) */
+#btnGlos{font-family:var(--mono);font-size:var(--fs-xs);padding:5px 2px;color:var(--tx2);letter-spacing:.04em;text-decoration:none;cursor:pointer}
+#btnGlos:hover{color:var(--tx);text-decoration:underline}
+/* ticker-registro: bitácora viva · separador «·» explícito (FIX-02) */
+#ticker{border-top:1px solid var(--line);background:rgba(2,6,23,.45)}
+/* FIX-05b · chrome superior compactado: padding vertical ~20% menor que antes (7px→6px) */
+#ticker .tk-in{max-width:1200px;margin:0 auto;padding:6px var(--sp-5);display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:var(--fs-xs);color:var(--tx2);white-space:nowrap;min-width:0}
+#ticker .tk-lab{flex:none;letter-spacing:.14em;color:var(--tx3);text-transform:uppercase}
+#ticker .tk-sep{flex:none;color:var(--tx3);opacity:.6}
+#ticker .tk-msg{overflow:hidden;text-overflow:ellipsis;min-width:0}
+.te{display:inline-flex;align-items:center;gap:6px;min-width:0}
+.te i{width:var(--dot-size);height:var(--dot-size);border-radius:50%;display:inline-block;flex:none;background:var(--tx3)}
+.te.seed i{background:var(--teal-b)}
+.te.new{animation:teIn .5s ease}
+@keyframes teIn{from{opacity:0;transform:translateX(8px)}to{opacity:1;transform:none}}
+nav.chaps{border-top:1px solid var(--line)}
+/* padding vertical ~20% menor que antes (6px→5px), mismo criterio que #ticker .tk-in */
+.chaps-in{max-width:1200px;margin:0 auto;padding:5px var(--sp-5);display:flex;gap:var(--sp-1);overflow-x:auto;scrollbar-width:none;-webkit-mask-image:linear-gradient(to right,transparent 0,black 24px,black calc(100% - 24px),transparent 100%);mask-image:linear-gradient(to right,transparent 0,black 24px,black calc(100% - 24px),transparent 100%)}
+.chaps-in::-webkit-scrollbar{display:none}
+nav.chaps a{font-family:var(--mono);font-size:var(--fs-xs);padding:6px 10px;border-radius:7px;color:var(--tx2);text-decoration:none;white-space:nowrap;display:inline-flex;align-items:center;gap:7px;letter-spacing:.04em;border:1px solid transparent}
+nav.chaps a:hover{background:var(--panel2);color:var(--tx)}
+nav.chaps a i{width:var(--dot-size);height:var(--dot-size);border-radius:50%;flex:none;display:inline-block}
+nav.chaps a.active,nav.chaps a[aria-current="page"]{background:var(--panel3);border-color:var(--line2);color:var(--tx)}
+nav.chaps a.active i,nav.chaps a[aria-current="page"] i{box-shadow:0 0 6px currentColor}
+/* ════════ 03 · VENTANAS + PORTADA ════════ */
+main{position:relative;z-index:1;padding-bottom:46px}
+.window[hidden]{display:none}
+.window.enter{animation:winIn .18s ease}
+@keyframes winIn{from{opacity:0}to{opacity:1}}
+.cover{position:relative;background:linear-gradient(180deg,var(--bg2),var(--bg));color:var(--tx);overflow:hidden;border-bottom:3px solid var(--accb,var(--teal-b))}
+.cover .wrap{padding-top:var(--sp-7);padding-bottom:0}
+.kicker{font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:.3em;color:var(--teal-b);margin-bottom:14px;text-transform:uppercase}
+.cover h1{font-size:var(--fs-xl);font-weight:800;max-width:22ch;color:#f8fafc;font-family:var(--sans);letter-spacing:-.02em;line-height:1.08}
+.cv-hook{font-size:clamp(var(--fs-base),1.8vw,var(--fs-md));color:var(--tx2);max-width:58ch;margin-top:14px}
+.cv-meta{display:flex;flex-wrap:wrap;row-gap:6px;column-gap:20px;border-top:1px solid var(--line);margin-top:24px}
+.cv-meta div{font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:.06em;color:var(--tx3);padding:11px 20px 11px 0;white-space:nowrap}
+.cv-meta b{color:var(--accb,var(--teal-b));font-weight:600}
+.cv-meta div:not(:last-child)::after{content:"·";margin-left:8px;opacity:.55}
+/* numeral decorativo de fondo: fuera de la escala tipográfica a propósito (110–220px no
+   tiene paso cercano sin distorsionar el resto de la escala; es un elemento gráfico, no texto
+   de lectura). En pantallas angostas se reduce para no solapar h1 en títulos largos (≤22ch). */
+.cv-num{position:absolute;right:8px;top:-26px;font-family:var(--mono);font-size:clamp(110px,20vw,220px);font-weight:700;line-height:1;color:transparent;-webkit-text-stroke:1.4px rgba(148,163,184,.14);user-select:none;pointer-events:none}
+@media (max-width:900px){.cv-num{font-size:clamp(90px,16vw,160px)}}
+/* ficha de caso: ancla dominio → decisión → riesgo, como en la presentación (§ficha), sin cifras reales */
+.ficha-caso{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));margin-top:22px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:rgba(148,163,184,.045);position:relative}
+.ficha-caso div{padding:11px 16px;border-left:1px solid var(--line)}
+.ficha-caso div:first-child{border-left:none}
+.ficha-caso .fk{display:block;font-family:var(--mono);font-size:var(--fs-2xs);letter-spacing:.13em;text-transform:uppercase;color:var(--tx3);margin-bottom:4px}
+.ficha-caso .fv{font-family:var(--sans);font-size:var(--fs-sm);color:var(--tx);line-height:1.35}
+.ficha-caso .fv.riesgo{color:var(--red-b)}
+@media (max-width:640px){.ficha-caso div{border-left:none;border-top:1px solid var(--line)}.ficha-caso div:first-child{border-top:none}}
+/* tabla AIC vs validación (SIM 03b): dos barras por candidato, una por criterio */
+.aic-table{width:100%;border-collapse:separate;border-spacing:0 7px}
+.aic-table td{padding:7px 10px;vertical-align:middle}
+.aic-name{font-family:var(--sans);font-size:var(--fs-sm);color:var(--tx);white-space:nowrap;border-radius:6px 0 0 6px}
+.aic-crown{margin-left:3px}
+.aic-bar-track{position:relative;height:15px;background:rgba(148,163,184,.14);border-radius:4px;overflow:hidden;min-width:80px}
+.aic-bar-fill{position:absolute;inset:0 auto 0 0;border-radius:4px;transition:width .25s ease}
+.aic-bar-fill.aic{background:var(--teal-b)}
+.aic-bar-fill.val{background:var(--amber-b)}
+.aic-val{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:var(--fs-2xs);color:var(--tx3);display:block;margin-top:3px}
+.aic-table tr{background:rgba(148,163,184,.03)}
+.winbody{padding:26px 0 6px}
+/* ════════ 04 · LAB-CONTAINER + GRID 30/70 (sistema v4) ════════ */
+.lab-container{--accb:var(--teal-b);background:var(--panel);border:1px solid var(--line);border-radius:var(--radius-card);color:var(--tx);overflow:hidden;box-shadow:0 18px 44px -18px rgba(2,6,23,.8);color-scheme:dark}
+.rig-bar{display:flex;align-items:center;gap:13px;padding:11px 16px;border-bottom:1px solid var(--line);background:var(--bg2);flex-wrap:wrap}
+.rig-name{font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:.2em;color:var(--tx2);text-transform:uppercase}
+.rig-bar .labno{font-family:var(--mono);font-size:var(--fs-xs);font-weight:700;color:#04141a;background:var(--accb,var(--teal-b));border-radius:6px;padding:2px 8px;letter-spacing:.12em}
+.rig-bar .spacer{flex:1}
+.rig-body{padding:var(--sp-4)}
+.lab-grid{display:grid;gap:var(--sp-4);grid-template-columns:1fr}
+@media (min-width:900px){.lab-grid{grid-template-columns:minmax(280px,30%) 1fr}}
+.lab-side{display:flex;flex-direction:column;gap:14px;min-width:0}
+.lab-main{display:flex;flex-direction:column;gap:14px;min-width:0}
+.rig-q{font-family:var(--sans);font-size:var(--fs-md);font-weight:600;color:var(--tx);margin-bottom:14px;max-width:70ch}
+.rig-q::before{content:"— "}
+.panel{background:var(--panel2);border:1px solid var(--line);border-radius:var(--radius-card);box-shadow:inset 0 1px 0 rgba(148,163,184,.08);padding:var(--sp-3);display:flex;flex-wrap:wrap;gap:var(--sp-3) var(--sp-5);align-items:end;margin-bottom:0}
+.lab-side .panel{flex-direction:column;align-items:stretch;gap:14px}
+.ctl{flex:1 1 190px;min-width:170px;display:flex;flex-direction:column;gap:7px}
+.lab-side .ctl{flex:1 1 auto;min-width:0}
+.ctl label,.ctl .lab{font-family:var(--mono);font-size:var(--fs-2xs);letter-spacing:.1em;text-transform:uppercase;color:var(--tx2);display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.ctl output{color:var(--accb,var(--teal-b));font-weight:700;font-variant-numeric:tabular-nums}
+/* FIX-05 · sliders propios en todo el documento: pista 4px · pulgar 16px · teal */
+input[type=range]{
+  -webkit-appearance:none;appearance:none;width:100%;height:22px;
+  background:transparent;cursor:pointer;accent-color:var(--teal);margin:0;
+}
+input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:999px;background:var(--panel3);border:1px solid var(--line)}
+input[type=range]::-moz-range-track{height:4px;border-radius:999px;background:var(--panel3);border:1px solid var(--line)}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;width:16px;height:16px;margin-top:-7px;
+  border-radius:50%;background:var(--teal);border:2px solid #67e8f9;box-shadow:0 0 0 3px rgba(14,116,144,.35);
+}
+input[type=range]::-moz-range-thumb{
+  width:16px;height:16px;border-radius:50%;background:var(--teal);
+  border:2px solid #67e8f9;box-shadow:0 0 0 3px rgba(14,116,144,.35);
+}
+input[type=range]:active::-webkit-slider-thumb{background:var(--teal-b)}
+input[type=range]:active::-moz-range-thumb{background:var(--teal-b)}
+.switch{display:inline-flex;align-items:center;gap:10px;background:var(--panel3);border:1px solid var(--line);border-radius:999px;padding:8px 14px;color:var(--tx);cursor:pointer;text-align:left}
+.switch .knob{width:34px;height:18px;border-radius:999px;background:#3b4a63;position:relative;flex:none;transition:background .15s}
+.switch .knob::after{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#0b1220;transition:left .15s}
+.switch[aria-checked="true"] .knob{background:var(--teal)}
+.switch[aria-checked="true"] .knob::after{left:18px}
+.switch .sw-txt{font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:.05em}
+.seg{display:inline-flex;flex-wrap:wrap;gap:4px;background:var(--panel3);border:1px solid var(--line);border-radius:10px;padding:4px}
+.seg button{font-family:var(--mono);font-size:var(--fs-xs);padding:7px 12px;border-radius:7px;border:1px solid transparent;background:transparent;color:var(--tx2);letter-spacing:.04em}
+.seg button:hover{color:var(--tx)}
+.seg button[aria-pressed="true"]{background:var(--teal);color:#eafcff;font-weight:700}
+/* ════════ 05 · VISUALIZACIONES + LECTURAS ════════ */
+.viz{background:var(--panel2);border:1px solid var(--line);border-radius:var(--radius-card);padding:10px;user-select:none;-webkit-user-select:none;transition:border-color .2s}
+.viz:hover{border-color:var(--line2)}
+.viz svg{display:block;width:100%;height:auto}
+.viz .ta-y{touch-action:pan-y;cursor:ew-resize}
+.viz .ta-y.dragging{cursor:grabbing}
+svg .svgt{font:var(--fs-2xs) var(--mono);fill:#8ea0b8}
+svg .svgt.ink{fill:var(--tx)}
+svg .svgt.teal{fill:var(--teal-b)}
+svg .svgt.halo{paint-order:stroke;stroke:var(--panel2);stroke-width:4px}
+svg .ax{stroke:rgba(148,163,184,.14);stroke-width:1}
+svg .axl{stroke:rgba(148,163,184,.35);stroke-width:1}
+.reads{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.read{background:var(--panel3);border:1px solid var(--line);border-top:2px solid var(--line);border-radius:var(--radius-card);padding:11px 13px}
+.read .rl{font-family:var(--mono);font-size:var(--fs-2xs);letter-spacing:.12em;text-transform:uppercase;color:var(--tx2);display:block;margin-bottom:5px}
+/* .data-readout: mono, grande, alineado a la derecha (sistema v4) */
+.data-readout,.read .rv{font-family:var(--mono);font-size:var(--fs-lg);line-height:1.2;font-weight:600;color:#fff;text-align:right;font-variant-numeric:tabular-nums;overflow-wrap:anywhere;display:block}
+.read .rv.acc{color:var(--accb,var(--teal-b))}
+.read .rv.amber{color:var(--amber-b)}
+.read .rv.red{color:var(--red-b)}
+.read .rv.green{color:var(--green-b)}
+.read .rv.wide{font-size:var(--fs-sm);line-height:1.4}
+/* ════════ 06 · VEREDICTO (FIX-06) + SELLO + HINTS ════════ */
+/* ════════ 06b · CALLOUT UNIFICADO: base compartida + variantes de color/tinte ════════
+   .verdict-card, .lesson y details.formula migran a esta base (mismo radio, borde y
+   borde-izq de acento); cada selector conserva solo su layout propio (flex vs. bloque)
+   y sus estados. La lógica JS de setVerdict() sigue tocando únicamente .safe/.alert/.danger. */
+.callout{border-radius:var(--radius-card);padding:var(--sp-3) var(--sp-4);border:1px solid var(--line2);border-left:4px solid var(--accb,var(--teal-b))}
+.callout--veredicto{background:rgba(34,211,238,.10)}
+.callout--leccion{border-left-color:var(--teal-b);background:rgba(14,116,144,.10)}
+.callout--formula{border-left-color:var(--tx3);background:var(--panel2)}
+.verdict-card{display:flex;gap:var(--sp-2);align-items:flex-start;margin-top:0}
+.verdict-card .vk{font-family:var(--mono);font-size:var(--fs-2xs);letter-spacing:.18em;text-transform:uppercase;color:var(--teal-b);padding-top:3px;flex:0 0 auto}
+.verdict-card .vt{font-size:var(--fs-base);line-height:1.55;color:var(--tx)}
+.verdict-card.safe{border-left-color:var(--green-b);background:rgba(74,222,128,.08)}
+.verdict-card.safe .vk{color:var(--green-b)}
+.verdict-card.alert{border-left-color:var(--amber-b);background:rgba(245,158,11,.09)}
+.verdict-card.alert .vk{color:var(--amber-b)}
+.verdict-card.alert.danger{border-left-color:var(--red-b);background:rgba(248,113,113,.10)}
+.verdict-card.alert.danger .vk{color:var(--red-b)}
+.sello{display:inline-block;font-family:var(--mono);font-size:var(--fs-2xs);font-weight:600;letter-spacing:.14em;color:var(--red-b);border:1.5px solid var(--red-b);border-radius:6px;padding:2px 8px;transform:rotate(-1.5deg);margin-left:4px;white-space:nowrap;flex:0 0 auto;align-self:flex-start;margin-top:6px}
+.hint{font-family:var(--mono);font-size:var(--fs-2xs);letter-spacing:.14em;color:var(--tx3);text-transform:uppercase}
+.vnote{font-family:var(--mono);font-size:var(--fs-2xs);letter-spacing:.12em;color:var(--tx3);text-transform:uppercase}
+details.formula summary{cursor:pointer;font-family:var(--mono);font-size:var(--fs-xs);letter-spacing:.08em;color:var(--teal-b)}
+details.formula summary::marker{color:var(--teal-b)}
+details.formula .fx{font-family:var(--mono);font-size:var(--fs-sm);line-height:1.75;color:var(--tx);margin-top:9px;overflow-wrap:anywhere}
+.lesson{display:flex;gap:var(--sp-2);align-items:flex-start;font-family:var(--sans);font-size:var(--fs-base);color:#c7f4fb}
+.lesson .lk{font-family:var(--mono);font-size:var(--fs-2xs);letter-spacing:.18em;color:var(--teal-b);flex:none;margin-top:4px;text-transform:uppercase}
+.rig-note{font-family:var(--mono);font-size:var(--fs-2xs);color:var(--tx3);padding:10px 16px;border-top:1px solid var(--line);display:flex;gap:8px;align-items:flex-start;line-height:1.6}
+.rig-note .ic{flex:none;color:var(--teal-b);font-style:normal}
+.gauges{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.gaugebox{background:var(--panel3);border:1px solid var(--line);border-radius:var(--radius-card);padding:10px 10px 6px;text-align:center}
+.gaugebox .gl{font-family:var(--mono);font-size:var(--fs-2xs);letter-spacing:.14em;text-transform:uppercase;color:var(--tx2);display:block;margin-bottom:2px}
+.gaugebox svg{display:block;width:100%;height:auto}
+/* ════════ 07 · GLOSARIO ════════ */
+.glos-tools{display:flex;gap:12px;align-items:end;flex-wrap:wrap;margin-bottom:14px}
+.glos-tools .ctl{flex:1 1 260px;max-width:420px}
+.glos-tools input[type=search]{
+  width:100%;font-family:var(--mono);font-size:var(--fs-sm);color:var(--tx);
+  background:var(--panel2);border:1px solid var(--line2);border-radius:9px;padding:10px 12px;
+}
+.glos-tools input[type=search]::placeholder{color:var(--tx3)}
+#glos-count{font-family:var(--mono);font-size:var(--fs-xs);color:var(--tx2);letter-spacing:.06em;padding:10px 2px}
+table.glos{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius-card);overflow:hidden}
+table.glos thead th{font-family:var(--mono);font-size:var(--fs-2xs);letter-spacing:.16em;text-transform:uppercase;color:var(--tx2);text-align:left;padding:10px 14px;background:var(--bg2);border-bottom:1px solid var(--line2)}
+table.glos tbody td{padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top;font-size:var(--fs-sm);line-height:1.55;color:var(--tx2)}
+table.glos tbody tr:last-child td{border-bottom:none}
+table.glos tbody tr:hover td{background:rgba(148,163,184,.05)}
+table.glos td.gt{font-family:var(--mono);font-size:var(--fs-xs);font-weight:700;color:var(--teal-b);white-space:nowrap;width:1%;padding-right:22px}
+table.glos td gt small{color:var(--tx3)}
+.glos-empty{padding:18px 14px;font-family:var(--mono);font-size:var(--fs-xs);color:var(--tx3);display:none}
+/* ════════ 08 · PIE (FIX-08) ════════ */
+footer.site{border-top:1px solid var(--line2);background:var(--bg2);position:relative;z-index:1}
+footer.site .in{max-width:1200px;margin:0 auto;padding:var(--sp-5) var(--sp-5) var(--sp-6);color:var(--tx2);font-family:var(--mono);font-size:var(--fs-xs);line-height:1.8}
+footer.site b{color:var(--tx)}
+footer.site .excl{margin-top:10px;border:1px dashed var(--line2);border-radius:10px;padding:12px 16px;background:rgba(2,6,23,.35)}
+footer.site .excl>b{display:block;margin-bottom:6px;letter-spacing:.08em;text-transform:uppercase;font-size:var(--fs-2xs);color:var(--amber-b)}
+footer.site .excl ul{list-style:none;display:flex;flex-wrap:wrap;gap:6px 22px}
+footer.site .excl li{display:flex;align-items:center;gap:8px}
+footer.site .excl li::before{content:"✕";color:var(--red-b);font-size:var(--fs-2xs)}
+@media (max-width:640px){
+  .wrap{padding:0 14px}
+  .top-in{padding:8px 14px;gap:8px}
+  .brand small{display:none}
+  #ticker .tk-in{padding:7px 14px}
+  .chaps-in{padding:6px 14px}
+  .cover .wrap{padding-top:34px}
+  .rig-body{padding:13px}
+  .panel{gap:10px 14px;padding:11px}
+  .switch{padding:11px 14px}
+  .ctl{flex:1 1 150px;min-width:145px}
+  table.glos td.gt{display:block;width:auto;padding-right:14px 14px 0}
+  table.glos tbody td{display:block}
+  table.glos thead{display:none}
+  footer.site .excl ul{flex-direction:column}
+  /* FIX-06b · targets táctiles ≥44px de alto en la nav de capítulos */
+  nav.chaps a{padding:9px 12px;min-height:44px}
+}
+</style>
+</head>
+<body>
+<noscript><div class="noscript">Esta monografía interactiva necesita JavaScript: todas las simulaciones corren localmente en tu navegador, sin conexión ni servidores.</div></noscript>
+<a class="skip" href="#app">saltar al contenido</a>
+
+<header class="top">
+  <div class="top-in">
+    <div class="brand">
+      <span class="sig">◆</span><b>MONOGRAFÍA INTERACTIVA</b>
+      <small>· forecasting simbólico · v4</small>
+    </div>
+    <div class="top-tools">
+      <span class="seedchip" title="Semilla del mundo (PRNG mulberry32). Re-sembrar regenera todas las simulaciones; ?seed=N en la URL reproduce este mundo exacto.">mundo <b id="lblSeed">#42</b></span>
+      <button type="button" id="btnSeed" aria-label="Re-sembrar el mundo: nueva semilla para todas las simulaciones">re-sembrar mundo</button>
+      <details class="menu-mas">
+        <summary aria-label="Más acciones" title="Más acciones">⋯</summary>
+        <div class="menu-mas-pop">
+          <button type="button" id="btnLink" aria-label="Copiar un enlace a esta página que incluye la semilla actual (?seed=N) para reproducir este mundo exacto">copiar enlace con semilla</button>
+        </div>
+      </details>
+      <a id="btnGlos" href="#/glosario">glosario →</a>
+    </div>
+  </div>
+  <div id="ticker" role="log" aria-label="Registro de interacciones">
+    <div class="tk-in">
+      <span class="tk-lab">registro</span>
+      <span class="tk-sep" aria-hidden="true">·</span>
+      <span class="te" id="tkTe"><i id="tkDot" aria-hidden="true"></i><span class="tk-msg" id="tkMsg" aria-live="polite">esperando al primer gesto…</span></span>
+    </div>
+  </div>
+  <nav class="chaps" aria-label="Capítulos">
+    <div class="chaps-in">
+      <a href="#/cap-01" title="Cap. 1 de la monografía · Marco teórico-metodológico y fundamentos"><i style="background:var(--c1)" aria-hidden="true"></i>01 abanico · fundamentos</a>
+      <a href="#/cap-02" title="Cap. 2 de la monografía · Semana 1: EDA, baselines y estacionalidad (Metro Traffic)"><i style="background:var(--c2)" aria-hidden="true"></i>02 frontera · metro</a>
+      <a href="#/cap-03" title="Cap. 3 de la monografía · Semana 2: ARIMA, estacionariedad y diagnóstico (Appliances Energy)"><i style="background:var(--c3)" aria-hidden="true"></i>03 memoria · energy</a>
+      <a href="#/cap-04" title="Cap. 4 de la monografía · Semana 3: SARIMAX y variables exógenas (Beijing PM2.5)"><i style="background:var(--c4)" aria-hidden="true"></i>04 oracle · beijing</a>
+      <a href="#/cap-05" title="Cap. 5 de la monografía · Semana 4: Feature engineering y Machine Learning (Bike Sharing)"><i style="background:var(--c5)" aria-hidden="true"></i>05 leakage · bike</a>
+      <a href="#/cap-06" title="Cap. 6 de la monografía · Semana 5: Modelos globales y cross-learning (Electricity)"><i style="background:var(--c6)" aria-hidden="true"></i>06 historia · electricity</a>
+      <a href="#/cap-07" title="Cap. 7 de la monografía · Semana 6: Deep Learning con LSTM (OPSD Germany)"><i style="background:var(--c7)" aria-hidden="true"></i>07 gradiente · opsd</a>
+      <a href="#/cap-08" title="Cap. 8 de la monografía · Semana 7: Arquitecturas modernas y transferencia entre series (PeMS-SF)"><i style="background:var(--c8)" aria-hidden="true"></i>08 apilamiento · pems</a>
+      <a href="#/cap-09" title="Cap. 9 de la monografía · Semana 8: Forecasting probabilístico y MLOps (M3 Monthly)"><i style="background:var(--c9)" aria-hidden="true"></i>09 promesa · m3</a>
+      <a href="#/cap-10" title="Cap. 10 de la monografía · Síntesis, lecciones transversales y conclusiones"><i style="background:var(--c10)" aria-hidden="true"></i>10 palancas · síntesis</a>
+      <a href="#/glosario"><i style="background:var(--teal-b)" aria-hidden="true"></i>glosario</a>
+    </div>
+  </nav>
+</header>
+
+<main id="app">
+
+<!-- ════════ CAP 01 · EL ABANICO ════════ -->
+<section class="window" id="cap-01" aria-labelledby="t-c1" style="--acc:#0e7490;--accb:var(--c1)">
+  <div class="cover">
+    <div class="wrap">
+      <div class="cv-num" aria-hidden="true">01</div>
+      <p class="kicker">Cap. 1 — Fundamentos · la incertidumbre no es un punto</p>
+      <h1 id="t-c1" tabindex="-1">El abanico</h1>
+      <p class="cv-hook">Un forecast honesto no es un número: es una distribución que se abre a medida que miras más lejos.</p>
+      <div class="ficha-caso">
+        <div><span class="fk">dominio</span><span class="fv">transversal a los ocho casos</span></div>
+        <div><span class="fk">decisión que informa</span><span class="fv">cuánta incertidumbre reportar junto al punto</span></div>
+        <div><span class="fk">riesgo metodológico</span><span class="fv riesgo">resumir la distribución en un solo número</span></div>
+      </div>
+      <div class="cv-meta">
+        <div>sim · <b>01 / 10</b></div>
+        <div>datos · <b>100 % simbólicos</b></div>
+        <div>prng · <b>mulberry32</b></div>
+      </div>
+    </div>
+  </div>
+  <div class="wrap winbody">
+    <article class="lab-container" data-sim="c1" aria-label="Simulación 01 · El abanico">
+      <div class="rig-bar">
+        <span class="labno">SIM 01</span><span class="rig-name">El abanico</span><span class="spacer"></span>
+      </div>
+      <div class="rig-body">
+        <p class="rig-q">¿Cuánto se abre el futuro cuando estiras el horizonte, inflas la dispersión o torces la asimetría?</p>
+        <div class="lab-grid">
+          <div class="lab-side">
+            <div class="panel" role="group" aria-label="Parámetros del abanico">
+              <div class="ctl">
+                <label for="c1-h">horizonte h · pasos <output id="c1-hv" for="c1-h">12</output></label>
+                <input type="range" id="c1-h" min="1" max="30" step="1" value="12">
+              </div>
+              <div class="ctl">
+                <label for="c1-s">dispersión σ · u <output id="c1-sv" for="c1-s">1,0</output></label>
+                <input type="range" id="c1-s" min="0.2" max="3" step="0.1" value="1">
+              </div>
+              <div class="ctl">
+                <label for="c1-a">asimetría a <output id="c1-av" for="c1-a">0,00</output></label>
+                <input type="range" id="c1-a" min="-0.8" max="0.8" step="0.05" value="0">
+              </div>
+            </div>
+            <div class="reads">
+              <div class="read"><span class="rl">ancho P10–P90 @ h · u</span><span class="rv" id="c1-r1">—</span></div>
+              <div class="read"><span class="rl">media − mediana @ h · u</span><span class="rv" id="c1-r2">—</span></div>
+              <div class="read"><span class="rl">trayectoria simulada @ h · u</span><span class="rv" id="c1-r3">—</span></div>
+            </div>
+          </div>
+          <div class="lab-main">
+            <div class="viz">
+              <svg id="c1-svg" viewBox="0 0 720 300" role="img" aria-label="Abanico de predicción: bandas P25–P75 y P10–P90, mediana, media y una trayectoria simulada desde hoy"></svg>
+            </div>
+            <div class="verdict-card callout callout--veredicto" id="c1-v" data-st="bien">
+              <span class="vk">veredicto</span><span class="vt" id="c1-vt">—</span>
+            </div>
+            <details class="formula callout callout--formula">
+              <summary>ver fórmula</summary>
+              <p class="fx">P<sub>q</sub>(h) = m + z<sub>q</sub> · σ·√h, con la dispersión partida en dos: σ<sup>+</sup> = σ·(1+a) hacia arriba y σ<sup>−</sup> = σ·(1−a) hacia abajo.</p>
+              <p class="fx">z<sub>90</sub> ≈ +1,28 · z<sub>25</sub> ≈ −0,67 · media − mediana ≈ 0,8·(σ<sup>+</sup>−σ<sup>−</sup>)·√h · unidades simbólicas (u).</p>
+            </details>
+            <div class="lesson callout callout--leccion"><span class="lk">lección</span><span>El punto es un resumen de la distribución, no el pronóstico.</span></div>
+          </div>
+        </div>
+      </div>
+      <p class="rig-note"><span class="ic">◐</span><span>Simulación simbólica con fines didácticos: no es un resultado cuantitativo.</span></p>
+    </article>
+  </div>
+</section>
+
+<!-- ════════ CAP 02 · LA FRONTERA ════════ -->
+<section class="window" id="cap-02" aria-labelledby="t-c2" hidden style="--acc:#15803d;--accb:var(--c2)">
+  <div class="cover">
+    <div class="wrap">
+      <div class="cv-num" aria-hidden="true">02</div>
+      <p class="kicker">Cap. 2 — Semana 1 · Metro Traffic · el calendario es sagrado</p>
+      <h1 id="t-c2" tabindex="-1">La frontera</h1>
+      <p class="cv-hook">Mezclar pasado y futuro en la validación mide memoria, no talento.</p>
+      <div class="ficha-caso">
+        <div><span class="fk">dominio</span><span class="fv">tráfico vehicular · Metro Traffic</span></div>
+        <div><span class="fk">decisión que informa</span><span class="fv">turnos de personal y apertura de carriles</span></div>
+        <div><span class="fk">riesgo metodológico</span><span class="fv riesgo">random split inválido: filtra el futuro al pasado</span></div>
+      </div>
+      <div class="cv-meta">
+        <div>sim · <b>02 / 10</b></div>
+        <div>datos · <b>100 % simbólicos</b></div>
+        <div>prng · <b>mulberry32</b></div>
+      </div>
+    </div>
+  </div>
+  <div class="wrap winbody">
+    <article class="lab-container" data-sim="c2" aria-label="Simulación 02 · La frontera">
+      <div class="rig-bar">
+        <span class="labno">SIM 02</span><span class="rig-name">La frontera</span><span class="spacer"></span>
+      </div>
+      <div class="rig-body">
+        <p class="rig-q">¿Por qué el MAE del split aleatorio parece mejor que el del split temporal?</p>
+        <div class="lab-grid">
+          <div class="lab-side">
+            <div class="panel" role="group" aria-label="Controles de la frontera">
+              <div class="ctl">
+                <label for="c2-f">frontera · día <output id="c2-fv" for="c2-f">84</output></label>
+                <input type="range" id="c2-f" min="12" max="108" step="1" value="84">
+              </div>
+              <div class="ctl">
+                <label for="c2-e">embargo tras la frontera · días <output id="c2-ev" for="c2-e">3</output></label>
+                <input type="range" id="c2-e" min="0" max="14" step="1" value="3">
+              </div>
+              <div class="ctl">
+                <span class="lab" id="c2-rl">división del test</span>
+                <button type="button" class="switch" id="c2-rand" role="switch" aria-checked="false" aria-labelledby="c2-rl" aria-describedby="c2-rt">
+                  <span class="knob" aria-hidden="true"></span><span class="sw-txt" id="c2-rt">split aleatorio · OFF</span>
+                </button>
+              </div>
+            </div>
+            <div class="reads">
+              <div class="read"><span class="rl">MAE · split temporal · u</span><span class="rv" id="c2-r1">—</span></div>
+              <div class="read"><span class="rl">MAE · split aleatorio · u</span><span class="rv" id="c2-r2">—</span></div>
+              <div class="read"><span class="rl">test ya visto en train · pts</span><span class="rv" id="c2-r3">—</span></div>
+            </div>
+            <p class="hint">arrastra la frontera · sube el embargo hasta cerrar la fuga por proximidad</p>
+          </div>
+          <div class="lab-main">
+            <div class="viz">
+              <svg id="c2-svg" class="ta-y" viewBox="0 0 720 300" role="img" aria-label="Serie diaria simbólica con frontera arrastrable entre train y test. Mueve el deslizador o arrastra la línea; activa el split aleatorio para repartir el test por todo el calendario."></svg>
+            </div>
+            <div class="verdict-card callout callout--veredicto" id="c2-v" data-st="alerta">
+              <span class="vk">veredicto</span><span class="vt" id="c2-vt">—</span><span class="sello" id="c2-sello" hidden>DEMASIADO BUENO PARA SER VERDAD</span>
+            </div>
+            <details class="formula callout callout--formula">
+              <summary>ver fórmula</summary>
+              <p class="fx">MAE = (1/|T|)·Σ<sub>t∈T</sub> |y<sub>t</sub> − ŷ<sub>t</sub>| · el modelo simbólico aprende nivel medio + efecto por día de la semana <b>solo con datos previos a la frontera</b>.</p>
+              <p class="fx">split temporal: T = {t ≥ frontera} · split aleatorio: T = 36 puntos repartidos por todo el calendario (parte del «test» ya estuvo en el train). El embargo reserva [frontera, frontera + embargo): esos puntos no puntúan en ningún test.</p>
+            </details>
+            <div class="lesson callout callout--leccion"><span class="lk">lección</span><span>Un split que filtra el futuro mide memoria, no predicción.</span></div>
+          </div>
+        </div>
+      </div>
+      <p class="rig-note"><span class="ic">◐</span><span>Simulación simbólica con fines didácticos: no es un resultado cuantitativo.</span></p>
+    </article>
+  </div>
+</section>
+<!-- ════════ CAP 03 · MEMORIA ════════ -->
+<section class="window" id="cap-03" aria-labelledby="t-c3" hidden style="--acc:#4d7c0f;--accb:var(--c3)">
+  <div class="cover">
+    <div class="wrap">
+      <div class="cv-num" aria-hidden="true">03</div>
+      <p class="kicker">Cap. 3 — Semana 2 · Appliances Energy · dos memorias cortas</p>
+      <h1 id="t-c3" tabindex="-1">Memoria</h1>
+      <p class="cv-hook">Una memoria sostiene el nivel paso a paso; la otra solo repite el golpe una vez y calla.</p>
+      <div class="ficha-caso">
+        <div><span class="fk">dominio</span><span class="fv">energía residencial · Appliances Energy</span></div>
+        <div><span class="fk">decisión que informa</span><span class="fv">detectar picos de consumo con antelación</span></div>
+        <div><span class="fk">riesgo metodológico</span><span class="fv riesgo">elegir el modelo solo por AIC/BIC</span></div>
+      </div>
+      <div class="cv-meta">
+        <div>sim · <b>03 / 10</b></div>
+        <div>datos · <b>100 % simbólicos</b></div>
+        <div>prng · <b>mulberry32</b></div>
+      </div>
+    </div>
+  </div>
+  <div class="wrap winbody">
+    <article class="lab-container" data-sim="c3" aria-label="Simulación 03 · Memoria">
+      <div class="rig-bar">
+        <span class="labno">SIM 03</span><span class="rig-name">Memoria · AR(1) vs MA(1)</span><span class="spacer"></span>
+      </div>
+      <div class="rig-body">
+        <p class="rig-q">¿Cuánto dura un golpe en la serie según quién lo recuerda: φ o θ?</p>
+        <div class="lab-grid">
+          <div class="lab-side">
+            <div class="panel" role="group" aria-label="Parámetros de memoria">
+              <div class="ctl">
+                <label for="c3-f">persistencia φ · AR(1) <output id="c3-fv" for="c3-f">0,70</output></label>
+                <input type="range" id="c3-f" min="-0.9" max="0.9" step="0.05" value="0.7">
+              </div>
+              <div class="ctl">
+                <label for="c3-t">eco θ · MA(1) <output id="c3-tv" for="c3-t">0,50</output></label>
+                <input type="range" id="c3-t" min="-0.9" max="0.9" step="0.05" value="0.5">
+              </div>
+            </div>
+            <div class="reads">
+              <div class="read"><span class="rl">AR · φ⁵ · persistencia a 5 pasos</span><span class="rv" id="c3-r1">—</span></div>
+              <div class="read"><span class="rl">AR · Σ|φ|^k · k ≤ 10</span><span class="rv" id="c3-r2">—</span></div>
+              <div class="read"><span class="rl">MA · vida del shock</span><span class="rv wide" id="c3-r3">—</span></div>
+            </div>
+          </div>
+          <div class="lab-main">
+            <div class="viz">
+              <svg id="c3-svg1" viewBox="0 0 720 250" role="img" aria-label="Función de respuesta al impulso: barras AR(1) φ^k frente a barras MA(1), que mueren tras un rezago"></svg>
+            </div>
+            <div class="viz">
+              <svg id="c3-svg2" viewBox="0 0 720 118" role="img" aria-label="Serie simbólica ARMA(1,1) con un shock marcado en t=60: su estela depende de φ y θ"></svg>
+            </div>
+            <p class="vnote">ventana ilustrativa · t = 0–120 · ACF/PACF teóricas: AR(1) → PACF corta en k = 1, ACF decae como φ^k · MA(1) → ACF corta en k = 1, PACF decae</p>
+            <div class="verdict-card callout callout--veredicto" id="c3-v" data-st="alerta">
+              <span class="vk">veredicto</span><span class="vt" id="c3-vt">—</span>
+            </div>
+            <details class="formula callout callout--formula">
+              <summary>ver fórmula</summary>
+              <p class="fx">AR(1): y<sub>t</sub> = φ·y<sub>t−1</sub> + ε<sub>t</sub> ⇒ IRF<sub>k</sub> = φ<sup>k</sup> · persistencia geométrica: el nivel queda vivo k pasos.</p>
+              <p class="fx">MA(1): y<sub>t</sub> = ε<sub>t</sub> + θ·ε<sub>t−1</sub> ⇒ IRF = 1, θ, 0, 0, … · el golpe deja una sola estela y muere.</p>
+            </details>
+            <div class="lesson callout callout--leccion"><span class="lk">lección</span><span>AR hereda el nivel; MA hereda el shock.</span></div>
+          </div>
+        </div>
+      </div>
+      <p class="rig-note"><span class="ic">◐</span><span>Simulación simbólica con fines didácticos: no es un resultado cuantitativo.</span></p>
+    </article>
+
+    <article class="lab-container" data-sim="c3b" aria-label="Simulación 03b · La trampa del AIC" style="margin-top:18px">
+      <div class="rig-bar">
+        <span class="labno">SIM 03B</span><span class="rig-name">La trampa del AIC</span><span class="spacer"></span>
+      </div>
+      <div class="rig-body">
+        <p class="rig-q">¿El modelo que gana por AIC dentro del train es el mismo que gana en validación?</p>
+        <div class="lab-grid">
+          <div class="lab-side">
+            <div class="panel" role="group" aria-label="Candidatos ARIMA/ETS">
+              <button type="button" class="switch" id="c3b-reseed" style="justify-content:center;width:100%" aria-label="Re-sembrar candidatos: recalcular AIC y validación">
+                <span class="knob" aria-hidden="true"></span><span class="sw-txt">↻ re-sembrar candidatos</span>
+              </button>
+            </div>
+            <div class="reads">
+              <div class="read"><span class="rl">ganador por AIC · train</span><span class="rv acc" id="c3b-r1">—</span></div>
+              <div class="read"><span class="rl">ganador por validación</span><span class="rv" id="c3b-r2">—</span></div>
+              <div class="read"><span class="rl">¿coinciden?</span><span class="rv wide" id="c3b-r3">—</span></div>
+            </div>
+            <p class="hint">el AIC compite dentro del train; la validación compite con datos que el ajuste nunca vio</p>
+          </div>
+          <div class="lab-main">
+            <table class="aic-table" aria-label="Cinco candidatos ordenados por AIC (train) y por validación">
+              <tbody id="c3b-body"></tbody>
+            </table>
+            <div class="verdict-card callout callout--veredicto" id="c3b-v" data-st="alerta">
+              <span class="vk">veredicto</span><span class="vt" id="c3b-vt">—</span>
+            </div>
+            <details class="formula callout callout--formula">
+              <summary>ver fórmula</summary>
+              <p class="fx">AIC = 2k − 2·ln(L̂) · premia el ajuste dentro de muestra y penaliza el número de parámetros k. No consulta ni un solo dato de validación.</p>
+              <p class="fx">validación = error medido en datos que el ajuste nunca vio · «¿ajusta bien el pasado?» y «¿generaliza al futuro?» son preguntas distintas y pueden tener respuestas distintas.</p>
+            </details>
+            <div class="lesson callout callout--leccion"><span class="lk">lección</span><span>El AIC es un consejo dentro del train; la validación temporal es el único juez del futuro.</span></div>
+          </div>
+        </div>
+      </div>
+      <p class="rig-note"><span class="ic">◐</span><span>Simulación simbólica con fines didácticos: no es un resultado cuantitativo.</span></p>
+    </article>
+  </div>
+</section>
+
+<!-- ════════ CAP 04 · ORACLE ════════ -->
+<section class="window" id="cap-04" aria-labelledby="t-c4" hidden style="--acc:#6d28d9;--accb:var(--c4)">
+  <div class="cover">
+    <div class="wrap">
+      <div class="cv-num" aria-hidden="true">04</div>
+      <p class="kicker">Cap. 4 — Semana 3 · Beijing PM2.5 · el oráculo vive en el laboratorio</p>
+      <h1 id="t-c4" tabindex="-1">Oracle</h1>
+      <p class="cv-hook">En producción, el futuro de la exógena también es un pronóstico.</p>
+      <div class="ficha-caso">
+        <div><span class="fk">dominio</span><span class="fv">calidad del aire · Beijing PM2.5</span></div>
+        <div><span class="fk">decisión que informa</span><span class="fv">alertas sanitarias y restricciones de tránsito</span></div>
+        <div><span class="fk">riesgo metodológico</span><span class="fv riesgo">exógena oracle: usar clima ya observado</span></div>
+      </div>
+      <div class="cv-meta">
+        <div>sim · <b>04 / 10</b></div>
+        <div>datos · <b>100 % simbólicos</b></div>
+        <div>prng · <b>mulberry32</b></div>
+      </div>
+    </div>
+  </div>
+  <div class="wrap winbody">
+    <article class="lab-container" data-sim="c4" aria-label="Simulación 04 · Oracle">
+      <div class="rig-bar">
+        <span class="labno">SIM 04</span><span class="rig-name">Oracle · la exógena futura</span><span class="spacer"></span>
+      </div>
+      <div class="rig-body">
+        <p class="rig-q">¿Cuánta mejora sobrevive cuando la exógena futura deja de ser un dato y pasa a ser un pronóstico?</p>
+        <div class="lab-grid">
+          <div class="lab-side">
+            <div class="panel" role="group" aria-label="Modo de evaluación">
+              <div class="ctl">
+                <span class="lab" id="c4-pl">escenario de la exógena futura</span>
+                <button type="button" class="switch" id="c4-prod" role="switch" aria-checked="false" aria-labelledby="c4-pl" aria-describedby="c4-pt">
+                  <span class="knob" aria-hidden="true"></span><span class="sw-txt" id="c4-pt">modo producción · OFF</span>
+                </button>
+              </div>
+              <div class="ctl">
+                <label for="c4-h">horizonte de evaluación · días <output id="c4-hv" for="c4-h">48</output></label>
+                <input type="range" id="c4-h" min="8" max="48" step="1" value="48">
+              </div>
+            </div>
+            <div class="reads">
+              <div class="read"><span class="rl">MAE baseline · naive · u</span><span class="rv" id="c4-r1">—</span></div>
+              <div class="read"><span class="rl">mejora laboratorio · %</span><span class="rv acc" id="c4-r2">—</span></div>
+              <div class="read"><span class="rl">mejora producción · %</span><span class="rv amber" id="c4-r3">—</span></div>
+            </div>
+          </div>
+          <div class="lab-main">
+            <div class="viz">
+              <svg id="c4-svg" viewBox="0 0 720 300" role="img" aria-label="Serie simbólica con train, test y pronósticos: naive, modelo con exógena real y modelo con exógena estimada"></svg>
+            </div>
+            <div class="viz">
+              <svg id="c4-xsvg" viewBox="0 0 720 86" role="img" aria-label="Exógena x con picos: conocida en el futuro en modo laboratorio, estimada por climatología en modo producción"></svg>
+            </div>
+            <p class="vnote">tablón de exógenas · observada solo hasta HOY · más allá de HOY: estimada (climatología)</p>
+            <div class="cmp" aria-label="Comparación de mejora simbólica frente al baseline">
+              <div class="cmp-row">
+                <span>laboratorio · x real</span>
+                <div class="cmp-track"><div class="cmp-fill" id="c4-lab-bar" style="width:0%"></div></div>
+                <b class="cmp-val" id="c4-lab-pct">0 %</b>
+              </div>
+              <div class="cmp-row">
+                <span>producción · x estimada</span>
+                <div class="cmp-track"><div class="cmp-fill amber" id="c4-prod-bar" style="width:0%"></div></div>
+                <b class="cmp-val" id="c4-prod-pct">0 %</b>
+              </div>
+            </div>
+            <div class="verdict-card callout callout--veredicto" id="c4-v" data-st="alerta">
+              <span class="vk">veredicto</span><span class="vt" id="c4-vt">—</span>
+            </div>
+            <details class="formula callout callout--formula">
+              <summary>ver fórmula</summary>
+              <p class="fx">ŷ<sub>t</sub> = β<sub>0</sub> + β<sub>1</sub>·x<sub>t</sub> (laboratorio: x futura conocida) · ŷ<sub>t</sub> = β<sub>0</sub> + β<sub>1</sub>·x̂<sub>t</sub> (producción: x̂ = climatología de train). β ajustado solo en train.</p>
+              <p class="fx">mejora = 1 − MAE<sub>modelo</sub> / MAE<sub>naive</sub> · naive: ŷ<sub>t</sub> = y<sub>t−1</sub>.</p>
+            </details>
+            <div class="lesson callout callout--leccion"><span class="lk">lección</span><span>Validar con el futuro observado es pedir prestado el futuro.</span></div>
+          </div>
+        </div>
+      </div>
+      <p class="rig-note"><span class="ic">◐</span><span>Simulación simbólica con fines didácticos: no es un resultado cuantitativo.</span></p>
+    </article>
+  </div>
+</section>
+<!-- ════════ CAP 05 · LEAKAGE ════════ -->
+<section class="window" id="cap-05" aria-labelledby="t-c5" hidden style="--acc:#9d174d;--accb:var(--c5)">
+  <div class="cover">
+    <div class="wrap">
+      <div class="cv-num" aria-hidden="true">05</div>
+      <p class="kicker">Cap. 5 — Semana 4 · Bike Sharing · fugas de información</p>
+      <h1 id="t-c5" tabindex="-1">Leakage</h1>
+      <p class="cv-hook">Cuando el presente se cuela en la feature, el futuro se vuelve sospechosamente fácil.</p>
+      <div class="ficha-caso">
+        <div><span class="fk">dominio</span><span class="fv">micromovilidad · Bike Sharing</span></div>
+        <div><span class="fk">decisión que informa</span><span class="fv">rebalanceo de flota entre estaciones</span></div>
+        <div><span class="fk">riesgo metodológico</span><span class="fv riesgo">fuga de información (leakage) en la feature</span></div>
+      </div>
+      <div class="cv-meta">
+        <div>sim · <b>05 / 10</b></div>
+        <div>datos · <b>100 % simbólicos</b></div>
+        <div>prng · <b>mulberry32</b></div>
+      </div>
+    </div>
+  </div>
+  <div class="wrap winbody">
+    <article class="lab-container" data-sim="c5" aria-label="Simulación 05 · Leakage">
+      <div class="rig-bar">
+        <span class="labno">SIM 05</span><span class="rig-name">Leakage · ventana centrada vs causal</span><span class="spacer"></span>
+      </div>
+      <div class="rig-body">
+        <p class="rig-q">¿Cuánto se infla la correlación cuando la feature mira al futuro en vez de solo al pasado?</p>
+        <div class="lab-grid">
+          <div class="lab-side">
+            <div class="panel" role="group" aria-label="Controles de fuga">
+              <div class="ctl">
+                <span class="lab" id="c5-wl">ventana de la feature</span>
+                <button type="button" class="switch" id="c5-win" role="switch" aria-checked="true" aria-labelledby="c5-wl" aria-describedby="c5-wt">
+                  <span class="knob" aria-hidden="true"></span><span class="sw-txt" id="c5-wt">ventana centrada · ON</span>
+                </button>
+              </div>
+              <div class="ctl">
+                <label for="c5-e">embargo · horas <output id="c5-ev" for="c5-e">0</output></label>
+                <input type="range" id="c5-e" min="0" max="48" step="1" value="0">
+              </div>
+            </div>
+            <div class="gaugebox">
+              <span class="gl">medidor · correlación con el objetivo</span>
+              <svg id="c5-gauge" viewBox="0 0 220 128" role="img" aria-label="Medidor semicircular de la correlación feature-objetivo: zona segura hasta 0,30, aviso entre 0,30 y 0,45, inflada por encima de 0,45"></svg>
+            </div>
+            <div class="reads">
+              <div class="read"><span class="rl">r feature ↔ objetivo</span><span class="rv acc" id="c5-r1">—</span></div>
+              <div class="read"><span class="rl">inflación vs causal · Δr</span><span class="rv" id="c5-r2">—</span></div>
+              <div class="read"><span class="rl">pares evaluados · n</span><span class="rv" id="c5-r3">—</span></div>
+            </div>
+          </div>
+          <div class="lab-main">
+            <div class="viz">
+              <svg id="c5-sc" viewBox="0 0 720 300" role="img" aria-label="Dispersión feature contra objetivo: cada punto es una réplica del experimento; la nube sube más cuando la ventana es centrada"></svg>
+            </div>
+            <div class="viz">
+              <svg id="c5-tl" viewBox="0 0 720 96" role="img" aria-label="Línea de tiempo con frontera de evaluación y zona de embargo grisada"></svg>
+            </div>
+            <p class="vnote">ventana ilustrativa · 12 réplicas × 240 h · embargo = horas reservadas tras la frontera (sin pares de evaluación)</p>
+            <div class="verdict-card callout callout--veredicto" id="c5-v" data-st="alerta">
+              <span class="vk">veredicto</span><span class="vt" id="c5-vt">—</span>
+            </div>
+            <details class="formula callout callout--formula">
+              <summary>ver fórmula</summary>
+              <p class="fx">centrada: f<sub>t</sub> = mean(y<sub>t−5</sub> … y<sub>t+5</sub>) — la ventana incluye el futuro (y<sub>t+1</sub> … y<sub>t+5</sub>) e incluso el propio objetivo y<sub>t+1</sub>.</p>
+              <p class="fx">causal shift(1): f<sub>t</sub> = mean(y<sub>t−11</sub> … y<sub>t−1</sub>) — solo pasado. r = cov(f, y<sub>t+1</sub>) / (σ<sub>f</sub>·σ<sub>y</sub>) sobre los pares de la región de test; el embargo los retira de la muestra.</p>
+            </details>
+            <div class="lesson callout callout--leccion"><span class="lk">lección</span><span>Si la feature puede ver el futuro, la métrica admira un espejo.</span></div>
+          </div>
+        </div>
+      </div>
+      <p class="rig-note"><span class="ic">◐</span><span>Simulación simbólica con fines didácticos: no es un resultado cuantitativo.</span></p>
+    </article>
+  </div>
+</section>
+
+<!-- ════════ CAP 06 · HISTORIA ════════ -->
+<section class="window" id="cap-06" aria-labelledby="t-c6" hidden style="--acc:#0369a1;--accb:var(--c6)">
+  <div class="cover">
+    <div class="wrap">
+      <div class="cv-num" aria-hidden="true">06</div>
+      <p class="kicker">Cap. 6 — Semana 5 · Electricity · aprender con poca historia</p>
+      <h1 id="t-c6" tabindex="-1">Historia</h1>
+      <p class="cv-hook">Cold start: cuánta historia hace falta antes de que el modelo deje de adivinar.</p>
+      <div class="ficha-caso">
+        <div><span class="fk">dominio</span><span class="fv">energía · 370 clientes · Electricity</span></div>
+        <div><span class="fk">decisión que informa</span><span class="fv">ofertas y pronóstico para clientes nuevos</span></div>
+        <div><span class="fk">riesgo metodológico</span><span class="fv riesgo">confiar en el modelo global sin historia propia</span></div>
+      </div>
+      <div class="cv-meta">
+        <div>sim · <b>06 / 10</b></div>
+        <div>datos · <b>100 % simbólicos</b></div>
+        <div>prng · <b>mulberry32</b></div>
+      </div>
+    </div>
+  </div>
+  <div class="wrap winbody">
+    <article class="lab-container" data-sim="c6" aria-label="Simulación 06 · Historia">
+      <div class="rig-bar">
+        <span class="labno">SIM 06</span><span class="rig-name">Historia · cold-start → warm-start</span><span class="spacer"></span>
+      </div>
+      <div class="rig-body">
+        <p class="rig-q">¿Qué pesa más en el error: la arquitectura del modelo o las semanas de historia disponibles?</p>
+        <div class="lab-grid">
+          <div class="lab-side">
+            <div class="panel" role="group" aria-label="Historia disponible">
+              <div class="ctl">
+                <label for="c6-w">historia disponible · semanas <output id="c6-wv" for="c6-w">2</output></label>
+                <input type="range" id="c6-w" min="0" max="52" step="1" value="2">
+              </div>
+            </div>
+            <div class="reads">
+              <div class="read"><span class="rl">MASE simbólico</span><span class="rv acc" id="c6-r1">—</span></div>
+              <div class="read"><span class="rl">régimen</span><span class="rv wide" id="c6-r2">—</span></div>
+              <div class="read"><span class="rl">error vs warm · ×</span><span class="rv" id="c6-r3">—</span></div>
+            </div>
+            <p class="hint">desliza la historia y mira cuándo el MASE cruza el umbral 1 zona a zona</p>
+          </div>
+          <div class="lab-main">
+            <div class="viz">
+              <svg id="c6-svg" viewBox="0 0 720 320" role="img" aria-label="Curva de MASE simbólico contra semanas de historia en escala logarítmica, con zonas cold en rojo, few-shot en ámbar y warm en verde, y el umbral MASE igual a 1 marcado"></svg>
+            </div>
+            <p class="vnote">ventana ilustrativa · eje Y logarítmico · zonas: cold &lt; 1 sem · few-shot 1–4 sem · warm &gt; 4 sem</p>
+            <div class="verdict-card callout callout--veredicto" id="c6-v" data-st="mal">
+              <span class="vk">veredicto</span><span class="vt" id="c6-vt">—</span>
+            </div>
+            <details class="formula callout callout--formula">
+              <summary>ver fórmula</summary>
+              <p class="fx">MASE(w) = 1,3 + (38 − 1,3)·e<sup>−λ·w</sup>, con λ ≈ 0,55 por semana · decaimiento inverso: cada semana de historia vale menos que la anterior, pero las primeras valen todo.</p>
+              <p class="fx">MASE = MAE<sub>modelo</sub> / MAE<sub>naive</sub> (escala libre) · umbral conceptual: MASE = 1 — por debajo, se le gana al naive; por encima, no.</p>
+            </details>
+            <div class="lesson callout callout--leccion"><span class="lk">lección</span><span>La disponibilidad de historia domina a la arquitectura: sin pasado no hay forma que aprender.</span></div>
+          </div>
+        </div>
+      </div>
+      <p class="rig-note"><span class="ic">◐</span><span>Simulación simbólica con fines didácticos: no es un resultado cuantitativo.</span></p>
+    </article>
+  </div>
+</section>
+<!-- ════════ CAP 07 · GRADIENTE ════════ -->
+<section class="window" id="cap-07" aria-labelledby="t-c7" hidden style="--acc:#4338ca;--accb:var(--c7)">
+  <div class="cover">
+    <div class="wrap">
+      <div class="cv-num" aria-hidden="true">07</div>
+      <p class="kicker">Cap. 7 — Semana 6 · OPSD Germany · el costo de mirar lejos</p>
+      <h1 id="t-c7" tabindex="-1">Gradiente</h1>
+      <p class="cv-hook">Mirar muchos pasos adelante tiene un precio que se compone paso a paso.</p>
+      <div class="ficha-caso">
+        <div><span class="fk">dominio</span><span class="fv">energía nacional · OPSD Germany</span></div>
+        <div><span class="fk">decisión que informa</span><span class="fv">despacho de carga y planeación de capacidad</span></div>
+        <div><span class="fk">riesgo metodológico</span><span class="fv riesgo">elegir arquitectura compleja por moda, no por costo/beneficio</span></div>
+      </div>
+      <div class="cv-meta">
+        <div>sim · <b>07 / 10</b></div>
+        <div>datos · <b>100 % simbólicos</b></div>
+        <div>prng · <b>mulberry32</b></div>
+      </div>
+    </div>
+  </div>
+  <div class="wrap winbody">
+    <article class="lab-container" data-sim="c7" aria-label="Simulación 07 · Gradiente">
+      <div class="rig-bar">
+        <span class="labno">SIM 07</span><span class="rig-name">Gradiente · desvanecimiento por paso</span><span class="spacer"></span>
+      </div>
+      <div class="rig-body">
+        <p class="rig-q">¿Cuánto del pasado sobrevive al descenso por gradiente cuando la secuencia se alarga?</p>
+        <div class="lab-grid">
+          <div class="lab-side">
+            <div class="panel" role="group" aria-label="Parámetros del gradiente">
+              <div class="ctl">
+                <label for="c7-t">longitud de secuencia T · pasos <output id="c7-tv" for="c7-t">60</output></label>
+                <input type="range" id="c7-t" min="10" max="336" step="1" value="60">
+              </div>
+              <div class="ctl">
+                <label for="c7-r">factor de retención por paso <output id="c7-rv" for="c7-r">0,95</output></label>
+                <input type="range" id="c7-r" min="0.90" max="0.99" step="0.005" value="0.95">
+              </div>
+            </div>
+            <div class="reads">
+              <div class="read"><span class="rl">gradiente @ paso 0</span><span class="rv acc" id="c7-r1">—</span></div>
+              <div class="read"><span class="rl">pasos vivos · grad &gt; 10⁻⁶</span><span class="rv" id="c7-r2">—</span></div>
+              <div class="read"><span class="rl">memoria efectiva · pasos</span><span class="rv" id="c7-r3">—</span></div>
+            </div>
+            <p class="hint">el extremo izquierdo es el pasado lejano: si su barra muere, la red no aprende de ahí</p>
+          </div>
+          <div class="lab-main">
+            <div class="viz">
+              <svg id="c7-svg" viewBox="0 0 720 300" role="img" aria-label="Magnitud del gradiente por paso de tiempo en escala logarítmica: las barras decrecen hacia la izquierda, hacia los pasos lejanos"></svg>
+            </div>
+            <p class="vnote">ventana ilustrativa · escala logarítmica · gradiente en el paso t = retención^(T−t) · umbral didáctico de señal: 10⁻⁶</p>
+            <div class="verdict-card callout callout--veredicto" id="c7-v" data-st="alerta">
+              <span class="vk">veredicto</span><span class="vt" id="c7-vt">—</span>
+            </div>
+            <details class="formula callout callout--formula">
+              <summary>ver fórmula</summary>
+              <p class="fx">|∇@t| = r<sup>(T−t)</sup> · producto de factores de retención a lo largo de la retropropagación: cada paso multiplica, el tiempo es exponencial.</p>
+              <p class="fx">memoria efectiva ≈ ln(10⁻⁶) / ln(r) pasos · con r = 0,90 son ≈ 131 pasos; con r = 0,99, ≈ 1 374.</p>
+            </details>
+            <div class="lesson callout callout--leccion"><span class="lk">lección</span><span>La longitud que prometes y la memoria que retienes son contratos distintos.</span></div>
+          </div>
+        </div>
+      </div>
+      <p class="rig-note"><span class="ic">◐</span><span>Simulación simbólica con fines didácticos: no es un resultado cuantitativo.</span></p>
+    </article>
+  </div>
+</section>
+
+<!-- ════════ CAP 08 · APILAMIENTO ════════ -->
+<section class="window" id="cap-08" aria-labelledby="t-c8" hidden style="--acc:#c2410c;--accb:var(--c8)">
+  <div class="cover">
+    <div class="wrap">
+      <div class="cv-num" aria-hidden="true">08</div>
+      <p class="kicker">Cap. 8 — Semana 7 · PeMS-SF · modelos que se apilan</p>
+      <h1 id="t-c8" tabindex="-1">Apilamiento</h1>
+      <p class="cv-hook">La serie como suma de piezas: backcasts acumulados y un residuo final.</p>
+      <div class="ficha-caso">
+        <div><span class="fk">dominio</span><span class="fv">tráfico · red de sensores · PeMS-SF</span></div>
+        <div><span class="fk">decisión que informa</span><span class="fv">estimar sensores nuevos sin historia propia</span></div>
+        <div><span class="fk">riesgo metodológico</span><span class="fv riesgo">confundir transferencia entre series con pronóstico</span></div>
+      </div>
+      <div class="cv-meta">
+        <div>sim · <b>08 / 10</b></div>
+        <div>datos · <b>100 % simbólicos</b></div>
+        <div>prng · <b>mulberry32</b></div>
+      </div>
+    </div>
+  </div>
+  <div class="wrap winbody">
+    <article class="lab-container" data-sim="c8" aria-label="Simulación 08 · Apilamiento">
+      <div class="rig-bar">
+        <span class="labno">SIM 08</span><span class="rig-name">Apilamiento · backcasts acumulados</span><span class="spacer"></span>
+      </div>
+      <div class="rig-body">
+        <p class="rig-q">¿Cuántas piezas hacen falta para que la suma de backcasts casi explique la serie?</p>
+        <div class="lab-grid">
+          <div class="lab-side">
+            <div class="panel" role="group" aria-label="Bloques activos">
+              <div class="ctl">
+                <span class="lab" id="c8-bl">bloques activos</span>
+                <div class="seg" role="group" aria-labelledby="c8-bl">
+                  <button type="button" id="c8-b1" aria-pressed="true">1</button>
+                  <button type="button" id="c8-b2" aria-pressed="true">2</button>
+                  <button type="button" id="c8-b3" aria-pressed="true">3</button>
+                  <button type="button" id="c8-b4" aria-pressed="true">4</button>
+                </div>
+              </div>
+            </div>
+            <div class="reads">
+              <div class="read"><span class="rl">varianza explicada</span><span class="rv acc" id="c8-r1">—</span></div>
+              <div class="read"><span class="rl">residuo · RMS · u</span><span class="rv" id="c8-r2">—</span></div>
+              <div class="read"><span class="rl">bloques activos</span><span class="rv" id="c8-r3">—</span></div>
+            </div>
+          </div>
+          <div class="lab-main">
+            <div class="viz">
+              <svg id="c8-svg" viewBox="0 0 720 320" role="img" aria-label="Áreas apiladas de backcasts acumulados: tendencia, estacionalidad, ciclo y componente fina, con la serie original encima y el residuo como área restante"></svg>
+            </div>
+            <p class="vnote">ventana ilustrativa · bloque 1 tendencia · bloque 2 estacionalidad · bloque 3 ciclo lento · bloque 4 componente fina · trazo discontinuo: continuación del forecast por bloques</p>
+            <div class="verdict-card callout callout--veredicto" id="c8-v" data-st="alerta">
+              <span class="vk">veredicto</span><span class="vt" id="c8-vt">—</span>
+            </div>
+            <details class="formula callout callout--formula">
+              <summary>ver fórmula</summary>
+              <p class="fx">ŷ<sub>t</sub> = Σ<sub>b≤B</sub> backcast<sub>b,t</sub> · residuo e<sub>t</sub> = y<sub>t</sub> − ŷ<sub>t</sub> · varianza explicada = 1 − var(e) / var(y).</p>
+              <p class="fx">cada bloque especializa su pieza (tendencia, estacionalidad, ciclo, fino) y el siguiente bloque aprende lo que el anterior dejó en el residuo.</p>
+            </details>
+            <div class="lesson callout callout--leccion"><span class="lk">lección</span><span>Ninguna pieza lo ve todo: el apilamiento reparte el trabajo y el residuo confiesa lo que falta.</span></div>
+          </div>
+        </div>
+      </div>
+      <p class="rig-note"><span class="ic">◐</span><span>Simulación simbólica con fines didácticos: no es un resultado cuantitativo.</span></p>
+    </article>
+  </div>
+</section>
+<!-- ════════ CAP 09 · LA PROMESA ════════ -->
+<section class="window" id="cap-09" aria-labelledby="t-c9" hidden style="--acc:#a21caf;--accb:var(--c9)">
+  <div class="cover">
+    <div class="wrap">
+      <div class="cv-num" aria-hidden="true">09</div>
+      <p class="kicker">Cap. 9 — Semana 8 · M3 Monthly · intervalos que cumplen</p>
+      <h1 id="t-c9" tabindex="-1">La promesa</h1>
+      <p class="cv-hook">Un intervalo es una promesa: el ancho que pagas y la cobertura que esperas.</p>
+      <div class="ficha-caso">
+        <div><span class="fk">dominio</span><span class="fv">planeamiento mensual · M3 Monthly</span></div>
+        <div><span class="fk">decisión que informa</span><span class="fv">niveles de stock y presupuesto por periodo</span></div>
+        <div><span class="fk">riesgo metodológico</span><span class="fv riesgo">bandas de confianza gaussianas sin verificar</span></div>
+      </div>
+      <div class="cv-meta">
+        <div>sim · <b>09 / 10</b></div>
+        <div>datos · <b>100 % simbólicos</b></div>
+        <div>prng · <b>mulberry32</b></div>
+      </div>
+    </div>
+  </div>
+  <div class="wrap winbody">
+    <article class="lab-container" data-sim="c9" aria-label="Simulación 09 · La promesa">
+      <div class="rig-bar">
+        <span class="labno">SIM 09</span><span class="rig-name">La promesa · cobertura vs sharpness</span><span class="spacer"></span>
+      </div>
+      <div class="rig-body">
+        <p class="rig-q">¿Qué ancho de intervalo cumple la promesa del 80 % sin regalar sharpness?</p>
+        <div class="lab-grid">
+          <div class="lab-side">
+            <div class="panel" role="group" aria-label="Ancho del intervalo">
+              <div class="ctl">
+                <label for="c9-k">ancho del intervalo · k·σ <output id="c9-kv" for="c9-k">1,00</output></label>
+                <input type="range" id="c9-k" min="0.2" max="3" step="0.05" value="1">
+              </div>
+            </div>
+            <div class="gauges">
+              <div class="gaugebox">
+                <span class="gl">cobertura empírica · objetivo 80 %</span>
+                <svg id="c9-g1" viewBox="0 0 220 132" role="img" aria-label="Medidor de cobertura empírica con zona calibrada entre 75 y 85 por ciento y objetivo 80"></svg>
+              </div>
+              <div class="gaugebox">
+                <span class="gl">sharpness · ancho medio (menor es mejor)</span>
+                <svg id="c9-g2" viewBox="0 0 220 132" role="img" aria-label="Medidor de sharpness: el ancho medio del intervalo; menor es mejor siempre que la cobertura esté calibrada"></svg>
+              </div>
+            </div>
+            <div class="reads">
+              <div class="read"><span class="rl">puntos dentro / total</span><span class="rv" id="c9-r1">—</span></div>
+              <div class="read"><span class="rl">ancho medio · σ</span><span class="rv" id="c9-r2">—</span></div>
+              <div class="read"><span class="rl">distancia al 80 % · pp</span><span class="rv" id="c9-r3">—</span></div>
+            </div>
+          </div>
+          <div class="lab-main">
+            <div class="viz">
+              <svg id="c9-svg" viewBox="0 0 720 300" role="img" aria-label="Serie temporal con banda de confianza: los puntos dentro de la banda en un tono y los violados en otro, con el centro de la banda como línea"></svg>
+            </div>
+            <p class="vnote">ventana ilustrativa · banda = centro ± k·σ · σ nominal = 1 · cobertura objetivo (nominal): 80 %</p>
+            <div class="verdict-card callout callout--veredicto" id="c9-v" data-st="alerta">
+              <span class="vk">veredicto</span><span class="vt" id="c9-vt">—</span>
+            </div>
+            <details class="formula callout callout--formula">
+              <summary>ver fórmula</summary>
+              <p class="fx">cobertura empírica = (# puntos con |y − centro| ≤ k·σ) / n · sharpness = ancho medio = 2·k·σ (menor es mejor, si la cobertura cumple).</p>
+              <p class="fx">punto dulce teórico: k ≈ 1,28 ↔ cobertura ≈ 80 % para errores gaussianos · el compromiso cobertura/sharpness es la cara visible de la calibración.</p>
+            </details>
+            <div class="lesson callout callout--leccion"><span class="lk">lección</span><span>Un intervalo estrecho que falla no es precisión: es optimismo sin recibo.</span></div>
+          </div>
+        </div>
+      </div>
+      <p class="rig-note"><span class="ic">◐</span><span>Simulación simbólica con fines didácticos: no es un resultado cuantitativo.</span></p>
+    </article>
+  </div>
+</section>
+
+<!-- ════════ CAP 10 · PALANCAS ════════ -->
+<section class="window" id="cap-10" aria-labelledby="t-c10" hidden style="--acc:#334155;--accb:var(--c10)">
+  <div class="cover">
+    <div class="wrap">
+      <div class="cv-num" aria-hidden="true">10</div>
+      <p class="kicker">Cap. 10 — Síntesis · dónde invertir de verdad</p>
+      <h1 id="t-c10" tabindex="-1">Palancas</h1>
+      <p class="cv-hook">Seis palancas de inversión; sin protocolo, ninguna funciona.</p>
+      <div class="ficha-caso">
+        <div><span class="fk">dominio</span><span class="fv">síntesis de los ocho casos anteriores</span></div>
+        <div><span class="fk">decisión que informa</span><span class="fv">dónde invertir el próximo sprint de mejora</span></div>
+        <div><span class="fk">riesgo metodológico</span><span class="fv riesgo">invertir en arquitectura antes que en protocolo</span></div>
+      </div>
+      <div class="cv-meta">
+        <div>sim · <b>10 / 10</b></div>
+        <div>datos · <b>100 % simbólicos</b></div>
+        <div>prng · <b>mulberry32</b></div>
+      </div>
+    </div>
+  </div>
+  <div class="wrap winbody">
+    <article class="lab-container" data-sim="c10" aria-label="Simulación 10 · Palancas">
+      <div class="rig-bar">
+        <span class="labno">SIM 10</span><span class="rig-name">Palancas · jerarquía de impacto</span><span class="spacer"></span>
+      </div>
+      <div class="rig-body">
+        <p class="rig-q">¿Dónde está el mayor retorno de inversión cuando puedes mover seis palancas?</p>
+        <div class="lab-grid">
+          <div class="lab-side">
+            <div class="panel" role="group" aria-label="Inversión por palanca">
+              <div class="ctl">
+                <label for="c10-p">protocolo <output id="c10-pv" for="c10-p">30</output></label>
+                <input type="range" id="c10-p" min="0" max="100" step="1" value="30">
+              </div>
+              <div class="ctl">
+                <label for="c10-f">features <output id="c10-fv" for="c10-f">55</output></label>
+                <input type="range" id="c10-f" min="0" max="100" step="1" value="55">
+              </div>
+              <div class="ctl">
+                <label for="c10-h">historia <output id="c10-hv" for="c10-h">50</output></label>
+                <input type="range" id="c10-h" min="0" max="100" step="1" value="50">
+              </div>
+              <div class="ctl">
+                <label for="c10-x">covariables <output id="c10-xv" for="c10-x">40</output></label>
+                <input type="range" id="c10-x" min="0" max="100" step="1" value="40">
+              </div>
+              <div class="ctl">
+                <label for="c10-a">arquitectura <output id="c10-av" for="c10-a">60</output></label>
+                <input type="range" id="c10-a" min="0" max="100" step="1" value="60">
+              </div>
+              <div class="ctl">
+                <label for="c10-c">calibración <output id="c10-cv" for="c10-c">45</output></label>
+                <input type="range" id="c10-c" min="0" max="100" step="1" value="45">
+              </div>
+            </div>
+          </div>
+          <div class="lab-main">
+            <div class="viz">
+              <svg id="c10-svg" viewBox="0 0 720 300" role="img" aria-label="Barras horizontales de inversión por palanca y barra destacada del error final simbólico"></svg>
+            </div>
+            <div class="reads">
+              <div class="read"><span class="rl">error final · MASE simbólico</span><span class="rv acc" id="c10-r1">—</span></div>
+              <div class="read"><span class="rl">mayor retorno marginal</span><span class="rv wide" id="c10-r2">—</span></div>
+              <div class="read"><span class="rl">condición necesaria · protocolo</span><span class="rv wide" id="c10-r3">—</span></div>
+            </div>
+            <p class="vnote">ventana ilustrativa · ponderación asimétrica: protocolo &lt; 50 penaliza ×5 · features &gt; 50 mejora ×0,6 · arquitectura &gt; 50 mejora ×0,95 · el resto: retorno marginal suave</p>
+            <div class="verdict-card callout callout--veredicto" id="c10-v" data-st="mal">
+              <span class="vk">veredicto</span><span class="vt" id="c10-vt">—</span>
+            </div>
+            <details class="formula callout callout--formula">
+              <summary>ver fórmula</summary>
+              <p class="fx">error = 6,0 × 5<sup>[protocolo&lt;50]</sup> × 0,6<sup>[features&gt;50]</sup> × 0,95<sup>[arquitectura&gt;50]</sup> × Π<sub>letras</sub>(1 − c<sub>i</sub>·v<sub>i</sub>) · los indicadores [·] valen 0 o 1.</p>
+              <p class="fx">retorno marginal de la palanca j = reducción relativa de error al subir j 25 puntos (desde su valor actual, sin pasarse de 100).</p>
+            </details>
+            <div class="lesson callout callout--leccion"><span class="lk">lección</span><span>La jerarquía no es democrática: sin protocolo, las demás palancas decoran.</span></div>
+          </div>
+        </div>
+      </div>
+      <p class="rig-note"><span class="ic">◐</span><span>Simulación simbólica con fines didácticos: no es un resultado cuantitativo.</span></p>
+    </article>
+  </div>
+</section>
+<!-- ════════ GLOSARIO ════════ -->
+<section class="window" id="glosario" aria-labelledby="t-glos" hidden style="--accb:var(--teal-b)">
+  <div class="cover">
+    <div class="wrap">
+      <div class="cv-num" aria-hidden="true">§</div>
+      <p class="kicker">ruta de referencia · apéndice E (conceptual)</p>
+      <h1 id="t-glos" tabindex="-1">Glosario</h1>
+      <p class="cv-hook">Los términos que comparten las diez simulaciones, con definiciones propias de esta herramienta.</p>
+      <div class="cv-meta">
+        <div>ruta · <b>#/glosario</b></div>
+        <div>buscador · <b>filtra en vivo</b></div>
+        <div>convención · <b>unidades simbólicas (u)</b></div>
+      </div>
+    </div>
+  </div>
+  <div class="wrap winbody">
+    <div class="glos-tools">
+      <div class="ctl">
+        <label for="glos-q">buscar término o concepto</label>
+        <input type="search" id="glos-q" placeholder="ACF, embargo, MASE, fuga…" autocomplete="off">
+      </div>
+      <span id="glos-count" role="status" aria-live="polite">— términos</span>
+    </div>
+    <table class="glos">
+      <thead>
+        <tr><th scope="col">término</th><th scope="col">definición simbólica</th></tr>
+      </thead>
+      <tbody id="glos-body"></tbody>
+    </table>
+    <p class="glos-empty" id="glos-empty">sin coincidencias · prueba con otra palabra (p. ej. «embargo» o «cobertura»)</p>
+  </div>
+</section>
+
+</main>
+
+<footer class="site">
+  <div class="in">
+    <p><span><b>MONOGRAFÍA INTERACTIVA SIMBÓLICA v4</b> ·</span> <span>herramienta didáctica 100 % sintética: cada serie se genera en tu navegador con PRNG mulberry32 y semilla visible; no contiene ningún dato real de la monografía. Umbrales exclusivamente conceptuales: MASE = 1 ·</span> <span>cobertura nominal 80 % ·</span> <span>PSI 0,25 ·</span> <span>embargo ≥ ciclo dominante.</span></p>
+    <p><span>Cero dependencias ·</span> <span>funciona offline con doble clic ·</span> <span>respeta prefers-reduced-motion ·</span> <span>formato numérico Intl es-PE ·</span> <span>10 ventanas + glosario con router por hash.</span></p>
+    <div class="excl">
+      <b>excluido por decisión (especificado vs. excluido)</b>
+      <ul>
+        <li>quizzes por capítulo</li>
+        <li>cierres «Lo que te llevas»</li>
+        <li>progreso visitados / total</li>
+        <li>persistencia localStorage</li>
+        <li>CDN y recursos externos</li>
+      </ul>
+    </div>
+  </div>
+</footer>
+<script>
+(function(){
+'use strict';
+/* ════════ A · UTILIDADES ════════ */
+var SVGNS='http://www.w3.org/2000/svg';
+var REDUCED=!!(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+function $id(i){return document.getElementById(i);}
+function mulberry32(a){a=a>>>0;return function(){a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function gauss(rng){var u=0,v=0;while(u===0)u=rng();while(v===0)v=rng();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+function seedStr(n){return '#' + (n>>>0);}
+/* formato numérico Intl 'es-PE' (contrato §7): separadores regionales reales */
+var NFC={};
+function fmt(x,d){if(d===undefined)d=1;var f=NFC[d]||(NFC[d]=new Intl.NumberFormat('es-PE',{minimumFractionDigits:d,maximumFractionDigits:d}));return f.format(x);}
+function pct(x){return fmt(x*100,0).replace('-','−')+' %';}
+function sgn(x,d){return (x<0?'−':'+')+fmt(Math.abs(x),d===undefined?1:d);}
+/* notación científica es-PE para lecturas de gradiente */
+function expo(x){
+  if(x===0)return '0';
+  var e=Math.floor(Math.log10(Math.abs(x))),m=x/Math.pow(10,e);
+  return fmt(m,2)+'e'+(e<0?'−':'')+Math.abs(e);
+}
+function E(n,at,parent){
+  var e=document.createElementNS(SVGNS,n),st=[];
+  for(var k in at){
+    var v=at[k];
+    if((k==='fill'||k==='stroke')&&v.charAt(0)==='v'){st.push(k+':'+v);}
+    else e.setAttribute(k,v);
+  }
+  if(st.length)e.setAttribute('style',st.join(';'));
+  if(parent)parent.appendChild(e);
+  return e;
+}
+function T(parent,x,y,str,cls,anchor){
+  var t=E('text',{x:x,y:y,'class':cls||'svgt','text-anchor':anchor||'start'},parent);
+  t.textContent=String(str);
+  return t;
+}
+function legend(svg,x0,y0,W,PR,items){
+  var cx=x0,cy=y0;
+  for(var i=0;i<items.length;i++){
+    var it=items[i];
+    var tw=it.t.length*6.3+13;
+    var w0=it.k==='rect'?17:(it.k==='line'?21:16);
+    if(cx+w0+tw>W-PR){cx=x0;cy+=15;}
+    if(it.k==='rect'){E('rect',{x:cx,y:cy-9,width:11,height:11,rx:2,fill:it.c,'fill-opacity':(it.o==null?1:it.o)},svg);}
+    else if(it.k==='line'){var at={x1:cx,y1:cy-3,x2:cx+15,y2:cy-3,'stroke-width':2.4,stroke:it.c};if(it.d)at['stroke-dasharray']=it.d;E('line',at,svg);}
+    else{E('circle',{cx:cx+5,cy:cy-3,r:3,fill:it.c},svg);}
+    T(svg,cx+w0,cy,it.t,'svgt ink');
+    cx+=w0+tw;
+  }
+}
+/* ancho del lienzo según contenedor: texto siempre ~escala 1:1 */
+function chartW(svg){var w=svg.clientWidth;return Math.max(340,Math.min(w||720,720));}
+
+/* ════════ A2 · SCHED · FIX-07: rAF coalescido por sim (rAF solo durante interacción) ════════ */
+window.__v4={raf:0}; /* contador de verificación interna */
+function sched(fn){
+  var pending=false;
+  return function(){
+    if(REDUCED){fn();return;}
+    if(pending)return;
+    pending=true;
+    window.__v4.raf++;
+    requestAnimationFrame(function(){pending=false;fn();});
+  };
+}
+/* medidor semicircular reutilizable (vocabulario gauges de 1.html) */
+function gauge(svg,cfg){
+  var W=220,H=132,cx=110,cy=104,R=78,ir=60;
+  svg.textContent='';
+  var a0=Math.PI,a1=0;
+  function pt(a,r){return (cx+r*Math.cos(a)).toFixed(1)+','+(cy-r*Math.sin(a)).toFixed(1);}
+  function arc(a,b,r){
+    var large=(a-b)>Math.PI?1:0;
+    return 'M'+pt(a,r)+' A'+r+','+r+' 0 '+large+' 1 '+pt(b,r);
+  }
+  var zones=cfg.zones; /* [{from,to,color}] en unidades [min,max] */
+  for(var i=0;i<zones.length;i++){
+    var z=zones[i];
+    var za=a0-(z.from-cfg.min)/(cfg.max-cfg.min)*Math.PI;
+    var zb=a0-(z.to-cfg.min)/(cfg.max-cfg.min)*Math.PI;
+    E('path',{d:arc(za,zb,R),fill:'none',stroke:z.color,'stroke-width':13,'stroke-linecap':'butt',opacity:0.9},svg);
+  }
+  /* aguja + valor */
+  var frac=Math.max(0,Math.min(1,(cfg.val-cfg.min)/(cfg.max-cfg.min)));
+  var ang=a0-frac*Math.PI;
+  E('line',{x1:cx,y1:cy,x2:cx+(ir-2)*Math.cos(ang),y2:cy-(ir-2)*Math.sin(ang),stroke:'#f8fafc','stroke-width':2.6,'stroke-linecap':'round'},svg);
+  E('circle',{cx:cx,cy:cy,r:4.5,fill:'#f8fafc'},svg);
+  /* marca del objetivo */
+  if(cfg.target!=null){
+    var ta=a0-(cfg.target-cfg.min)/(cfg.max-cfg.min)*Math.PI;
+    E('line',{x1:cx+(R-9)*Math.cos(ta),y1:cy-(R-9)*Math.sin(ta),x2:cx+(R+9)*Math.cos(ta),y2:cy-(R+9)*Math.sin(ta),stroke:'#f8fafc','stroke-width':2.2},svg);
+  }
+  T(svg,cx,cy+22,cfg.fmt(cfg.val),'svgt ink halo','middle');
+  T(svg,14,H-6,cfg.fmt(cfg.min),'svgt','start');
+  T(svg,W-14,H-6,cfg.fmt(cfg.max),'svgt','end');
+  if(cfg.target!=null)T(svg,cx,cy-R-4,cfg.targetTxt||('objetivo '+cfg.fmt(cfg.target)),'svgt halo','middle');
+}
+
+/* ════════ B · MUNDO (semilla) + REGISTRO ════════ */
+var seedLabel=$id('lblSeed'),tkMsg=$id('tkMsg'),tkDot=$id('tkDot'),tkTe=$id('tkTe');
+/* FIX-03: semilla por defecto 42 (eco de SEED = 42); ?seed=N la fija y reproduce el mundo exacto */
+var SEED_Q=false,SEED_DEF=42;
+try{
+  var sv=new URLSearchParams(location.search).get('seed');
+  if(sv!==null&&/^[0-9]{1,10}$/.test(sv)){var nv=+sv;if(nv<=4294967295){SEED_DEF=nv;SEED_Q=true;}}
+}catch(e){}
+var MUNDO={
+  seed:SEED_DEF,
+  sims:[],
+  register:function(f){this.sims.push(f);},
+  resembrar:function(){
+    this.seed=(Math.random()*4294967296)>>>0;
+    seedLabel.textContent=seedStr(this.seed);
+    for(var i=0;i<this.sims.length;i++)this.sims[i]();
+    ticker('mundo re-sembrado → '+seedStr(this.seed)+' · todas las simulaciones regeneradas',true);
+  }
+};
+/* enlace reproducible: ?seed=N en la URL fija la semilla del mundo */
+function copySeedLink(){
+  var url=location.protocol+'//'+location.host+location.pathname+'?seed='+(MUNDO.seed>>>0)+location.hash;
+  function ok(){ticker('enlace copiado · al abrirlo, el mundo '+seedStr(MUNDO.seed)+' se reproduce exacto',true);}
+  function fb(){
+    var ta=document.createElement('textarea');
+    ta.value=url;ta.setAttribute('readonly','');
+    ta.style.position='fixed';ta.style.left='-9999px';
+    document.body.appendChild(ta);ta.select();
+    var done=false;
+    try{done=document.execCommand('copy');}catch(e){}
+    document.body.removeChild(ta);
+    ticker(done?('enlace copiado · al abrirlo, el mundo '+seedStr(MUNDO.seed)+' se reproduce exacto'):('no pude copiar automáticamente · URL con semilla: '+url),true);
+  }
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(url).then(ok,fb);
+  else fb();
+}
+function ticker(msg,seed){
+  tkMsg.textContent=msg;
+  tkDot.parentElement.className='te'+(seed?' seed':'');
+  if(!REDUCED){tkTe.classList.remove('new');void tkTe.offsetWidth;tkTe.classList.add('new');}
+}
+
+/* ════════ C · ROUTER POR HASH (no interfiere anclas nativas) · FIX-04 .active ════════ */
+var REDRAW=[];
+function redrawAll(){for(var i=0;i<REDRAW.length;i++)REDRAW[i]();}
+/* identidad de fondo por capítulo (ver body::before): --active-accb pasa a valer
+   var(--cN) del capítulo activo — indirección de custom property, no getComputedStyle,
+   así que no depende de que el navegador resuelva var() anidados en el momento de leerlos. */
+function updateAccentWash(id){
+  var m=/^cap-(\d{2})$/.exec(id);
+  var n=m?parseInt(m[1],10):0;
+  var css=(n>=1&&n<=10)?'var(--c'+n+')':'var(--teal-b)';
+  document.documentElement.style.setProperty('--active-accb',css);
+}
+function initRouter(){
+  var wins=[].slice.call(document.querySelectorAll('main .window'));
+  var links=[].slice.call(document.querySelectorAll('a[href^="#/"]'));
+  var booted=false;
+  function go(focus){
+    var h=location.hash;
+    if(h&&h.indexOf('#/')!==0)return; /* ancla nativa (#app): no interceptar */
+    var id=h.indexOf('#/')===0?h.slice(2):'cap-01';
+    var ok=false;
+    for(var i=0;i<wins.length;i++){if(wins[i].id===id){ok=true;break;}}
+    if(!ok)id='cap-01';
+    updateAccentWash(id);
+    for(var j=0;j<wins.length;j++){
+      if(wins[j].id===id){
+        wins[j].removeAttribute('hidden');
+        if(!REDUCED){wins[j].classList.remove('enter');void wins[j].offsetWidth;wins[j].classList.add('enter');}
+      }
+      else wins[j].setAttribute('hidden','');
+    }
+    for(var k=0;k<links.length;k++){
+      if(links[k].getAttribute('href')==='#/'+id){
+        links[k].setAttribute('aria-current','page');
+        links[k].classList.add('active'); /* FIX-04: indicador de estado activo */
+      }else{
+        links[k].removeAttribute('aria-current');
+        links[k].classList.remove('active');
+      }
+    }
+    if(booted){
+      window.scrollTo({top:0,behavior:REDUCED?'auto':'smooth'});
+      redrawAll(); /* re-layout de los lienzos ahora visibles */
+      if(focus){
+        var tgt=document.getElementById(id);
+        var h2=tgt?tgt.querySelector('h1'):null;
+        if(h2)h2.focus({preventScroll:true});
+      }
+    }
+    booted=true;
+  }
+  try{
+    if(location.hash.indexOf('#/')!==0)history.replaceState(null,'','#/cap-01');
+  }catch(e){location.hash='#/cap-01';}
+  go(false);
+  window.addEventListener('hashchange',function(){go(true);});
+}
+/* ════════ A3 · VEREDICTO · FIX-06: verdict-card con clases .safe / .alert (+.danger) ════════ */
+function setVerdict(vEl,vTx,st,txt){
+  vEl.setAttribute('data-st',st);
+  vEl.classList.toggle('safe',st==='bien');
+  vEl.classList.toggle('alert',st!=='bien');
+  vEl.classList.toggle('danger',st==='mal');
+  vTx.textContent=txt;
+}
+
+/* ════════ D · SIM 01 · EL ABANICO ════════ */
+function simC1(){
+  var svg=$id('c1-svg'),inH=$id('c1-h'),inS=$id('c1-s'),inA=$id('c1-a');
+  var oH=$id('c1-hv'),oS=$id('c1-sv'),oA=$id('c1-av');
+  var r1=$id('c1-r1'),r2=$id('c1-r2'),r3=$id('c1-r3');
+  var vEl=$id('c1-v'),vTx=$id('c1-vt');
+  var Z90=1.2816,Z25=0.6745,KS=Math.sqrt(2/Math.PI);
+  var level=60,hist=[],zk=[];
+  function genWorld(){
+    var rng=mulberry32((MUNDO.seed^0xC01A)>>>0);
+    level=44+Math.round(rng()*32);
+    var raw=[],v=level,i,off;
+    for(i=0;i<12;i++){v-=gauss(rng)*1.1;raw.push(v);}
+    off=level-raw[raw.length-1];
+    hist=raw.map(function(x){return x+off;});
+    hist.push(level);
+    zk=[];
+    for(i=0;i<30;i++)zk.push(gauss(rng));
+  }
+  function draw(){
+    var W=chartW(svg),H=300,PL=52,PR=16,PT=34,PB=34;
+    svg.setAttribute('viewBox','0 0 '+W+' '+H);
+    var h=+inH.value,s=+inS.value,a=+inA.value,i,k;
+    oH.textContent=String(h);oS.textContent=fmt(s);oA.textContent=fmt(a,2);
+    var su=s*(1+a),sd=s*(1-a);
+    var up90=[],lo10=[],up75=[],lo25=[],mean=[];
+    var ymin=level,ymax=level;
+    for(k=1;k<=h;k++){
+      var q=Math.sqrt(k);
+      var u=level+Z90*su*q,l=level-Z90*sd*q;
+      up90.push(u);lo10.push(l);
+      up75.push(level+Z25*su*q);lo25.push(level-Z25*sd*q);
+      mean.push(level+(su-sd)*KS*q);
+      if(l<ymin)ymin=l;
+      if(u>ymax)ymax=u;
+    }
+    for(i=0;i<hist.length;i++){if(hist[i]<ymin)ymin=hist[i];if(hist[i]>ymax)ymax=hist[i];}
+    var path=[level],v=level;
+    for(k=1;k<=h;k++){var z=zk[k-1];v+=z*s*(z>0?(1+a):(1-a));path.push(v);if(v<ymin)ymin=v;if(v>ymax)ymax=v;}
+    var pad=(ymax-ymin)*0.1+1e-9;ymin-=pad;ymax+=pad;
+    var x0=-12,x1=h;
+    function X(t){return PL+((t-x0)/(x1-x0))*(W-PL-PR);}
+    function Y(w){return H-PB-((w-ymin)/(ymax-ymin))*(H-PT-PB);}
+    svg.textContent='';
+    for(i=0;i<=4;i++){
+      var val=ymin+(i/4)*(ymax-ymin),yy=Y(val);
+      E('line',{x1:PL,y1:yy,x2:W-PR,y2:yy,'class':'ax'},svg);
+      T(svg,PL-6,yy+3.5,fmt(val,0),'svgt','end');
+    }
+    var ticks=[],seen={};
+    [0,Math.round(h/2),h].forEach(function(t){if(!seen[t]){seen[t]=1;ticks.push(t);}});
+    for(i=0;i<ticks.length;i++)T(svg,X(ticks[i]),H-PB+15,String(ticks[i]),'svgt','middle');
+    T(svg,4,H-4,'unidades','svgt');
+    T(svg,W-PR,H-4,'pasos desde hoy →','svgt','end');
+    E('line',{x1:X(0),y1:PT,x2:X(0),y2:H-PB,'class':'axl'},svg);
+    T(svg,X(0)+5,PT-6,'hoy','svgt ink');
+    function band(U,L,op){
+      var pts=[],k;
+      for(k=1;k<=h;k++)pts.push(X(k)+','+Y(U[k-1]));
+      for(k=h;k>=1;k--)pts.push(X(k)+','+Y(L[k-1]));
+      E('polygon',{points:pts.join(' '),fill:'var(--accb)','fill-opacity':op},svg);
+    }
+    band(up90,lo10,0.13);
+    band(up75,lo25,0.32);
+    E('line',{x1:X(0),y1:Y(level),x2:X(h),y2:Y(level),stroke:'var(--accb)','stroke-width':2.4},svg);
+    var mpts=[];
+    for(i=0;i<mean.length;i++)mpts.push(X(i+1)+','+Y(mean[i]));
+    E('polyline',{points:mpts.join(' '),fill:'none',stroke:'#e2e8f0','stroke-width':1.6,'stroke-dasharray':'6 4'},svg);
+    var hpts=[];
+    for(i=0;i<hist.length;i++)hpts.push(X(i-12)+','+Y(hist[i]));
+    E('polyline',{points:hpts.join(' '),fill:'none',stroke:'#5f7189','stroke-width':1.4},svg);
+    for(i=0;i<hist.length;i++)E('circle',{cx:X(i-12),cy:Y(hist[i]),r:2.5,fill:'#5f7189'},svg);
+    var ppts=[];
+    for(k=0;k<path.length;k++)ppts.push(X(k)+','+Y(path[k]));
+    E('polyline',{points:ppts.join(' '),fill:'none',stroke:'var(--tx)','stroke-width':1.2,'stroke-dasharray':'2 3',opacity:0.85},svg);
+    E('circle',{cx:X(h),cy:Y(path[h]),r:3.2,fill:'var(--tx)'},svg);
+    /* densidad al borde: alfombra de 36 cuantiles simulados en x = h */
+    var rr=mulberry32((MUNDO.seed^0xC01B)>>>0);
+    for(i=0;i<36;i++){
+      var zr=gauss(rr),vr=level+(zr>0?zr*su:zr*sd)*Math.sqrt(h);
+      E('line',{x1:X(h)-9,y1:Y(vr),x2:X(h)-2,y2:Y(vr),stroke:'var(--accb)','stroke-width':1.1,opacity:0.8},svg);
+    }
+    legend(svg,PL,14,W,PR,[
+      {k:'rect',c:'var(--accb)',o:0.32,t:'P25–P75'},
+      {k:'rect',c:'var(--accb)',o:0.13,t:'P10–P90'},
+      {k:'line',c:'var(--accb)',t:'mediana'},
+      {k:'line',c:'#e2e8f0',d:'6 4',t:'media'},
+      {k:'dot',c:'var(--tx)',t:'trayectoria simulada'}
+    ]);
+    r1.textContent=fmt(Z90*(su+sd)*Math.sqrt(h));
+    var gap=(su-sd)*KS*Math.sqrt(h);
+    r2.textContent=sgn(gap);
+    r2.className='rv'+(Math.abs(a)>=0.2?' amber':'');
+    r3.textContent=fmt(path[h]);
+    /* veredicto con estados por región de asimetría (§6 d · FIX-06) */
+    var gapV=(su-sd)*KS*Math.sqrt(h),st1,tx1;
+    if(Math.abs(a)<0.05){st1='bien';tx1='Simétrica: media y mediana caminan juntas y el punto resume la distribución sin mentir.';}
+    else if(Math.abs(a)<0.45){st1='alerta';tx1='Asimetría '+(a>0?'positiva':'negativa')+': media − mediana = '+sgn(gapV,1)+' u @ h — se separan y el punto ya no resume el abanico.';}
+    else{st1='mal';tx1='Cola dominante: media − mediana = '+sgn(gapV,1)+' u @ h. El veredicto cambia: publicar solo el punto esconde la cola '+(a>0?'alta':'baja')+'.';}
+    setVerdict(vEl,vTx,st1,tx1);
+  }
+  var drawS=sched(draw);
+  function rerun(){genWorld();draw();}
+  [inH,inS,inA].forEach(function(el){el.addEventListener('input',drawS);});
+  [inH,inS,inA].forEach(function(el){
+    el.addEventListener('change',function(){
+      ticker('C1 · abanico: h='+inH.value+' · σ='+fmt(+inS.value)+' · asimetría='+fmt(+inA.value,2));
+    });
+  });
+  MUNDO.register(rerun);
+  REDRAW.push(draw);
+  rerun();
+}
+
+/* ════════ E · SIM 02 · LA FRONTERA ════════ */
+function simC2(){
+  var svg=$id('c2-svg'),inF=$id('c2-f'),oF=$id('c2-fv');
+  var btn=$id('c2-rand'),bt=$id('c2-rt');
+  var inE=$id('c2-e'),oE=$id('c2-ev'),vEl=$id('c2-v'),vTx=$id('c2-vt'),sello=$id('c2-sello');
+  var r1=$id('c2-r1'),r2=$id('c2-r2'),r3=$id('c2-r3');
+  var N=120,NR=36,CYC=7;
+  var y=[],dw=[],randIdx=[],randOn=false,dragging=false,CW=720;
+  function genWorld(){
+    var rng=mulberry32((MUNDO.seed^0xC02A)>>>0);
+    var seas=[],i;
+    for(i=0;i<7;i++)seas.push((rng()-0.5)*10);
+    var ph=Math.floor(rng()*7);
+    y=[];dw=[];
+    for(i=0;i<N;i++){dw.push((i+ph)%7);y.push(38+0.045*i+seas[dw[i]]+gauss(rng)*1.6);}
+    var r2=mulberry32((MUNDO.seed^0xC02B)>>>0);
+    var idx=[];
+    for(i=0;i<N;i++)idx.push(i);
+    for(i=N-1;i>0;i--){var j=Math.floor(r2()*(i+1));var tmp=idx[i];idx[i]=idx[j];idx[j]=tmp;}
+    randIdx=idx.slice(0,NR).sort(function(a,b){return a-b;});
+  }
+  function model(F){
+    var sum=0,n=0,i;
+    for(i=0;i<F;i++){sum+=y[i];n++;}
+    var gm=sum/Math.max(n,1);
+    var s=[0,0,0,0,0,0,0],c=[0,0,0,0,0,0,0];
+    for(i=0;i<F;i++){s[dw[i]]+=y[i];c[dw[i]]++;}
+    for(i=0;i<7;i++)s[i]=c[i]?s[i]/c[i]-gm:0;
+    var yh=[];
+    for(i=0;i<N;i++)yh.push(gm+s[dw[i]]);
+    return yh;
+  }
+  function draw(){
+    var W=chartW(svg),H=300,PL=46,PR=14,PT=34,PB=32;
+    CW=W;
+    svg.setAttribute('viewBox','0 0 '+W+' '+H);
+    var F=+inF.value,emb=+inE.value,te=Math.min(F+emb,N);
+    oF.textContent=F+' · '+Math.round(F/N*100)+' %';
+    oE.textContent=emb+' d';
+    var yh=model(F),i,t;
+    var ymin=1e9,ymax=-1e9;
+    for(i=0;i<N;i++){if(y[i]<ymin)ymin=y[i];if(y[i]>ymax)ymax=y[i];}
+    ymin-=2.5;ymax+=2.5;
+    function X(t){return PL+(t/(N-1))*(W-PL-PR);}
+    function Y(v){return H-PB-((v-ymin)/(ymax-ymin))*(H-PT-PB);}
+    svg.textContent='';
+    for(i=0;i<=4;i++){
+      var val=ymin+(i/4)*(ymax-ymin),yy=Y(val);
+      E('line',{x1:PL,y1:yy,x2:W-PR,y2:yy,'class':'ax'},svg);
+      T(svg,PL-6,yy+3.5,fmt(val,0),'svgt','end');
+    }
+    var ticks=W<520?[0,60,119]:[0,30,60,90,119];
+    for(i=0;i<ticks.length;i++)T(svg,X(ticks[i]),H-PB+15,String(ticks[i]),'svgt','middle');
+    T(svg,4,H-4,'unidades','svgt');
+    T(svg,W-PR,H-4,'días →','svgt','end');
+    if(emb>0)E('rect',{x:X(F),y:PT,width:Math.max(X(te)-X(F),0),height:H-PT-PB,fill:'var(--amber-b)','fill-opacity':0.08},svg);
+    E('rect',{x:X(te),y:PT,width:Math.max(W-PR-X(te),0),height:H-PT-PB,fill:'var(--accb)','fill-opacity':0.06},svg);
+    var spts=[];
+    for(i=0;i<N;i++)spts.push(X(i)+','+Y(y[i]));
+    E('polyline',{points:spts.join(' '),fill:'none',stroke:'#43536b','stroke-width':1},svg);
+    for(i=0;i<N;i++){
+      if(i<F)E('circle',{cx:X(i),cy:Y(y[i]),r:2.4,fill:'#64748b'},svg);
+      else if(i<te)E('circle',{cx:X(i),cy:Y(y[i]),r:2.4,fill:'none',stroke:'#64748b','stroke-width':1,opacity:0.75},svg);
+      else E('circle',{cx:X(i),cy:Y(y[i]),r:2.8,fill:'var(--accb)'},svg);
+    }
+    var seenN=0;
+    for(i=0;i<randIdx.length;i++){
+      t=randIdx[i];
+      if(t<F)seenN++;
+      if(t<F||t>=te){
+        E('circle',{cx:X(t),cy:Y(y[t]),r:4.6,fill:'none',stroke:'var(--amber-b)','stroke-width':1.8,opacity:randOn?0.95:0.35},svg);
+        if(t<F&&randOn)E('circle',{cx:X(t),cy:Y(y[t]),r:2,fill:'var(--amber-b)'},svg);
+      }
+    }
+    var fx=X(F);
+    E('line',{x1:fx,y1:PT-4,x2:fx,y2:H-PB,stroke:'var(--amber-b)','stroke-width':2.4},svg);
+    E('circle',{cx:fx,cy:PT+16,r:7,fill:'var(--amber-b)'},svg);
+    E('line',{x1:fx-3,y1:PT+16,x2:fx+3,y2:PT+16,stroke:'#0f172a','stroke-width':1.6},svg);
+    var lbl='frontera · día '+F,lw=lbl.length*6.3;
+    var lx=Math.max(PL+lw/2,Math.min(fx,W-PR-lw/2));
+    T(svg,lx,PT+36,lbl,'svgt ink halo','middle');
+    if(emb>0)T(svg,(X(F)+X(te))/2,PT+50,'embargo','svgt halo','middle');
+    legend(svg,PL,14,W,PR,[
+      {k:'dot',c:'#64748b',t:'train'},
+      {k:'dot',c:'var(--accb)',t:'test temporal'},
+      {k:'dot',c:'var(--amber-b)',t:'test aleatorio'},
+      {k:'line',c:'var(--amber-b)',t:'frontera (arrastrable)'}
+    ]);
+    var mt=0,nt=0;
+    for(i=te;i<N;i++){mt+=Math.abs(y[i]-yh[i]);nt++;}
+    mt=nt?mt/nt:0;
+    var mr=0,nr2=0;
+    /* el test aleatorio puntúa TODOS sus anillos (t<F incluidos: esa es la fuga); solo se reserva el embargo [F,te) */
+    for(i=0;i<NR;i++){t=randIdx[i];if(t<F||t>=te){mr+=Math.abs(y[t]-yh[t]);nr2++;}}
+    mr=nr2?mr/nr2:0;
+    r1.textContent=nt?fmt(mt,2):'—';
+    r2.textContent=nr2?fmt(mr,2):'—';
+    r2.className='rv'+(mr<mt?' amber':'');
+    r3.textContent=seenN+' / '+NR;
+    r3.className='rv'+(seenN>0?' amber':'');
+    /* veredicto con estados + sello (§6 d · lenguaje 1.html) */
+    var bad=randOn&&nr2>0&&nt>0&&mt>0&&mr<mt,st2,tx2;
+    if(!randOn&&emb>=CYC){st2='bien';tx2='Split temporal con embargo ≥ ciclo dominante (7 d): el test vive estrictamente después de la frontera. Veredicto defendible.';}
+    else if(!randOn){st2='alerta';tx2='Embargo de '+emb+' d < ciclo dominante (7 d): los puntos pegados a la frontera comparten fase — aviso de proximidad, la fuga sigue abierta.';}
+    else if(bad){st2='mal';tx2='El split aleatorio visita el futuro: su MAE ('+fmt(mr,2)+') bate al temporal ('+fmt(mt,2)+') — eso solo puede ser memoria.';}
+    else{st2='alerta';tx2='Split aleatorio activo: parte del test ya estuvo en el train; aunque hoy no bata al temporal, la comparación está contaminada.';}
+    setVerdict(vEl,vTx,st2,tx2);
+    if(bad)sello.removeAttribute('hidden');else sello.setAttribute('hidden','');
+  }
+  var drawS=sched(draw);
+  function setF(v){
+    v=Math.max(+inF.min,Math.min(+inF.max,Math.round(v)));
+    if(String(v)!==inF.value)inF.value=String(v);
+    drawS();
+  }
+  function evX(ev){
+    var r=svg.getBoundingClientRect();
+    return {x:(ev.clientX-r.left)*(CW/r.width),y:(ev.clientY-r.top)*(300/r.height)};
+  }
+  svg.addEventListener('pointerdown',function(ev){
+    var p=evX(ev);
+    if(p.y<20||p.y>280)return;
+    dragging=true;
+    svg.classList.add('dragging');
+    try{svg.setPointerCapture(ev.pointerId);}catch(e){}
+    setF((p.x-46)/(CW-46-14)*119);
+    ev.preventDefault();
+  });
+  svg.addEventListener('pointermove',function(ev){
+    if(!dragging)return;
+    var p=evX(ev);
+    setF((p.x-46)/(CW-46-14)*119);
+  });
+  function endDrag(){
+    if(!dragging)return;
+    dragging=false;
+    svg.classList.remove('dragging');
+    ticker('C2 · frontera en el día '+inF.value+' ('+Math.round(+inF.value/120*100)+' % del calendario)');
+  }
+  svg.addEventListener('pointerup',endDrag);
+  svg.addEventListener('pointercancel',endDrag);
+  inF.addEventListener('input',drawS);
+  inF.addEventListener('change',function(){
+    ticker('C2 · frontera en el día '+inF.value+' ('+Math.round(+inF.value/120*100)+' % del calendario)');
+  });
+  inE.addEventListener('input',drawS);
+  inE.addEventListener('change',function(){
+    ticker('C2 · embargo '+inE.value+' d '+(+inE.value<CYC?'(< ciclo de 7 d · fuga por proximidad abierta)':'(≥ ciclo de 7 d · fuga cerrada)'));
+  });
+  btn.addEventListener('click',function(){
+    randOn=!randOn;
+    btn.setAttribute('aria-checked',String(randOn));
+    bt.textContent='split aleatorio · '+(randOn?'ON':'OFF');
+    ticker('C2 · split aleatorio '+(randOn?'ON — el test cubre todo el calendario':'OFF'));
+    drawS();
+  });
+  MUNDO.register(function(){genWorld();draw();});
+  REDRAW.push(draw);
+  genWorld();
+  draw();
+}
+/* ════════ F · SIM 03 · MEMORIA ════════ */
+function simC3(){
+  var inPhi=$id('c3-f'),inTh=$id('c3-t'),oP=$id('c3-fv'),oT=$id('c3-tv');
+  var s1=$id('c3-svg1'),s2=$id('c3-svg2');
+  var r1=$id('c3-r1'),r2=$id('c3-r2'),r3=$id('c3-r3');
+  var vEl=$id('c3-v'),vTx=$id('c3-vt');
+  var eps=[];
+  function genWorld(){
+    var rng=mulberry32((MUNDO.seed^0xC03A)>>>0);
+    eps=[];
+    for(var i=0;i<120;i++)eps.push(gauss(rng));
+  }
+  function drawIrf(p,th){
+    var W=chartW(s1),H=250,PL=46,PR=14,PT=34,PB=30;
+    s1.setAttribute('viewBox','0 0 '+W+' '+H);
+    s1.textContent='';
+    var mid=PT+(H-PT-PB)/2,amp=(H-PT-PB)/2/1.15;
+    var K=10,gw=(W-PL-PR)/(K+1);
+    E('line',{x1:PL,y1:mid,x2:W-PR,y2:mid,'class':'ax'},s1);
+    for(var k=0;k<=K;k++){
+      var cx=PL+gw*(k+0.5),bw=gw>44?13:9;
+      var va=Math.pow(p,k);
+      var vb=k===0?1:(k===1?th:0);
+      if(Math.abs(va)>1e-6)E('rect',{x:cx-bw-2,y:va>=0?mid-va*amp:mid,width:bw,height:Math.abs(va)*amp,fill:'var(--accb)'},s1);
+      if(Math.abs(vb)>1e-6)E('rect',{x:cx+2,y:vb>=0?mid-vb*amp:mid,width:bw,height:Math.abs(vb)*amp,fill:'#94a3b8'},s1);
+      T(s1,cx,H-PB+14,String(k),'svgt','middle');
+    }
+    T(s1,W-PR,12,'IRF ante un shock ε=1','svgt','end');
+    T(s1,W-PR,H-3,'rezago k →','svgt','end');
+    legend(s1,PL,14,W,PR,[
+      {k:'rect',c:'var(--accb)',t:'AR(1) · IRF = φ^k'},
+      {k:'rect',c:'#94a3b8',t:'MA(1) · IRF = 1, θ, 0…'}
+    ]);
+  }
+  function drawPath(p,th){
+    var W=chartW(s2),H=118,P2=46,PR=14;
+    s2.setAttribute('viewBox','0 0 '+W+' '+H);
+    s2.textContent='';
+    var ys=[],prev=0,pe=0,i;
+    for(i=0;i<120;i++){
+      var e=eps[i];
+      if(i===60)e+=6;
+      var v=p*prev+e+th*pe;
+      ys.push(v);pe=e;prev=v;
+    }
+    var mn=1e9,mx=-1e9;
+    for(i=0;i<ys.length;i++){if(ys[i]<mn)mn=ys[i];if(ys[i]>mx)mx=ys[i];}
+    var pad=(mx-mn)*0.14+1e-9;mn-=pad;mx+=pad;
+    function X(i){return P2+(i/119)*(W-P2-PR);}
+    function Y(v){return H-24-((v-mn)/(mx-mn))*(H-30);}
+    for(i=0;i<=2;i++){
+      var val=mn+(i/2)*(mx-mn),yy=Y(val);
+      E('line',{x1:P2,y1:yy,x2:W-PR,y2:yy,'class':'ax'},s2);
+      T(s2,P2-6,yy+3.5,fmt(val,0),'svgt','end');
+    }
+    E('line',{x1:X(60),y1:8,x2:X(60),y2:H-24,stroke:'var(--amber-b)','stroke-width':1.5,'stroke-dasharray':'3 3'},s2);
+    var pts=[];
+    for(i=0;i<ys.length;i++)pts.push(X(i)+','+Y(ys[i]));
+    E('polyline',{points:pts.join(' '),fill:'none',stroke:'var(--tx)','stroke-width':1.3},s2);
+    T(s2,X(60)+5,14,'shock','svgt ink halo');
+    T(s2,4,10,'y simbólica · ARMA(1,1)','svgt');
+    T(s2,W-PR,H-6,'t →','svgt','end');
+  }
+  function draw(){
+    var p=+inPhi.value,th=+inTh.value;
+    oP.textContent=fmt(p,2);
+    oT.textContent=fmt(th,2);
+    drawIrf(p,th);
+    drawPath(p,th);
+    var accM=0,k;
+    for(k=0;k<=10;k++)accM+=Math.abs(Math.pow(p,k));
+    r1.textContent=fmt(Math.pow(p,5),2);
+    r2.textContent=fmt(accM,2);
+    r3.textContent=th===0?'muere en el acto':'1 paso de estela (θ)';
+    r3.className='rv wide';
+    /* veredicto con estados por región de |φ| (§6 d) */
+    var ap=Math.abs(p),st3,tx3;
+    if(ap<0.3){st3='bien';tx3='Memoria corta: el shock muere casi de inmediato y la serie vuelve al nivel sin arrastrarlo.';}
+    else if(ap<=0.7){st3='alerta';tx3='Memoria media: el shock sobrevive varios rezagos; la ACF decae como φ^k y el PACF corta en k = 1.';}
+    else{st3='mal';tx3='Memoria larga: |φ| alto hereda el nivel durante muchos pasos — lo que pasó al inicio de la serie sigue pesando hoy.';}
+    if(Math.abs(th)>=0.3)tx3+=' El MA(1) añade su propio eco: una estela de tamaño θ y silencio.';
+    setVerdict(vEl,vTx,st3,tx3);
+  }
+  var drawS=sched(draw);
+  [inPhi,inTh].forEach(function(el){el.addEventListener('input',drawS);});
+  [inPhi,inTh].forEach(function(el){
+    el.addEventListener('change',function(){
+      ticker('C3 · memoria: φ='+fmt(+inPhi.value,2)+' · θ='+fmt(+inTh.value,2));
+    });
+  });
+  MUNDO.register(function(){genWorld();draw();});
+  REDRAW.push(draw);
+  genWorld();
+  draw();
+}
+/* ════════ F2 · SIM 03B · LA TRAMPA DEL AIC ════════
+   Cinco candidatos con complejidad creciente. El AIC penaliza parámetros
+   dentro del train (bien real: ARIMA(1,0,2) ganó por AIC en Cap. 3 y aun
+   así perdió en validación frente a ETS); la validación no sabe nada de
+   AIC, solo mide error en datos no vistos. Por diseño ambos criterios
+   pueden discrepar: eso es exactamente lo que hay que descubrir a tiempo. */
+function simC3b(){
+  var body=$id('c3b-body'),btn=$id('c3b-reseed');
+  var r1=$id('c3b-r1'),r2=$id('c3b-r2'),r3=$id('c3b-r3');
+  var vEl=$id('c3b-v'),vTx=$id('c3b-vt');
+  var NAMES=['AR(1)','ARMA(1,1)','ARMA(2,1)','SARIMA(1,0,1)×(1,0,0)','ETS (no lineal)'];
+  var rev=0,rows=[];
+  function genWorld(){
+    var rng=mulberry32((MUNDO.seed^0xC03B^(rev*7919))>>>0);
+    rows=NAMES.map(function(name,i){
+      var trueQ=1.6+rng()*1.8;
+      return {name:name,aic:trueQ*0.5+i*1.7+(rng()-0.5)*0.6,val:trueQ+(rng()-0.5)*0.15};
+    });
+  }
+  function draw(){
+    var aics=rows.map(function(r){return r.aic;}),vals=rows.map(function(r){return r.val;});
+    var aicMin=Math.min.apply(null,aics),aicMax=Math.max.apply(null,aics);
+    var valMin=Math.min.apply(null,vals),valMax=Math.max.apply(null,vals);
+    var winAic=rows[aics.indexOf(aicMin)],winVal=rows[vals.indexOf(valMin)];
+    body.innerHTML='';
+    rows.forEach(function(r){
+      var pAic=Math.max(8,100*(1-(r.aic-aicMin)/Math.max(1e-6,aicMax-aicMin)));
+      var pVal=Math.max(8,100*(1-(r.val-valMin)/Math.max(1e-6,valMax-valMin)));
+      var tr=document.createElement('tr');
+      tr.innerHTML=
+        '<td class="aic-name">'+r.name+(r===winAic?' <span class="aic-crown" title="menor AIC">🏆</span>':'')+'</td>'+
+        '<td><div class="aic-bar-track"><div class="aic-bar-fill aic" style="width:'+pAic+'%"></div></div><span class="aic-val">AIC '+fmt(r.aic,2)+'</span></td>'+
+        '<td><div class="aic-bar-track"><div class="aic-bar-fill val" style="width:'+pVal+'%"></div></div><span class="aic-val">validación '+fmt(r.val,2)+(r===winVal?' 🏆':'')+'</span></td>';
+      body.appendChild(tr);
+    });
+    r1.textContent=winAic.name;
+    r2.textContent=winVal.name;
+    var same=winAic===winVal;
+    r3.textContent=same?'sí':'no';
+    r3.className='rv wide'+(same?'':' amber');
+    if(!same)setVerdict(vEl,vTx,'mal','El AIC corona a «'+winAic.name+'» — más simple, mejor ajuste dentro del train — pero en validación gana «'+winVal.name+'». Quedarse con el AIC habría sido la elección equivocada.');
+    else setVerdict(vEl,vTx,'bien','Esta vez coinciden: «'+winAic.name+'» gana por AIC y por validación. Es coincidencia, no garantía — vuelve a sembrar y compruébalo de nuevo.');
+    ticker('C3b · AIC elige «'+winAic.name+'» · validación elige «'+winVal.name+'»'+(same?' (coinciden)':' (no coinciden)'));
+  }
+  btn.addEventListener('click',function(){rev++;genWorld();draw();});
+  MUNDO.register(function(){genWorld();draw();});
+  REDRAW.push(draw);
+  genWorld();
+  draw();
+}
+
+/* ════════ G · SIM 04 · ORACLE ════════ */
+function simC4(){
+  var btn=$id('c4-prod'),bt=$id('c4-pt');
+  var svg=$id('c4-svg'),xsvg=$id('c4-xsvg');
+  var r1=$id('c4-r1'),r2=$id('c4-r2'),r3=$id('c4-r3');
+  var inH4=$id('c4-h'),oH4=$id('c4-hv'),vEl=$id('c4-v'),vTx=$id('c4-vt');
+  var labBar=$id('c4-lab-bar'),labPct=$id('c4-lab-pct'),prBar=$id('c4-prod-bar'),prPct=$id('c4-prod-pct');
+  var TT=120,F0=72,PER=28;
+  var x=[],y=[],xh=[],prod=false;
+  var res={mb:0,mo:0,mp:0,il:0,ip:0,b:0,c:40};
+  function genWorld(){
+    var rng=mulberry32((MUNDO.seed^0xC04A)>>>0);
+    var used={},spikes={},i;
+    for(i=0;i<14;i++){
+      var t=10+Math.floor(rng()*(TT-20)),g=0;
+      while(used[t]&&g++<60)t=10+Math.floor(rng()*(TT-20));
+      used[t]=1;
+      spikes[t]=8+rng()*14;
+    }
+    x=[];y=[];
+    for(i=0;i<TT;i++){
+      var base=40+9*Math.sin(2*Math.PI*i/PER)+0.03*i;
+      var xv=base+(spikes[i]||0);
+      x.push(xv);
+      y.push(0.8*xv+gauss(rng)*1.2);
+    }
+    var acc=[],cnt=[];
+    for(i=0;i<PER;i++){acc.push(0);cnt.push(0);}
+    for(i=0;i<F0;i++){var p=i%PER;acc[p]+=x[i];cnt[p]++;}
+    xh=[];
+    for(i=0;i<TT;i++){var q=i%PER;xh.push(cnt[q]?acc[q]/cnt[q]:40);}
+  }
+  function compute(hor){
+    var sx=0,sy=0,sxx=0,sxy=0,n=0,i;
+    for(i=0;i<F0;i++){sx+=x[i];sy+=y[i];sxx+=x[i]*x[i];sxy+=x[i]*y[i];n++;}
+    var den=n*sxx-sx*sx;
+    res.b=Math.abs(den)<1e-9?0:(n*sxy-sx*sy)/den;
+    res.c=(sy-res.b*sx)/n;
+    var lim=Math.min(F0+hor,TT),eb=0,eo=0,ep=0,m=0;
+    for(i=F0;i<lim;i++){
+      m++;
+      eb+=Math.abs(y[i]-y[i-1]);
+      eo+=Math.abs(y[i]-(res.c+res.b*x[i]));
+      ep+=Math.abs(y[i]-(res.c+res.b*xh[i]));
+    }
+    res.mb=eb/m;res.mo=eo/m;res.mp=ep/m;
+    res.il=1-res.mo/res.mb;
+    res.ip=1-res.mp/res.mb;
+  }
+  function drawMain(hor){
+    var W=chartW(svg),H=300,PL=46,PR=14,PT=34,PB=32,FH=Math.min(F0+hor,TT);
+    svg.setAttribute('viewBox','0 0 '+W+' '+H);
+    svg.textContent='';
+    var ymin=1e9,ymax=-1e9,i;
+    for(i=0;i<TT;i++){if(y[i]<ymin)ymin=y[i];if(y[i]>ymax)ymax=y[i];}
+    ymin-=2;ymax+=2;
+    function X(t){return PL+(t/(TT-1))*(W-PL-PR);}
+    function Y(v){return H-PB-((v-ymin)/(ymax-ymin))*(H-PT-PB);}
+    for(i=0;i<=4;i++){
+      var val=ymin+(i/4)*(ymax-ymin),yy=Y(val);
+      E('line',{x1:PL,y1:yy,x2:W-PR,y2:yy,'class':'ax'},svg);
+      T(svg,PL-6,yy+3.5,fmt(val,0),'svgt','end');
+    }
+    var ticks=W<520?[0,60,119]:[0,30,60,90,119];
+    for(i=0;i<ticks.length;i++)T(svg,X(ticks[i]),H-PB+15,String(ticks[i]),'svgt','middle');
+    T(svg,W-PR,12,'y · unidades','svgt','end');
+    T(svg,W-PR,H-4,'días →','svgt','end');
+    E('rect',{x:X(F0),y:PT,width:Math.max(W-PR-X(F0),0),height:H-PT-PB,fill:'var(--accb)','fill-opacity':0.05},svg);
+    if(hor<TT-F0)E('line',{x1:X(FH),y1:PT,x2:X(FH),y2:H-PB,stroke:'#94a3b8','stroke-width':1.2,'stroke-dasharray':'4 4'},svg);
+    /* marcador HOY (lenguaje 1.html): la frontera entre lo vivido y lo por vivir */
+    E('line',{x1:X(F0),y1:PT,x2:X(F0),y2:H-PB,stroke:'var(--amber-b)','stroke-width':2.4},svg);
+    T(svg,X(F0)-6,PT-6,'train','svgt halo','end');
+    T(svg,X(F0)+6,PT-6,'test','svgt halo');
+    T(svg,X(F0),H-PB+15,'HOY','svgt ink halo','middle');
+    for(i=0;i<TT;i++){
+      var tst=i>=F0,at={cx:X(i),cy:Y(y[i]),r:tst?2.7:2.2,fill:tst?'var(--accb)':'#64748b'};
+      if(i>=FH)at.opacity=0.3;
+      E('circle',at,svg);
+    }
+    var npts=[];
+    for(i=F0-1;i<FH;i++)npts.push(X(i)+','+Y(y[i]));
+    E('polyline',{points:npts.join(' '),fill:'none',stroke:'#94a3b8','stroke-width':1.4,'stroke-dasharray':'5 4'},svg);
+    var apts=[];
+    for(i=F0;i<FH;i++){
+      var yh=prod?res.c+res.b*xh[i]:res.c+res.b*x[i];
+      apts.push(X(i)+','+Y(yh));
+    }
+    E('polyline',{points:apts.join(' '),fill:'none',stroke:prod?'var(--amber-b)':'var(--accb)','stroke-width':2.2},svg);
+    var lg4=[
+      {k:'dot',c:'#64748b',t:'y observada'},
+      {k:'line',c:'#94a3b8',d:'5 4',t:'naive'},
+      {k:'line',c:prod?'var(--amber-b)':'var(--accb)',t:prod?'modelo + x̂ estimada':'modelo + x real'}
+    ];
+    if(hor<TT-F0)lg4.push({k:'line',c:'#94a3b8',d:'4 4',t:'fin horizonte'});
+    legend(svg,PL,14,W,PR,lg4);
+  }
+  function drawStrip(hor){
+    var W=chartW(xsvg),H=86,P2=30,PR=14,FH=Math.min(F0+hor,TT);
+    xsvg.setAttribute('viewBox','0 0 '+W+' '+H);
+    xsvg.textContent='';
+    var xmin=1e9,xmax=-1e9,i;
+    for(i=0;i<TT;i++){if(x[i]<xmin)xmin=x[i];if(x[i]>xmax)xmax=x[i];}
+    xmin*=0.92;xmax*=1.05;
+    function X(t){return P2+(t/(TT-1))*(W-P2-PR);}
+    function Y(v){return H-20-((v-xmin)/(xmax-xmin))*(H-26);}
+    var bw=Math.max((W-P2-PR)/TT-1.2,1.5);
+    for(i=0;i<TT;i++){
+      var inTest=i>=F0,dim=inTest&&i>=FH;
+      if(!inTest){
+        E('rect',{x:X(i)-bw/2,y:Y(x[i]),width:bw,height:(H-20)-Y(x[i]),fill:'#64748b'},xsvg);
+      }else if(!prod){
+        E('rect',{x:X(i)-bw/2,y:Y(x[i]),width:bw,height:(H-20)-Y(x[i]),fill:'var(--accb)','fill-opacity':0.85,opacity:dim?0.25:1},xsvg);
+      }else{
+        E('rect',{x:X(i)-bw/2,y:Y(xh[i]),width:bw,height:(H-20)-Y(xh[i]),fill:'var(--amber-b)','fill-opacity':0.3,opacity:dim?0.25:1},xsvg);
+        E('rect',{x:X(i)-bw/2,y:Y(x[i]),width:bw,height:(H-20)-Y(x[i]),fill:'none',stroke:'var(--amber-b)','stroke-width':1,opacity:dim?0.21:0.85},xsvg);
+      }
+    }
+    T(xsvg,2,10,'exógena x','svgt');
+    T(xsvg,W-PR,10,prod?'futura: estimada':'futura: conocida','svgt ink halo','end');
+  }
+  function draw(){
+    var hor=+inH4.value;
+    oH4.textContent=hor+' d';
+    compute(hor);
+    drawMain(hor);
+    drawStrip(hor);
+    r1.textContent=fmt(res.mb,2);
+    r2.textContent=pct(res.il);
+    r3.textContent=pct(res.ip);
+    labBar.style.width=Math.max(Math.min(res.il*100,100),0)+'%';
+    prBar.style.width=Math.max(Math.min(res.ip*100,100),0)+'%';
+    labPct.textContent=pct(res.il);
+    prPct.textContent=pct(res.ip);
+    /* estados oracle/producción (§6 d) */
+    var st4,tx4;
+    if(!prod){st4='alerta';tx4='Estado oracle: la exógena futura se lee observada y la mejora deslumbra ('+pct(res.il)+'). Esa columna del tablón no existirá en producción.';}
+    else{st4='bien';tx4='Estado producción: más allá de HOY el clima observado se borra, entra la estimación y la mejora real queda en '+pct(res.ip)+'.';}
+    setVerdict(vEl,vTx,st4,tx4);
+  }
+  var drawS=sched(draw);
+  btn.addEventListener('click',function(){
+    prod=!prod;
+    btn.setAttribute('aria-checked',String(prod));
+    bt.textContent='modo producción · '+(prod?'ON':'OFF');
+    ticker('C4 · modo producción '+(prod?'ON — la exógena futura pasa a estimarse':'OFF — laboratorio'));
+    drawS();
+  });
+  inH4.addEventListener('input',drawS);
+  inH4.addEventListener('change',function(){
+    ticker('C4 · horizonte de evaluación '+inH4.value+' d desde HOY');
+  });
+  MUNDO.register(function(){genWorld();draw();});
+  REDRAW.push(draw);
+  genWorld();
+  draw();
+}
+/* ════════ H · SIM 05 · LEAKAGE ════════ */
+function simC5(){
+  var btn=$id('c5-win'),bt=$id('c5-wt');
+  var inE=$id('c5-e'),oE=$id('c5-ev');
+  var sc=$id('c5-sc'),tl=$id('c5-tl'),gg=$id('c5-gauge');
+  var r1=$id('c5-r1'),r2=$id('c5-r2'),r3=$id('c5-r3');
+  var vEl=$id('c5-v'),vTx=$id('c5-vt');
+  var N=240,HRS=120,REP=12,W=11;
+  var F0=11,FT=132; /* índice base: pares t∈[F0, N-7]; frontera de test en t=HRS */
+  var centered=true,fc=[],fk=[],tg=[],tp=[];
+  function corr(xs,ys){
+    var n=xs.length,sx=0,sy=0,sxx=0,syy=0,sxy=0,i;
+    for(i=0;i<n;i++){sx+=xs[i];sy+=ys[i];sxx+=xs[i]*xs[i];syy+=ys[i]*ys[i];sxy+=xs[i]*ys[i];}
+    var cov=n*sxy-sx*sy,vx=n*sxx-sx*sx,vy=n*syy-sy*sy;
+    return (vx<1e-12||vy<1e-12)?0:cov/Math.sqrt(vx*vy);
+  }
+  function genWorld(){
+    var PHI=0.7,VAR=40,A=6,SY=8,PER=168;
+    var sA=Math.sqrt(VAR*(1-PHI*PHI));
+    fc=[];fk=[];tg=[];tp=[];
+    for(var p=0;p<REP;p++){
+      var rng=mulberry32(((MUNDO.seed^0xC05A)+p*0x9E37)>>>0),ar=0,y=[],i;
+      for(i=0;i<N;i++){ar=PHI*ar+gauss(rng)*sA;y.push(ar+A*Math.sin(2*Math.PI*(i+p*37)/PER)+gauss(rng)*SY);}
+      for(i=F0;i<=N-7;i++){
+        var mc=0,mk=0,k;
+        for(k=-5;k<=5;k++)mc+=y[i+k];
+        for(k=1;k<=W;k++)mk+=y[i-k];
+        fc.push(mc/W);fk.push(mk/W);tg.push(y[i+1]);tp.push(i);
+      }
+    }
+  }
+  function draw(){
+    var emb=+inE.value;
+    oE.textContent=emb+' h';
+    bt.textContent=centered?'ventana centrada · ON':'ventana causal · OFF';
+    /* pares en test [HRS, N-7); el embargo retira los primeros emb horas */
+    var xs=[],ys=[],xe=[],ye=[],i;
+    for(i=0;i<tp.length;i++){
+      if(tp[i]<HRS)continue;
+      if(tp[i]<HRS+emb){xe.push(centered?fc[i]:fk[i]);ye.push(tg[i]);}
+      else{xs.push(centered?fc[i]:fk[i]);ys.push(tg[i]);}
+    }
+    var rC=corr(xs,ys),rAll=corr(xe.concat(xs),ye.concat(ys)),rK=corr(
+      (function(){var a=[],j;for(j=0;j<tp.length;j++)if(tp[j]>=HRS+emb)a.push(fk[j]);return a;})(),
+      (function(){var a=[],j;for(j=0;j<tp.length;j++)if(tp[j]>=HRS+emb)a.push(tg[j]);return a;})()
+    );
+    var rShow=centered?rC:rK;
+    var rInf=centered?rC:rAll; /* la centrada equivalente con el mismo embargo */
+    var delta=Math.max(0,rInf-rK);
+    /* ── gauge ── */
+    gauge(gg,{
+      min:0,max:1,val:Math.max(0,rShow),
+      zones:[
+        {from:0,to:0.30,color:'rgba(74,222,128,.75)'},
+        {from:0.30,to:0.45,color:'rgba(245,158,11,.8)'},
+        {from:0.45,to:1,color:'rgba(248,113,113,.85)'}
+      ],
+      fmt:function(v){return fmt(v,2);}
+    });
+    /* ── scatter ── */
+    var Wc=chartW(sc),Hc=300,PL=52,PR=16,PT=34,PB=36;
+    sc.setAttribute('viewBox','0 0 '+Wc+' '+Hc);
+    sc.textContent='';
+    var allx=xe.concat(xs),ally=ye.concat(ys);
+    var xmin=1e9,xmax=-1e9,ymin=1e9,ymax=-1e9;
+    for(i=0;i<allx.length;i++){
+      if(allx[i]<xmin)xmin=allx[i];if(allx[i]>xmax)xmax=allx[i];
+      if(ally[i]<ymin)ymin=ally[i];if(ally[i]>ymax)ymax=ally[i];
+    }
+    var pxd=(xmax-xmin)*0.08+1e-9,pad=(ymax-ymin)*0.08+1e-9;
+    xmin-=pxd;xmax+=pxd;ymin-=pad;ymax+=pad;
+    function X(v){return PL+((v-xmin)/(xmax-xmin))*(Wc-PL-PR);}
+    function Y(v){return Hc-PB-((v-ymin)/(ymax-ymin))*(Hc-PT-PB);}
+    for(i=0;i<=4;i++){
+      var vyv=ymin+(i/4)*(ymax-ymin),yy=Y(vyv);
+      E('line',{x1:PL,y1:yy,x2:Wc-PR,y2:yy,'class':'ax'},sc);
+      T(sc,PL-6,yy+3.5,fmt(vyv,0),'svgt','end');
+    }
+    for(i=0;i<=4;i++){
+      var vxx=xmin+(i/4)*(xmax-xmin),xx=X(vxx);
+      E('line',{x1:xx,y1:PT,x2:xx,y2:Hc-PB,'class':'ax'},sc);
+      T(sc,xx,Hc-PB+15,fmt(vxx,0),'svgt','middle');
+    }
+    T(sc,4,Hc-4,'objetivo y(t+1)','svgt');
+    T(sc,Wc-PR,Hc-4,'feature f(t) →','svgt','end');
+    for(i=0;i<xe.length;i++)E('circle',{cx:X(xe[i]),cy:Y(ye[i]),r:2.6,fill:'none',stroke:'#64748b','stroke-width':1,opacity:0.7},sc);
+    for(i=0;i<xs.length;i++)E('circle',{cx:X(xs[i]),cy:Y(ys[i]),r:2.8,fill:'var(--accb)','fill-opacity':0.75},sc);
+    legend(sc,PL,14,Wc,PR,[
+      {k:'dot',c:'var(--accb)',t:'pares evaluados ('+xs.length+')'},
+      {k:'dot',c:'#64748b',t:'retirados por embargo ('+xe.length+')'}
+    ]);
+    T(sc,Wc-PR,PT-6,'r = '+fmt(Math.max(rShow,0),2),'svgt ink halo','end');
+    /* ── línea de tiempo (réplica 0) ── */
+    var Wt=chartW(tl),Ht=96,P2=30,PRT=14;
+    tl.setAttribute('viewBox','0 0 '+Wt+' '+Ht);
+    tl.textContent='';
+    function TX(t){return P2+(t/N)*(Wt-P2-PRT);}
+    E('rect',{x:TX(0),y:14,width:TX(HRS)-TX(0),height:Ht-38,fill:'rgba(148,163,184,.10)'},tl);
+    if(emb>0)E('rect',{x:TX(HRS),y:14,width:Math.max(TX(HRS+emb)-TX(HRS),1),height:Ht-38,fill:'rgba(148,163,184,.28)'},tl);
+    E('rect',{x:TX(HRS+emb),y:14,width:Math.max(TX(N)-TX(HRS+emb),1),height:Ht-38,fill:'var(--accb)','fill-opacity':0.10},tl);
+    E('line',{x1:TX(HRS),y1:10,x2:TX(HRS),y2:Ht-24,stroke:'var(--amber-b)','stroke-width':2},tl);
+    T(tl,TX(HRS/2),Ht-12,'train','svgt','middle');
+    if(emb>0)T(tl,TX(HRS)+6,Ht-12,'embargo','svgt halo');
+    T(tl,TX(Math.min(HRS+emb+30,N-10)),Ht-12,'test','svgt halo');
+    T(tl,Wt-PRT,10,'frontera de evaluación','svgt','end');
+    /* ── lecturas + veredicto ── */
+    r1.textContent=fmt(Math.max(rShow,0),2);
+    r1.className='rv '+(rShow>0.45?'red':(rShow>0.30?'amber':'acc'));
+    r2.textContent=sgn(delta,2);
+    r2.className='rv'+(delta>0.05?' amber':'');
+    r3.textContent=String(xs.length+xe.length);
+    var st5,tx5;
+    if(centered&&emb<24){
+      st5='mal';
+      tx5='⚠️ FUGA POR PROXIMIDAD · Ventana centrada: la feature contiene y(t+1)…y(t+5) y el propio objetivo — r se infla a '+fmt(Math.max(rInf,0),2)+' (causal: '+fmt(Math.max(rK,0),2)+'). Encima, el embargo ('+emb+' h) no cubre el ciclo dominante (24 h).';
+    }else if(centered){
+      st5='alerta';
+      tx5='Ventana centrada con embargo ≥ ciclo: la fuga por proximidad está reservada, pero la feature sigue viendo el futuro — r = '+fmt(Math.max(rInf,0),2)+' sigue inflada. Pasa a causal.';
+    }else if(emb<24){
+      st5='alerta';
+      tx5='⚠️ FUGA POR PROXIMIDAD · Ventana causal, pero el embargo ('+emb+' h) es menor que el ciclo dominante (24 h): los pares pegados a la frontera comparten fase. Sube el embargo a ≥ 24 h.';
+    }else{
+      st5='bien';
+      tx5='Protocolo limpio: ventana causal shift(1) + embargo ('+emb+' h) ≥ ciclo dominante (24 h). r = '+fmt(Math.max(rK,0),2)+' es la correlación honesta que deberías esperar.';
+    }
+    setVerdict(vEl,vTx,st5,tx5);
+  }
+  var drawS=sched(draw);
+  btn.addEventListener('click',function(){
+    centered=!centered;
+    btn.setAttribute('aria-checked',String(centered));
+    ticker('C5 · ventana '+(centered?'CENTRADA (mira al futuro)':'CAUSAL shift(1) (solo pasado)'));
+    drawS();
+  });
+  inE.addEventListener('input',drawS);
+  inE.addEventListener('change',function(){
+    ticker('C5 · embargo '+inE.value+' h '+(+inE.value<24?'(< ciclo 24 h · fuga por proximidad)':'(≥ ciclo 24 h)'));
+  });
+  MUNDO.register(function(){genWorld();draw();});
+  REDRAW.push(draw);
+  genWorld();
+  draw();
+}
+
+/* ════════ I · SIM 06 · HISTORIA ════════ */
+function simC6(){
+  var inW=$id('c6-w'),oW=$id('c6-wv');
+  var svg=$id('c6-svg');
+  var r1=$id('c6-r1'),r2=$id('c6-r2'),r3=$id('c6-r3');
+  var vEl=$id('c6-v'),vTx=$id('c6-vt');
+  var M0=38,M1=1.3,LAM=0.55,WMAX=52;
+  function mase(w){return M1+(M0-M1)*Math.exp(-LAM*w);}
+  function draw(){
+    var W=chartW(svg),H=320,PL=52,PR=16,PT=34,PB=36;
+    svg.setAttribute('viewBox','0 0 '+W+' '+H);
+    svg.textContent='';
+    var w=+inW.value,m=mase(w);
+    oW.textContent=w+' sem';
+    var LY0=Math.log(1),LY1=Math.log(45);
+    function X(t){return PL+(t/WMAX)*(W-PL-PR);}
+    function Y(v){return H-PB-((Math.log(Math.max(v,1))-LY0)/(LY1-LY0))*(H-PT-PB);}
+    /* zonas: cold <1 · few-shot 1-4 · warm >4 */
+    E('rect',{x:X(0),y:PT,width:Math.max(X(1)-X(0),0),height:H-PT-PB,fill:'var(--red-b)','fill-opacity':0.10},svg);
+    E('rect',{x:X(1),y:PT,width:Math.max(X(4)-X(1),0),height:H-PT-PB,fill:'var(--amber-b)','fill-opacity':0.10},svg);
+    E('rect',{x:X(4),y:PT,width:Math.max(X(WMAX)-X(4),0),height:H-PT-PB,fill:'var(--green-b)','fill-opacity':0.08},svg);
+    T(svg,X(0.5),PT+14,'COLD','svgt halo','middle');
+    T(svg,X(2.5),PT+14,'FEW-SHOT','svgt halo','middle');
+    T(svg,X(Math.min(14,WMAX-6)),PT+14,'WARM','svgt halo','middle');
+    /* rejilla log: 1,2,5,10,20,40 */
+    [1,2,5,10,20,40].forEach(function(v){
+      var yy=Y(v);
+      E('line',{x1:PL,y1:yy,x2:W-PR,y2:yy,'class':'ax'},svg);
+      T(svg,PL-6,yy+3.5,String(v),'svgt','end');
+    });
+    for(var t=0;t<=WMAX;t+=4){
+      E('line',{x1:X(t),y1:H-PB,x2:X(t),y2:H-PB+4,'class':'axl'},svg);
+      T(svg,X(t),H-PB+15,String(t),'svgt','middle');
+    }
+    T(svg,4,H-4,'MASE','svgt');
+    T(svg,W-PR,H-4,'semanas de historia →','svgt','end');
+    /* umbral MASE = 1 */
+    E('line',{x1:PL,y1:Y(1),x2:W-PR,y2:Y(1),stroke:'var(--amber-b)','stroke-width':1.4,'stroke-dasharray':'6 4'},svg);
+    T(svg,W-PR,Y(1)-6,'MASE = 1 · empata al naive','svgt halo','end');
+    /* curva */
+    var pts=[];
+    for(var q=0;q<=WMAX*2;q++){
+      var ww=q/2;
+      pts.push(X(ww)+','+Y(mase(ww)));
+    }
+    E('polyline',{points:pts.join(' '),fill:'none',stroke:'var(--accb)','stroke-width':2.6},svg);
+    /* punto actual */
+    E('circle',{cx:X(w),cy:Y(m),r:6,fill:'var(--accb)'},svg);
+    E('circle',{cx:X(w),cy:Y(m),r:10,fill:'none',stroke:'var(--accb)','stroke-width':1.4,opacity:0.5},svg);
+    T(svg,Math.min(X(w)+10,W-120),Math.max(Y(m)-12,PT+10),'MASE '+fmt(m,1),'svgt ink halo');
+    legend(svg,PL,14,W,PR,[
+      {k:'rect',c:'var(--red-b)',o:0.35,t:'cold < 1 sem'},
+      {k:'rect',c:'var(--amber-b)',o:0.35,t:'few-shot 1–4'},
+      {k:'rect',c:'var(--green-b)',o:0.35,t:'warm > 4'}
+    ]);
+    r1.textContent=fmt(m,1);
+    r1.className='rv '+(w<1?'red':(w<=4?'amber':'acc'));
+    r2.textContent=w<1?'cold start':(w<=4?'few-shot':'warm start');
+    r2.className='rv wide';
+    r3.textContent='×'+fmt(m/M1,1);
+    r3.className='rv';
+    /* veredicto por zona (§6 d) */
+    var st6,tx6;
+    if(w<1){
+      st6='mal';
+      tx6='Adivinando escala: con '+w+' sem de historia el MASE simbólico ronda '+fmt(mase(Math.max(w,0.001)),0)+' — el modelo ni siquiera conoce la magnitud del negocio. Primero, historia.';
+    }else if(w<=4){
+      st6='alerta';
+      tx6='Adaptando forma: '+w+' sem alcanzan para el ciclo corto y el MASE cae a '+fmt(m,1)+', pero la estacionalidad larga sigue siendo una hipótesis sin datos.';
+    }else{
+      st6='bien';
+      tx6='Modelo local viable: con '+w+' sem el MASE simbólico se asienta en '+fmt(m,1)+' y cada semana extra mejora poco — el margen ya no está en la historia.';
+    }
+    setVerdict(vEl,vTx,st6,tx6);
+  }
+  var drawS=sched(draw);
+  inW.addEventListener('input',drawS);
+  inW.addEventListener('change',function(){
+    ticker('C6 · historia disponible '+inW.value+' sem · MASE '+fmt(mase(+inW.value),1));
+  });
+  MUNDO.register(draw);
+  REDRAW.push(draw);
+  draw();
+}
+/* ════════ J · SIM 07 · GRADIENTE ════════ */
+function simC7(){
+  var inT=$id('c7-t'),inR=$id('c7-r'),oT=$id('c7-tv'),oR=$id('c7-rv');
+  var svg=$id('c7-svg');
+  var r1=$id('c7-r1'),r2=$id('c7-r2'),r3=$id('c7-r3');
+  var vEl=$id('c7-v'),vTx=$id('c7-vt');
+  var CUT=1e-6,LMIN=Math.log10(1e-14),LMAX=Math.log10(2);
+  function draw(){
+    var W=chartW(svg),H=300,PL=52,PR=16,PT=34,PB=36;
+    svg.setAttribute('viewBox','0 0 '+W+' '+H);
+    svg.textContent='';
+    var Tn=+inT.value,r=+inR.value;
+    oT.textContent=Tn+' pasos';
+    oR.textContent=fmt(r,3);
+    function Y(g){
+      var lg=Math.log10(Math.max(g,1e-15));
+      return H-PB-((lg-LMIN)/(LMAX-LMIN))*(H-PT-PB);
+    }
+    /* rejilla log */
+    var tv=[],p;
+    for(p=-14;p<=0;p+=2)tv.push(Math.pow(10,p));
+    for(p=0;p<tv.length;p++){
+      var yy=Y(tv[p]);
+      E('line',{x1:PL,y1:yy,x2:W-PR,y2:yy,'class':'ax'},svg);
+      T(svg,PL-6,yy+3.5,tv[p].toExponential(0).replace('e-','e−').replace('e+0','e+'),'svgt','end');
+    }
+    T(svg,4,H-4,'|∇| log','svgt');
+    T(svg,W-PR,H-4,'t → (0 = pasado lejano)','svgt','end');
+    /* umbral de señal */
+    E('line',{x1:PL,y1:Y(CUT),x2:W-PR,y2:Y(CUT),stroke:'var(--amber-b)','stroke-width':1.3,'stroke-dasharray':'6 4'},svg);
+    T(svg,W-PR,Y(CUT)-6,'umbral 10⁻⁶','svgt halo','end');
+    /* barras: gradiente[t] = r^(T-t), muestreadas para caber */
+    var plotW=W-PL-PR;
+    var maxBars=Math.max(24,Math.min(Tn,Math.floor(plotW/2.2)));
+    var step=Math.max(1,Math.round(Tn/maxBars));
+    var bw=Math.max(plotW/maxBars-1,1.2);
+    var alive=0,mu=0;
+    for(var t=0;t<Tn;t++){
+      var g=Math.pow(r,Tn-t);
+      if(g>CUT)alive++;
+      if(t%step===0){
+        var x=PL+(t/Tn)*plotW;
+        var alive0=g>CUT;
+        E('rect',{x:x,y:Y(g),width:bw,height:(H-PB)-Y(g),fill:alive0?'var(--accb)':'var(--red-b)','fill-opacity':alive0?0.85:0.65},svg);
+      }
+    }
+    /* profundidad efectiva (ln(1e-6)/ln(r)) marcada */
+    var eff=Math.log(CUT)/Math.log(r);
+    if(eff>0&&eff<Tn){
+      var xe2=PL+(eff/Tn)*plotW;
+      E('line',{x1:xe2,y1:PT,x2:xe2,y2:H-PB,stroke:'var(--tx2)','stroke-width':1,'stroke-dasharray':'3 4'},svg);
+      T(svg,xe2+5,PT+10,'memoria efectiva ≈ '+Math.round(eff)+' pasos','svgt halo');
+    }
+    var g0=Math.pow(r,Tn-1);
+    T(svg,PL+4,Y(g0)-8,'grad @ paso 0: '+expo(g0),'svgt ink halo');
+    r1.textContent=expo(g0);
+    r1.className='rv '+(g0<CUT?'red':(g0<1e-3?'amber':'acc'));
+    r2.textContent=alive+' / '+Tn;
+    r2.className='rv'+(alive<Tn*0.5?' red':(alive<Tn?' amber':''));
+    r3.textContent=(eff>0&&isFinite(eff))?(eff<Tn?fmt(eff,0)+' de '+Tn:'toda ('+Tn+')'):'—';
+    var st7,tx7;
+    if(g0<CUT){
+      st7='mal';
+      tx7='⚠️ LA RED NO APRENDE DEL PASADO LEJANO · con retención '+fmt(r,3)+' y T = '+Tn+', el gradiente llega al paso 0 con magnitud '+expo(g0)+' — por debajo de 10⁻⁶: señal muerta.';
+    }else if(g0<1e-3){
+      st7='alerta';
+      tx7='Señal tenue: el gradiente en el paso 0 vale '+expo(g0)+' — llega, pero amortiguado. Acortar secuencia, retención mayor o conexiones residuales.';
+    }else{
+      st7='bien';
+      tx7='El gradiente sobrevive: '+expo(g0)+' en el paso 0 con T = '+Tn+'. La memoria efectiva ('+fmt(eff,0)+' pasos) cubre la secuencia completa.';
+    }
+    setVerdict(vEl,vTx,st7,tx7);
+  }
+  var drawS=sched(draw);
+  [inT,inR].forEach(function(el){el.addEventListener('input',drawS);});
+  [inT,inR].forEach(function(el){
+    el.addEventListener('change',function(){
+      ticker('C7 · gradiente: T='+inT.value+' · retención='+fmt(+inR.value,3)+' · @0 = '+expo(Math.pow(+inR.value,+inT.value-1)));
+    });
+  });
+  MUNDO.register(draw);
+  REDRAW.push(draw);
+  draw();
+}
+
+/* ════════ K · SIM 08 · APILAMIENTO ════════ */
+function simC8(){
+  var svg=$id('c8-svg');
+  var r1=$id('c8-r1'),r2=$id('c8-r2'),r3=$id('c8-r3');
+  var vEl=$id('c8-v'),vTx=$id('c8-vt');
+  var b1=$id('c8-b1'),b2=$id('c8-b2'),b3=$id('c8-b3'),b4=$id('c8-b4');
+  var N=144,FH=12; /* 12 pasos de forecast */
+  var y=[],parts=[],blocks=4;
+  function genWorld(){
+    var rng=mulberry32((MUNDO.seed^0xC08A)>>>0);
+    var sl=0.16+rng()*0.10,ph=rng()*7,amp=9+rng()*5;
+    var nse=1.6+rng()*0.8;
+    var cph=rng()*40,cper=52+Math.floor(rng()*18),camp=5+rng()*3;
+    var NT=N+FH;
+    y=[];parts=[];
+    /* componentes (definidos también en la zona de forecast: son deterministas) */
+    var trend=[],seas=[],cyc=[],fine=[];
+    var mid=(N-1)/2,i,j;
+    for(i=0;i<NT;i++){
+      trend.push(40+sl*(i-mid)*2);
+      seas.push(amp*Math.sin(2*Math.PI*(i+ph)/24));
+      cyc.push(camp*Math.sin(2*Math.PI*(i+cph)/cper));
+      fine.push(0);
+    }
+    var lat=[];
+    for(i=0;i<N;i++)lat.push(trend[i]+seas[i]+cyc[i]);
+    for(i=0;i<N;i++)y.push(lat[i]+gauss(rng)*nse);
+    /* bloque 4: componente fina = media móvil centrada del residuo (aprende textura) */
+    var res0=[];
+    for(i=0;i<N;i++)res0.push(y[i]-lat[i]);
+    for(i=0;i<N;i++){
+      var s=0,c=0;
+      for(j=Math.max(0,i-3);j<=Math.min(N-1,i+3);j++){s+=res0[j];c++;}
+      fine[i]=s/c;
+    }
+    parts=[trend,seas,cyc,fine];
+  }
+  function draw(){
+    var W=chartW(svg),H=320,PL=52,PR=16,PT=34,PB=36;
+    svg.setAttribute('viewBox','0 0 '+W+' '+H);
+    svg.textContent='';
+    var b=[b1,b2,b3,b4],nb=0,i,k;
+    for(i=0;i<4;i++){if(b[i].getAttribute('aria-pressed')==='true')nb++;}
+    blocks=nb;
+    /* acumulados por bloque: los bloques se apilan en orden 1..nb */
+    var cum=[],acc=[],NT=N+FH;
+    for(i=0;i<NT;i++)acc.push(0);
+    cum.push(acc.slice());
+    for(k=0;k<blocks;k++){
+      for(i=0;i<NT;i++)acc[i]+=parts[k][i];
+      cum.push(acc.slice());
+    }
+    var resid=[],mres=0,vy=0,my=0;
+    for(i=0;i<N;i++){
+      resid.push(y[i]-cum[blocks][i]);
+      mres+=resid[i]*resid[i];
+      my+=y[i];
+      vy+=y[i]*y[i];
+    }
+    mres=Math.sqrt(mres/N);
+    vy=vy/N-(my/N)*(my/N);
+    var vres=0;
+    for(i=0;i<N;i++)vres+=resid[i]*resid[i];
+    vres/=N;
+    var expl=Math.max(0,Math.min(1,1-vres/Math.max(vy,1e-9)));
+    /* ejes */
+    var ymin=1e9,ymax=-1e9;
+    for(i=0;i<N;i++){if(y[i]<ymin)ymin=y[i];if(y[i]>ymax)ymax=y[i];}
+    for(i=0;i<NT;i++){
+      if(cum[blocks][i]<ymin)ymin=cum[blocks][i];
+      if(cum[blocks][i]>ymax)ymax=cum[blocks][i];
+    }
+    var pad=(ymax-ymin)*0.10+1e-9;ymin-=pad;ymax+=pad;
+    function X(i){return PL+(i/(NT-1))*(W-PL-PR);}
+    function Y(v){return H-PB-((v-ymin)/(ymax-ymin))*(H-PT-PB);}
+    for(i=0;i<=4;i++){
+      var val=ymin+(i/4)*(ymax-ymin),yy=Y(val);
+      E('line',{x1:PL,y1:yy,x2:W-PR,y2:yy,'class':'ax'},svg);
+      T(svg,PL-6,yy+3.5,fmt(val,0),'svgt','end');
+    }
+    T(svg,4,H-4,'unidades','svgt');
+    T(svg,W-PR,H-4,'t → (continuo: forecast)','svgt','end');
+    E('line',{x1:X(N-1),y1:PT,x2:X(N-1),y2:H-PB,'class':'axl'},svg);
+    T(svg,X(N-1),H-PB+15,'HOY','svgt ink halo','middle');
+    /* áreas apiladas: bloque k entre cum[k-1] y cum[k] */
+    var cols=['var(--accb)','var(--c2, #4ade80)','var(--c6, #7dd3fc)','var(--c9, #e879f9)'];
+    var names=['bloque 1 · tendencia','bloque 2 · estacionalidad','bloque 3 · ciclo','bloque 4 · fino'];
+    for(k=1;k<=blocks;k++){
+      var pts=[];
+      for(i=0;i<NT;i++)pts.push(X(i)+','+Y(cum[k][i]));
+      for(i=NT-1;i>=0;i--)pts.push(X(i)+','+Y(cum[k-1][i]));
+      E('polygon',{points:pts.join(' '),fill:cols[k-1],'fill-opacity':0.30},svg);
+      var top=[];
+      for(i=0;i<NT;i++)top.push(X(i)+','+Y(cum[k][i]));
+      E('polyline',{points:top.join(' '),fill:'none',stroke:cols[k-1],'stroke-width':1.2},svg);
+    }
+    /* residuo visible: entre cum[blocks] y la serie original (solo pasado) */
+    var rp=[];
+    for(i=0;i<N;i++)rp.push(X(i)+','+Y(y[i]));
+    for(i=N-1;i>=0;i--)rp.push(X(i)+','+Y(cum[blocks][i]));
+    E('polygon',{points:rp.join(' '),fill:'var(--red-b)','fill-opacity':0.22},svg);
+    /* serie original */
+    var yp=[];
+    for(i=0;i<N;i++)yp.push(X(i)+','+Y(y[i]));
+    E('polyline',{points:yp.join(' '),fill:'none',stroke:'var(--tx)','stroke-width':1.8},svg);
+    /* forecast discontinuo */
+    var fp=[];
+    for(i=N-1;i<NT;i++)fp.push(X(i)+','+Y(cum[blocks][i]));
+    E('polyline',{points:fp.join(' '),fill:'none',stroke:'var(--tx)','stroke-width':1.6,'stroke-dasharray':'6 4',opacity:0.85},svg);
+    legend(svg,PL,14,W,PR,[
+      {k:'rect',c:cols[0],o:0.5,t:names[0]},
+      {k:'rect',c:cols[1],o:0.5,t:names[1]},
+      {k:'rect',c:cols[2],o:0.5,t:names[2]},
+      {k:'rect',c:cols[3],o:0.5,t:names[3]},
+      {k:'rect',c:'var(--red-b)',o:0.4,t:'residuo'},
+      {k:'dot',c:'var(--tx)',t:'serie original'}
+    ]);
+    r1.textContent=pct(expl);
+    r1.className='rv '+(expl>=0.9?'acc':(expl>=0.7?'amber':'red'));
+    r2.textContent=fmt(mres,2);
+    r3.textContent=String(blocks);
+    /* veredicto dinámico: varianza explicada */
+    var st8,tx8;
+    if(expl<0.70){
+      st8='alerta';
+      tx8='Varianza explicada: '+pct(expl)+' — faltan piezas: el residuo ('+fmt(mres,2)+' u RMS) todavía guarda estructura que ningún bloque reclama.';
+    }else if(expl<0.90){
+      st8='alerta';
+      tx8='Varianza explicada: '+pct(expl)+' — la suma de '+blocks+' bloque'+(blocks>1?'s':'')+' ya captura lo grueso; el residuo afina ('+fmt(mres,2)+' u RMS).';
+    }else{
+      st8='bien';
+      tx8='Varianza explicada: '+pct(expl)+' — los '+blocks+' bloques casi explican la serie; cuidado: lo que quede en el residuo puede ser ruido… o la próxima sorpresa.';
+    }
+    setVerdict(vEl,vTx,st8,tx8);
+  }
+  var drawS=sched(draw);
+  /* selector de bloques: el botón k activa los bloques 1..k (apilado acumulativo) */
+  [b1,b2,b3,b4].forEach(function(btn,idx){
+    btn.addEventListener('click',function(){
+      var kk=idx+1,j;
+      var cur=blocksRef();
+      if(kk===cur)return;
+      [b1,b2,b3,b4].forEach(function(bb,jj){bb.setAttribute('aria-pressed',String(jj<kk));});
+      ticker('C8 · bloques activos: '+kk+' de 4');
+      drawS();
+    });
+  });
+  function blocksRef(){
+    var b=[b1,b2,b3,b4],n=0,i;
+    for(i=0;i<4;i++)if(b[i].getAttribute('aria-pressed')==='true')n++;
+    return n;
+  }
+  MUNDO.register(function(){genWorld();draw();});
+  REDRAW.push(draw);
+  genWorld();
+  draw();
+}
+/* ════════ L · SIM 09 · LA PROMESA ════════ */
+function simC9(){
+  var inK=$id('c9-k'),oK=$id('c9-kv');
+  var svg=$id('c9-svg'),g1=$id('c9-g1'),g2=$id('c9-g2');
+  var r1=$id('c9-r1'),r2=$id('c9-r2'),r3=$id('c9-r3');
+  var vEl=$id('c9-v'),vTx=$id('c9-vt');
+  var N=120,SIG=1;
+  var y=[],cen=[];
+  function genWorld(){
+    var rng=mulberry32((MUNDO.seed^0xC09A)>>>0);
+    y=[];cen=[];
+    for(var i=0;i<N;i++){
+      var c=50+6*Math.sin(2*Math.PI*i/40)+1.2*Math.sin(2*Math.PI*i/9);
+      cen.push(c);
+      y.push(c+gauss(rng)*SIG);
+    }
+  }
+  function draw(){
+    var W=chartW(svg),H=300,PL=52,PR=16,PT=34,PB=36;
+    svg.setAttribute('viewBox','0 0 '+W+' '+H);
+    svg.textContent='';
+    var k=+inK.value;
+    oK.textContent=fmt(k,2)+'·σ';
+    var ymin=1e9,ymax=-1e9,i;
+    for(i=0;i<N;i++){
+      var lo=cen[i]-k*SIG,hi=cen[i]+k*SIG;
+      if(y[i]<ymin)ymin=y[i];if(y[i]>ymax)ymax=y[i];
+      if(lo<ymin)ymin=lo;if(hi>ymax)ymax=hi;
+    }
+    var pad=(ymax-ymin)*0.08+1e-9;ymin-=pad;ymax+=pad;
+    function X(i){return PL+(i/(N-1))*(W-PL-PR);}
+    function Y(v){return H-PB-((v-ymin)/(ymax-ymin))*(H-PT-PB);}
+    for(i=0;i<=4;i++){
+      var val=ymin+(i/4)*(ymax-ymin),yy=Y(val);
+      E('line',{x1:PL,y1:yy,x2:W-PR,y2:yy,'class':'ax'},svg);
+      T(svg,PL-6,yy+3.5,fmt(val,0),'svgt','end');
+    }
+    var tk=N<=120?(W<520?40:20):20;
+    for(i=0;i<N;i+=tk)T(svg,X(i),H-PB+15,String(i),'svgt','middle');
+    T(svg,4,H-4,'unidades','svgt');
+    T(svg,W-PR,H-4,'t →','svgt','end');
+    /* banda */
+    var up=[],lo2=[];
+    for(i=0;i<N;i++){up.push(X(i)+','+Y(cen[i]+k*SIG));lo2.push(X(i)+','+Y(cen[i]-k*SIG));}
+    E('polygon',{points:up.join(' ')+' '+lo2.reverse().join(' '),fill:'var(--accb)','fill-opacity':0.18},svg);
+    /* centro */
+    var cp=[];
+    for(i=0;i<N;i++)cp.push(X(i)+','+Y(cen[i]));
+    E('polyline',{points:cp.join(' '),fill:'none',stroke:'var(--accb)','stroke-width':1.6,'stroke-dasharray':'5 4'},svg);
+    /* puntos dentro/fuera */
+    var inside=0;
+    for(i=0;i<N;i++){
+      var d=Math.abs(y[i]-cen[i]);
+      var ok=d<=k*SIG;
+      if(ok)inside++;
+      E('circle',{cx:X(i),cy:Y(y[i]),r:3,fill:ok?'var(--accb)':'var(--red-b)'},svg);
+      if(!ok)E('circle',{cx:X(i),cy:Y(y[i]),r:5.5,fill:'none',stroke:'var(--red-b)','stroke-width':1.4},svg);
+    }
+    var cov=inside/N;
+    legend(svg,PL,14,W,PR,[
+      {k:'rect',c:'var(--accb)',o:0.4,t:'banda ± '+fmt(k,2)+'·σ'},
+      {k:'dot',c:'var(--accb)',t:'dentro ('+inside+')'},
+      {k:'dot',c:'var(--red-b)',t:'violado ('+(N-inside)+')'},
+      {k:'line',c:'var(--accb)',d:'5 4',t:'centro'}
+    ]);
+    /* gauges */
+    gauge(g1,{
+      min:0,max:100,val:cov*100,target:80,targetTxt:'nominal 80 %',
+      zones:[
+        {from:0,to:75,color:'rgba(248,113,113,.8)'},
+        {from:75,to:85,color:'rgba(74,222,128,.8)'},
+        {from:85,to:100,color:'rgba(245,158,11,.8)'}
+      ],
+      fmt:function(v){return fmt(v,0)+' %';}
+    });
+    gauge(g2,{
+      min:0.4,max:6,val:2*k*SIG,
+      zones:[
+        {from:0.4,to:2.56,color:'rgba(74,222,128,.8)'},
+        {from:2.56,to:4,color:'rgba(245,158,11,.8)'},
+        {from:4,to:6,color:'rgba(248,113,113,.8)'}
+      ],
+      fmt:function(v){return fmt(v,2)+' σ';}
+    });
+    r1.textContent=inside+' / '+N;
+    r2.textContent=fmt(2*k*SIG,2)+' σ';
+    var dist=(cov*100)-80;
+    r3.textContent=sgn(dist,0)+' pp';
+    r3.className='rv'+(Math.abs(dist)>5?' amber':'');
+    /* veredicto dinámico (umbral contractual: 80 % nominal) */
+    var st9,tx9;
+    if(cov<0.75){
+      st9='mal';
+      tx9='⚠️ OPTIMISTA (Riesgo subestimado) · la banda ±'+fmt(k,2)+'·σ solo cubre '+fmt(cov*100,0)+' % de los puntos: la promesa del 80 % se incumple por abajo. Ensancha o recalibra σ.';
+    }else if(cov>0.85){
+      st9='alerta';
+      tx9='⚠️ POCO ÚTIL (Demasiado ancho) · cobertura '+fmt(cov*100,0)+' % cumple de sobra, pero el ancho medio ('+fmt(2*k*SIG,2)+' σ) regala sharpness: el intervalo dice poco.';
+    }else{
+      st9='bien';
+      tx9='✅ CALIBRADO · cobertura empírica '+fmt(cov*100,0)+' % frente a la nominal 80 %, con el ancho medio más pequeño posible ('+fmt(2*k*SIG,2)+' σ) que sostiene la promesa.';
+    }
+    setVerdict(vEl,vTx,st9,tx9);
+  }
+  var drawS=sched(draw);
+  inK.addEventListener('input',drawS);
+  inK.addEventListener('change',function(){
+    ticker('C9 · ancho ±'+fmt(+inK.value,2)+'·σ · ancho medio '+fmt(2*(+inK.value),2)+' σ');
+  });
+  MUNDO.register(function(){genWorld();draw();});
+  REDRAW.push(draw);
+  genWorld();
+  draw();
+}
+
+/* ════════ M · SIM 10 · PALANCAS ════════ */
+function simC10(){
+  var ids=['p','f','h','x','a','c'];
+  var names={p:'protocolo',f:'features',h:'historia',x:'covariables',a:'arquitectura',c:'calibración'};
+  var ins={},outs={};
+  ids.forEach(function(k){
+    ins[k]=$id('c10-'+k);
+    outs[k]=$id('c10-'+k+'v');
+  });
+  var svg=$id('c10-svg');
+  var r1=$id('c10-r1'),r2=$id('c10-r2'),r3=$id('c10-r3');
+  var vEl=$id('c10-v'),vTx=$id('c10-vt');
+  var BASE=6.0;
+  function error(v){
+    var e=BASE;
+    if(v.p<50)e*=5.0;
+    e*=(1-0.001*Math.min(v.p,50));
+    if(v.f>50)e*=0.6;
+    e*=(1-0.002*Math.min(v.f,50));
+    e*=(1-0.0015*v.h);
+    e*=(1-0.0012*v.x);
+    if(v.a>50)e*=0.95;
+    e*=(1-0.0008*Math.min(v.a,50));
+    e*=(1-0.0010*v.c);
+    return e;
+  }
+  function vals(){
+    var v={};
+    ids.forEach(function(k){v[k]=+ins[k].value;});
+    return v;
+  }
+  function draw(){
+    var W=chartW(svg),H=300,PL=118,PR=64,PT=30,PB=30;
+    svg.setAttribute('viewBox','0 0 '+W+' '+H);
+    svg.textContent='';
+    var v=vals(),i,k;
+    ids.forEach(function(k){outs[k].textContent=String(v[k]);});
+    var err=error(v);
+    /* retorno marginal: −% de error al subir 25 pts */
+    var marg={};
+    ids.forEach(function(k){
+      var v2={},j;
+      for(j in v)v2[j]=v[j];
+      v2[k]=Math.min(100,v[k]+25);
+      marg[k]=(err-error(v2))/err;
+    });
+    var best='p',bm=-1;
+    ids.forEach(function(k){if(marg[k]>bm){bm=marg[k];best=k;}});
+    var plotW=W-PL-PR;
+    var rowH=(H-PT-PB)/7;
+    /* 6 barras de inversión */
+    for(i=0;i<6;i++){
+      k=ids[i];
+      var y0=PT+rowH*i+rowH*0.18,h2=rowH*0.5;
+      T(svg,PL-8,y0+h2-1,names[k],'svgt ink','end');
+      E('rect',{x:PL,y:y0,width:plotW,height:h2,rx:4,fill:'rgba(148,163,184,.10)'},svg);
+      var critical=k===best&&bm>0.01;
+      E('rect',{x:PL,y:y0,width:Math.max(plotW*v[k]/100,2),height:h2,rx:4,fill:critical?'var(--amber-b)':'var(--accb)','fill-opacity':critical?0.95:0.8},svg);
+      T(svg,PL+plotW+8,y0+h2-1,v[k]+' %','svgt','start');
+      if(critical)T(svg,PL+Math.max(plotW*v[k]/100-6,34),y0-3,'▲ mayor retorno','svgt halo','end');
+    }
+    /* barra de error final */
+    var ye=PT+rowH*6+rowH*0.18,he=rowH*0.62;
+    var EMAX=BASE*5;
+    T(svg,PL-8,ye+he-1,'error final','svgt ink','end');
+    E('rect',{x:PL,y:ye,width:plotW,height:he,rx:4,fill:'rgba(148,163,184,.10)'},svg);
+    var ew=Math.max(plotW*Math.min(err/EMAX,1),2);
+    var bad=err>BASE;
+    E('rect',{x:PL,y:ye,width:ew,height:he,rx:4,fill:bad?'var(--red-b)':'var(--green-b)','fill-opacity':0.85},svg);
+    /* marcas: base 6,0 y techo 30 */
+    var xb=PL+plotW*(BASE/EMAX);
+    E('line',{x1:xb,y1:ye-4,x2:xb,y2:ye+he+4,stroke:'var(--amber-b)','stroke-width':1.4,'stroke-dasharray':'4 3'},svg);
+    T(svg,xb,ye+he+14,'base 6,0','svgt halo','middle');
+    T(svg,PL+plotW,ye-4,'MASE simbólico '+fmt(err,2),'svgt ink halo','end');
+    T(svg,4,H-4,'0','svgt');
+    T(svg,PL+plotW,H-4,'×5 máx','svgt','end');
+    r1.textContent=fmt(err,2);
+    r1.className='rv '+(bad?'red':'acc');
+    r2.textContent=names[best]+' (−'+fmt(bm*100,0)+' % por +25 pts)';
+    r2.className='rv wide';
+    var gated=v.p<50;
+    r3.textContent=gated?'inactiva · penalización ×5 activa':'activa · puerta abierta';
+    r3.className='rv wide '+(gated?'red':'');
+    /* veredicto dinámico */
+    var st10,tx10;
+    if(v.p<50){
+      st10='mal';
+      tx10='Sin protocolo no hay palanca que valga: con protocolo en '+v.p+' (< 50), el error vive multiplicado ×5 ('+fmt(err,2)+' MASE simbólico). Sube protocolo antes que nada.';
+    }else if(bm<=0.01){
+      st10='bien';
+      tx10='Cartera equilibrada: error '+fmt(err,2)+' MASE simbólico y ningún movimiento de +25 pts recorta más de 1 % — estás en la meseta. Sostén protocolo y calibración.';
+    }else{
+      st10='alerta';
+      tx10='El mayor retorno de inversión está en '+names[best].toUpperCase()+': subirlo 25 pts (hasta '+Math.min(100,v[best]+25)+') recorta el error simbólico un '+fmt(bm*100,0)+' % ('+fmt(err,2)+' → '+fmt(error(function(){var v2={},j;for(j in v)v2[j]=v[j];v2[best]=Math.min(100,v[best]+25);return v2;}()),2)+').';
+    }
+    setVerdict(vEl,vTx,st10,tx10);
+  }
+  var drawS=sched(draw);
+  ids.forEach(function(k){
+    ins[k].addEventListener('input',drawS);
+    ins[k].addEventListener('change',function(){
+      ticker('C10 · '+names[k]+' = '+ins[k].value+' / 100 · error '+fmt(error(vals()),2));
+    });
+  });
+  MUNDO.register(draw);
+  REDRAW.push(draw);
+  draw();
+}
+/* ════════ N · GLOSARIO · buscador en vivo ════════ */
+function initGlosario(){
+  var body=$id('glos-body'),q=$id('glos-q'),count=$id('glos-count'),empty=$id('glos-empty');
+  var TERMS=[
+    ['ACF','Autocorrelación: cuánto se parece la serie a sí misma k pasos atrás. En AR(1) decae como φ^k; en MA(1) corta en k = 1.'],
+    ['ADF','Test de raíz unitaria (Dickey-Fuller aumentado): comprueba si la serie necesita diferenciarse. Su hipótesis nula es «hay raíz unitaria».'],
+    ['AR(1)','Proceso de primera orden: y(t) = φ·y(t−1) + ε(t). Hereda el nivel: su memoria es geométrica, φ^k.'],
+    ['MA(1)','Media móvil de primera orden: y(t) = ε(t) + θ·ε(t−1). Hereda el shock: una estela de tamaño θ y silencio.'],
+    ['Backcast','Pieza que un bloque ajusta hacia atrás sobre la historia (tendencia, estacionalidad). En N-BEATS la serie se reconoce como suma de backcasts.'],
+    ['Calibración','Ajuste de la incertidumbre publicada: que la cobertura empírica se parezca a la nominal. Es palanca propia, no un detalle.'],
+    ['Cobertura','Fracción de puntos reales que caen dentro del intervalo prometido. Se compara contra la cobertura nominal (aquí: 80 %).'],
+    ['Cold start','Arranque sin historia: el modelo adivina la escala antes que la forma. MASE simbólico enorme hasta que llegan datos.'],
+    ['CRPS','Puntaje continuo de probabilidad clasificada: mide la distribución completa del forecast, no solo el punto. Menor es mejor.'],
+    ['Embargo','Reserva de puntos tras la frontera que no puntúan en ningún test. Regla conceptual: embargo ≥ ciclo dominante.'],
+    ['Estacionalidad','Patrón que se repite con periodo fijo (24 h, 7 d, 12 meses). Se aprende con historia que cubra al menos un ciclo completo.'],
+    ['Exógena','Variable externa x(t) que entra al modelo además de la serie. En producción, su futuro también es un pronóstico.'],
+    ['Feature','Variable derivada que alimenta al modelo. Si su ventana mira al futuro, contamina todo lo que se mida con ella.'],
+    ['Frontera temporal','El día/hora que separa train de test. Es sagrada: todo lo que el modelo aprende debe vivir antes de ella.'],
+    ['Fuga (leakage)','Información del futuro (o del test) colada en el train o en la feature. Síntoma clásico: métricas demasiado buenas para ser verdad.'],
+    ['Few-shot','Régimen con poca historia (aquí 1–4 semanas): alcanza para la forma corta, no para la estacionalidad larga.'],
+    ['Horizonte','Cuántos pasos adelante pronostica el modelo. El error crece con él; el abanico se abre.'],
+    ['IRF','Función de respuesta al impulso: la estela que deja un shock ε=1 a lo largo de k rezagos.'],
+    ['MAE','Error absoluto medio: (1/n)·Σ|y − ŷ|. En unidades de la serie; fácil de explicar, ciego a la escala del naive.'],
+    ['MASE','MAE escalado por el MAE del naive in-sample. Umbral conceptual: MASE = 1 — por debajo se le gana al naive.'],
+    ['Naive','Baseline que pronostica «mañana = hoy». Toda mejora se declara respecto a él.'],
+    ['PACF','Autocorrelación parcial: el efecto de k pasos atrás descontando los intermedios. En AR(1) corta en k = 1.'],
+    ['PSI','Índice de estabilidad poblacional: mide cuánto se mueve una distribución entre dos ventanas. Referencia conceptual: 0,25.'],
+    ['Residuo','Lo que la suma de piezas no explica: e(t) = y(t) − ŷ(t). Buen modelo: residuo sin estructura. Residuo con patrón: pieza faltante.'],
+    ['Rolling origin','Validación que repite el experimento moviendo la frontera hacia adelante. Varios tests pequeños en vez de uno grande.'],
+    ['Semilla (PRNG)','Número que inicializa el generador (mulberry32). Con la misma semilla, el mismo mundo; visible y reproducible vía ?seed=N.'],
+    ['Sharpness','Lo estrechos que son los intervalos una vez calibrados. Menor es mejor — pero solo si la cobertura cumple.'],
+    ['Shift(1)','Desplazar la serie un paso antes de usarla como feature: la ventana solo ve pasado. El antídoto mínimo contra la fuga.'],
+    ['Split aleatorio','Reparto de test al azar por todo el calendario: parte del «futuro» ya estuvo en el train. Mide memoria, no predicción.'],
+    ['Split temporal','Test estrictamente después del train, con embargo si hace falta. La única comparación defendible en series temporales.'],
+    ['Vanishing gradient','En retropropagación larga, el gradiente se multiplica paso a paso y muere: la red deja de aprender del pasado lejano.'],
+    ['Ventana causal','Ventana de feature que solo usa observaciones pasadas (t−w…t−1). Correlación honesta con el objetivo.'],
+    ['Ventana centrada','Ventana que incluye el presente y el futuro (t−w…t+w). Infla la correlación: comparte el objetivo consigo misma.'],
+    ['Warm start','Régimen con historia suficiente (aquí > 4 semanas): el modelo local compite de verdad y la arquitectura vuelve a importar.']
+  ];
+  var i,h='';
+  for(i=0;i<TERMS.length;i++){
+    h+='<tr><td class="gt">'+TERMS[i][0]+'</td><td>'+TERMS[i][1]+'</td></tr>';
+  }
+  body.innerHTML=h;
+  function norm(s){return s.toLowerCase().replace(/[áà]/g,'a').replace(/[éè]/g,'e').replace(/[íì]/g,'i').replace(/[óò]/g,'o').replace(/[úù]/g,'u');}
+  function filter(){
+    var term=norm(q.value.trim());
+    var rows=body.rows,vis=0;
+    for(var j=0;j<rows.length;j++){
+      var hit=term===''||norm(rows[j].textContent).indexOf(term)!==-1;
+      rows[j].style.display=hit?'':'none';
+      if(hit)vis++;
+    }
+    count.textContent=vis+(vis===1?' término':' términos')+' de '+TERMS.length;
+    empty.style.display=vis===0?'block':'none';
+  }
+  q.addEventListener('input',filter);
+  filter();
+  ticker('glosario listo · '+TERMS.length+' términos con buscador en vivo');
+}
+
+/* ════════ O · ERROR-BOUNDARY GLOBAL (escribe en el ticker, nunca pantalla en blanco) ════════ */
+function errTick(w){
+  try{ticker('error recuperado ('+w+') · la sesión sigue viva; re-sembrar o abrir con ?seed= restaura el mundo');}catch(e){}
+}
+window.addEventListener('error',function(ev){errTick(ev&&ev.message?String(ev.message).slice(0,80):'desconocido');});
+window.addEventListener('unhandledrejection',function(){errTick('promesa rechazada');});
+
+/* ════════ P · ARRANQUE ════════ */
+seedLabel.textContent=seedStr(MUNDO.seed);
+try{simC1();}catch(e){errTick('SIM 01 · '+(e&&e.message||e));}
+try{simC2();}catch(e){errTick('SIM 02 · '+(e&&e.message||e));}
+try{simC3();}catch(e){errTick('SIM 03 · '+(e&&e.message||e));}
+try{simC3b();}catch(e){errTick('SIM 03b · '+(e&&e.message||e));}
+try{simC4();}catch(e){errTick('SIM 04 · '+(e&&e.message||e));}
+try{simC5();}catch(e){errTick('SIM 05 · '+(e&&e.message||e));}
+try{simC6();}catch(e){errTick('SIM 06 · '+(e&&e.message||e));}
+try{simC7();}catch(e){errTick('SIM 07 · '+(e&&e.message||e));}
+try{simC8();}catch(e){errTick('SIM 08 · '+(e&&e.message||e));}
+try{simC9();}catch(e){errTick('SIM 09 · '+(e&&e.message||e));}
+try{simC10();}catch(e){errTick('SIM 10 · '+(e&&e.message||e));}
+try{initGlosario();}catch(e){errTick('glosario · '+(e&&e.message||e));}
+initRouter();
+$id('btnSeed').addEventListener('click',function(){MUNDO.resembrar();});
+$id('btnLink').addEventListener('click',function(){
+  copySeedLink();
+  var d=this.closest('details.menu-mas'); if(d)d.removeAttribute('open');
+});
+/* cierra el menú de un ícono (.menu-mas) al hacer clic fuera de él */
+document.addEventListener('click',function(ev){
+  var open=document.querySelector('.menu-mas[open]');
+  if(open&&!open.contains(ev.target))open.removeAttribute('open');
+});
+var rzT=null;
+window.addEventListener('resize',function(){
+  if(rzT)clearTimeout(rzT);
+  rzT=setTimeout(function(){redrawAll();},160);
+});
+ticker((SEED_Q?'mundo '+seedStr(MUNDO.seed)+' desde ?seed= · ':'mundo '+seedStr(MUNDO.seed)+' listo · ')+'tira de cada palanca · nada de lo que ves aquí es un dato real',true);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,621 @@
+{
+  "directed": true,
+  "multigraph": false,
+  "graph": {
+    "title": "Mapa de conocimiento — Semana 7: Arquitecturas modernas para forecasting (N-BEATS, LSTM, TFT-like)",
+    "chapter": "Semana 7",
+    "course": "Forecasting de Series Temporales: De Modelos Paramétricos a Deep Learning en Producción",
+    "format": "node-link",
+    "description": "Objeto pedagógico completo de la Semana 7: PeMS-SF (963 sensores de ocupación vial), split obligatorio por sensor 770/193 para medir transferencia a sensores nunca vistos, cohorte CPU 48/24 efectivamente ejecutada, y la lección central: TFT-like gana por apenas 4.0% sobre el baseline LastValue tras 398 segundos de entrenamiento — la ganancia en precisión puntual es marginal; el valor real de las arquitecturas modernas está en la capacidad de transferir a sensores nuevos."
+  },
+  "nodes": [
+    {
+      "id": "capitulo_07",
+      "label": "Semana 7: Arquitecturas Modernas para Forecasting",
+      "type": "chapter",
+      "group": 0,
+      "level": 0,
+      "chapter_number": 7,
+      "description": "PeMS-SF: un split obligatorio por sensor (770 entrenan, 193 quedan fuera) convierte la pregunta en transferencia a series nunca vistas, no en forecast temporal clásico. Sobre una cohorte CPU de 48/24 sensores, TFT-like (MAE 0.013122) supera a N-BEATS (0.013360) y al baseline LastValue (0.013671) por apenas 4.0%, mientras LSTM pierde contra ese mismo baseline (0.013817). La complejidad se justifica por la capacidad de transferencia, no por la precisión puntual.",
+      "cct": {
+        "ontologico": {
+          "nivel": "ocupación de sensores de red vial",
+          "unidad_de_analisis": "sensor / tramo de vía (ocupación cada 10 min)",
+          "limites_de_inferencia": [
+            "El modelo transfiere patrones temporales, no relaciones espaciales o de red vial real.",
+            "La 'conectividad' se basa en correlación estadística, no en topología vial."
+          ]
+        },
+        "epistemico": {
+          "rrl_actual": 4,
+          "rrl_esperado": 4,
+          "estado_evidencia": "ejecutado",
+          "protocolo": "Split por sensor 770/193 (obligatorio); cohorte CPU ejecutada 48/24. LOOKBACK=72, HORIZON=6, escalado por ventana.",
+          "incertidumbre": [
+            "El split completo 770/193 permanece como especificación no ejecutada (deuda prioritaria, Cap. 10)."
+          ]
+        },
+        "pragmatico": {
+          "stakeholder": "centro de gestión de tráfico",
+          "decision": "qué arquitectura adoptar para estimar sensores nuevos considerando costo de entrenamiento",
+          "traduccion_operativa": "Un error de 0.013 en ocupación normalizada es aceptable lejos de umbrales de congestión, pero requiere vigilancia en horas pico."
+        }
+      },
+      "evidence": [
+        {
+          "claim": "TFT-like alcanza el mejor MAE en transferencia a sensores no vistos, con mejora marginal sobre N-BEATS a mayor costo.",
+          "value": {
+            "TFT_like_MAE": 0.013122,
+            "TFT_like_seconds": 398.45,
+            "N_BEATS_MAE": 0.01336,
+            "N_BEATS_seconds": 95.41,
+            "LastValue_MAE": 0.013671
+          },
+          "source_ref": "notebook:07:seccion=3",
+          "status": "ejecutado",
+          "metric_comparability_scope": "solo_capitulo_7_cohorte_48_24",
+          "oracle": false,
+          "epistemic_warning": "Resultado válido para la cohorte CPU 48/24 ejecutada; no debe interpretarse como el rendimiento definitivo del split completo 770/193."
+        }
+      ],
+      "integrity": {
+        "leakage_controls": [
+          "split_por_sensor",
+          "escalado_por_ventana_sin_estadisticas_globales",
+          "cohorte_declarada_explicitamente"
+        ],
+        "data_statement": "PeMS-SF (UCI), formato ancho, 963 sensores.",
+        "ai_use": "no declarado",
+        "conflicts": "ninguno",
+        "limitations": [
+          "El rendimiento en la cohorte 48/24 no se ha verificado en el split completo.",
+          "La transferencia no funcionará igual para sensores con dinámicas muy distintas.",
+          "El modelo no está listo para producción sin monitoreo de drift y calidad de datos."
+        ]
+      },
+      "quality": {
+        "gates": {
+          "G1_problema": "pass",
+          "G2_nivel_analisis": "pass",
+          "G3_evidencia": "pass",
+          "G4_audiencia": "pass",
+          "G5_metodo": "pass",
+          "G6_integridad": "pass",
+          "G7_trazabilidad": "pass",
+          "G8_no_sobreventa": "pass"
+        },
+        "decision": "aprobado"
+      },
+      "sources": [
+        {
+          "source_type": "monografia",
+          "locator": "monografia_timeseries_benchmarks.typ:capitulo=8"
+        },
+        {
+          "source_type": "presentacion",
+          "locator": "presentacion_monografia.typ:capitulo=8"
+        },
+        {
+          "source_type": "notebook",
+          "locator": "07_semana_7_transformers_transfer_sensores.ipynb"
+        }
+      ],
+      "decision_ejecutiva": "Desempate por costo: N-BEATS (95.41s) vs. TFT-like (398.45s); adoptar arquitecturas modernas solo si la transferencia es requisito de negocio.",
+      "limitations": [
+        "El rendimiento en la cohorte 48/24 no se ha verificado en el split completo.",
+        "La transferencia no funcionará igual para sensores con dinámicas muy distintas.",
+        "El modelo no está listo para producción sin monitoreo de drift y calidad de datos."
+      ],
+      "oracle": false
+    },
+    {
+      "id": "clase_capitulo_07",
+      "label": "Clase 7: Transferencia entre Sensores y Arquitecturas Modernas",
+      "type": "class_plan",
+      "group": 1,
+      "level": 1,
+      "duration_minutes": 80,
+      "objective": "Distinguir transferencia entre series de forecast temporal clásico, evaluar si N-BEATS, LSTM y TFT-like justifican su costo frente a baselines de persistencia bajo un split obligatorio por sensor, y decidir arquitectura por complejidad vs. beneficio, no por prestigio.",
+      "agenda": [
+        {
+          "start": 0,
+          "end": 10,
+          "duration": 10,
+          "type": "apertura",
+          "activity": "Caso de negocio y contrato: 963 sensores, split por sensor 770/193, cohorte CPU 48/24",
+          "resource_refs": [],
+          "product": null
+        },
+        {
+          "start": 10,
+          "end": 20,
+          "duration": 10,
+          "type": "contexto_negocio",
+          "activity": "Análisis previo: perfiles diario/semanal, conectividad entre sensores, STL",
+          "resource_refs": [],
+          "product": null
+        },
+        {
+          "start": 20,
+          "end": 35,
+          "duration": 15,
+          "type": "metodo_validacion",
+          "activity": "Estrategia de validación: ventanas LOOKBACK=72/HORIZON=6, escalado por ventana",
+          "resource_refs": [],
+          "product": null
+        },
+        {
+          "start": 35,
+          "end": 60,
+          "duration": 25,
+          "type": "demo_practica",
+          "activity": "Modelado: baselines vs. N-BEATS, LSTM y TFT-like bajo el mismo protocolo",
+          "resource_refs": [],
+          "product": null
+        },
+        {
+          "start": 60,
+          "end": 70,
+          "duration": 10,
+          "type": "discusion_limites",
+          "activity": "Análisis posterior: sensibilidad temporal, diagnóstico de residuos, error por weekday",
+          "resource_refs": [],
+          "product": null
+        },
+        {
+          "start": 70,
+          "end": 80,
+          "duration": 10,
+          "type": "cierre_decision",
+          "activity": "Decisión ejecutiva, lecciones metodológicas y ejercicios",
+          "resource_refs": [],
+          "product": null
+        }
+      ],
+      "decision_ejecutiva": "Desempate por costo: N-BEATS (95.41s) vs. TFT-like (398.45s); adoptar arquitecturas modernas solo si la transferencia es requisito de negocio."
+    },
+    {
+      "id": "diapositivas_capitulo_07",
+      "label": "Diapositivas de la Semana 7 (sincronizado con presentacion_monografia.typ)",
+      "type": "slide_deck",
+      "group": 2,
+      "level": 1,
+      "slide_count": 2,
+      "format": "slides",
+      "synced_with_source": "presentacion_monografia.typ"
+    },
+    {
+      "id": "notebook_capitulo_07",
+      "label": "Notebook: Arquitecturas modernas para forecasting",
+      "type": "notebook",
+      "group": 3,
+      "level": 1,
+      "file": "07_semana_7_transformers_transfer_sensores.ipynb",
+      "dataset": "PeMS-SF (UCI) — data/07_traffic_pems/traffic_pems.csv",
+      "kernel": "Python 3 (PyTorch / CPU)",
+      "purpose": "Medir transferencia a sensores nunca vistos con un split obligatorio por sensor, y decidir si N-BEATS, LSTM o TFT-like justifican su costo frente a baselines de persistencia."
+    },
+    {
+      "id": "nb_cell_01",
+      "label": "Celda 1: Split por sensor y aserción anti-leakage",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "language": "python",
+      "purpose": "Barajar los 963 sensores con la seed y partir en 770 train / 193 test, verificando determinismo y ausencia de solapamiento.",
+      "code_lines": [
+        "# Split por sensor: baraja los 963 sensores con la seed y corta en 770/193.",
+        "N_TRAIN_SENSORS = 770; N_TEST_SENSORS = 193",
+        "assert len(TRAIN_SENSORS) == N_TRAIN_SENSORS and len(TEST_SENSORS) == N_TEST_SENSORS",
+        "assert set(TRAIN_SENSORS) | set(TEST_SENSORS) == set(SENSORS)",
+        "assert not (set(TRAIN_SENSORS) & set(TEST_SENSORS))",
+        "rng_check = np.random.default_rng(SEED); order_check = np.array(SENSORS); rng_check.shuffle(order_check)",
+        "assert list(order_check[:770]) == TRAIN_SENSORS and list(order_check[770:]) == TEST_SENSORS"
+      ],
+      "expected_output": [
+        "Anti-leakage OK: split por sensor determinista, 770 train / 193 test, sin solapamiento."
+      ]
+    },
+    {
+      "id": "nb_cell_02",
+      "label": "Celda 2: Contrato de filas y schema",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "language": "python",
+      "purpose": "Verificar shape (63,360, 967), cardinalidad de day_id/slot_10min y ausencia de nulos antes de modelar.",
+      "code_lines": [
+        "# Contrato de filas: dimensiones, cardinalidad de día/slot y ausencia de nulos",
+        "assert df.shape[0]==63_360",
+        "assert df.day_id.nunique()==440",
+        "assert df.slot_10min.nunique()==144",
+        "assert not df.isna().any().any()",
+        "print(df.split.value_counts(), df.weekday_label.value_counts().sort_index())"
+      ],
+      "expected_output": [
+        "split",
+        "train    38448",
+        "test     24912",
+        "Name: count, dtype: int64",
+        "weekday_label",
+        "1    8928",
+        "2    8208",
+        "3    9216",
+        "4    9360",
+        "5    9360",
+        "6    9072",
+        "7    9216"
+      ]
+    },
+    {
+      "id": "nb_cell_03",
+      "label": "Celda 3: STL diaria de un sensor ejemplo",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "language": "python",
+      "purpose": "Descomponer tendencia, estacionalidad diaria (periodo 144) y residuo sobre los primeros 60 días de un sensor de ejemplo.",
+      "code_lines": [
+        "# STL robusta: descompone tendencia, estacionalidad diaria (144) y residuo",
+        "series = pd.Series(df[uid].values, index=df.time_index)",
+        "stl = STL(series.iloc[:144*60], period=144, robust=True).fit()",
+        "fig = stl.plot(); fig.set_size_inches(14, 8); fig.suptitle('STL diaria sensor ejemplo', y=1.01)"
+      ],
+      "expected_output": [
+        "<Figure size 1400x800 with 4 Axes>"
+      ]
+    },
+    {
+      "id": "nb_cell_04",
+      "label": "Celda 4: Ventanas 72/6 y aserción anti-leakage temporal",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "language": "python",
+      "purpose": "Construir tensores (LOOKBACK=72, HORIZON=6) y verificar que train/test no comparten días ni sensores.",
+      "code_lines": [
+        "# Las ventanas train/test usan días disjuntos y sensores disjuntos por construcción.",
+        "assert Xtr.shape[1] == LOOKBACK and Xte.shape[1] == LOOKBACK",
+        "assert np.unique(sidtr).size == len(LAB_TRAIN)",
+        "assert np.unique(sidte).size == len(LAB_TEST)",
+        "train_days = set(df[df.day_id < 300].day_id)",
+        "test_days = set(df[(df.day_id >= 300) & (df.day_id < 440)].day_id)",
+        "assert not (train_days & test_days)",
+        "print('Anti-leakage OK:', Xtr.shape, Xte.shape)"
+      ],
+      "expected_output": [
+        "Anti-leakage OK: ventanas train/test sin solapamiento temporal ni de sensores. (86256, 72, 1) (40176, 72, 1)"
+      ]
+    },
+    {
+      "id": "nb_cell_05",
+      "label": "Celda 5: Baselines LastValue y Lag6",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "language": "python",
+      "purpose": "Fijar el piso de rendimiento con dos baselines de persistencia antes de entrenar cualquier arquitectura.",
+      "code_lines": [
+        "# Baselines: último valor observado y valor de hace 1 hora (lag 6)",
+        "baseline_last = Xte[:, -1, 0]",
+        "baseline_lag6 = Xte[:, -6, 0]",
+        "print(metrics(yte, baseline_last), metrics(yte, baseline_lag6))"
+      ],
+      "expected_output": [
+        "{'MAE': 0.01367119699716568, 'RMSE': 0.029531987383961678, 'WAPE_pct': 26.369564056396484} {'MAE': 0.019748637452721596, 'RMSE': 0.038774650543928146, 'WAPE_pct': 38.09197998046875}"
+      ]
+    },
+    {
+      "id": "nb_cell_06",
+      "label": "Celda 6: Arquitectura TFT-like",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "language": "python",
+      "purpose": "Definir el Transformer compacto (proyección + TransformerEncoderLayer + gate sigmoide) etiquetado honestamente como TFT-like, no un TFT completo.",
+      "code_lines": [
+        "# TFT-like: proyección + encoder Transformer + gate sigmoide (NO es TFT completo)",
+        "class TFTLike(nn.Module):",
+        "    def __init__(self, d_model: int = 32) -> None:",
+        "        super().__init__()",
+        "        self.proj = nn.Linear(1, d_model)",
+        "        layer = nn.TransformerEncoderLayer(d_model, 4, 64, batch_first=True, dropout=.1)",
+        "        self.encoder = nn.TransformerEncoder(layer, 1)",
+        "        self.gate = nn.Sequential(nn.Linear(d_model, d_model), nn.Sigmoid())",
+        "        self.head = nn.Linear(d_model, 1)",
+        "    def forward(self, x):",
+        "        h = self.proj(x); h = self.encoder(h); z = h[:, -1]",
+        "        return self.head(z * self.gate(z)).squeeze(-1)"
+      ],
+      "expected_output": []
+    },
+    {
+      "id": "nb_cell_07",
+      "label": "Celda 7: Entrenamiento y tabla comparativa final",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "language": "python",
+      "purpose": "Entrenar N-BEATS, LSTM y TFT-like con el mismo protocolo y compararlos contra los dos baselines en una sola tabla ordenada por MAE.",
+      "code_lines": [
+        "# Entrenamiento de las tres arquitecturas + baselines en la misma tabla",
+        "rows = [{'model': 'LastValue', **metrics(yte, baseline_last)}, {'model': 'Lag6', **metrics(yte, baseline_lag6)}]",
+        "for name, model in {'N-BEATS': CompactNBeats(), 'LSTM': SmallLSTM(), 'TFT-like': TFTLike()}.items():",
+        "    model, h = fit_model(model); model.eval()",
+        "    with torch.no_grad(): ps = model(test_x).numpy() * ste_scale",
+        "    rows.append({'model': name, 'fit_seconds': time.time() - start, **metrics(yte, ps)})",
+        "scores = pd.DataFrame(rows).set_index('model').sort_values('MAE'); scores"
+      ],
+      "expected_output": [
+        "                MAE      RMSE   WAPE_pct  fit_seconds",
+        "model",
+        "TFT-like   0.013122  0.028147  25.310625   244.83*",
+        "N-BEATS    0.013360  0.028224  25.769979     4.04*",
+        "LastValue  0.013671  0.029532  26.369564          NaN",
+        "LSTM       0.013817  0.029438  26.651091    29.95*",
+        "Lag6       0.019749  0.038775  38.091980          NaN",
+        "*fit_seconds de la corrida guardada en este notebook; la Tabla 8.3 de la monografía cita 398.45/95.41/360.58 s de una ejecución distinta — el MAE coincide de forma exacta en ambas fuentes."
+      ]
+    },
+    {
+      "id": "nb_cell_08",
+      "label": "Celda 8: Diagnóstico de residuos (Ljung-Box)",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "language": "python",
+      "purpose": "Verificar autocorrelación residual del primer sensor de test ordenado temporalmente.",
+      "code_lines": [
+        "# Test Ljung-Box sobre los residuos del primer sensor test ordenado",
+        "r = residual[sidte == 0]",
+        "lb = acorr_ljungbox(r, lags=[10, 20], return_df=True)",
+        "lb['H0'] = 'sin autocorrelación'",
+        "lb['decision'] = np.where(lb.lb_pvalue < .05, 'rechazar H0', 'no rechazar H0')"
+      ],
+      "expected_output": [
+        "      lb_stat  lb_pvalue                   H0     decision",
+        "10  26.052302   0.003670  sin autocorrelación  rechazar H0",
+        "20  50.252657   0.000204  sin autocorrelación  rechazar H0"
+      ]
+    },
+    {
+      "id": "evaluacion_capitulo_07",
+      "label": "Ejercicios Propuestos: Semana 7",
+      "type": "assessment",
+      "group": 4,
+      "level": 1,
+      "exercises": [
+        "Fácil: Aumente la cohorte hasta el split completo de 770/193 sensores y mida el costo computacional adicional frente a la tabla comparativa.",
+        "Use IDs reales de sensores para incorporar una matriz vial externa verificada.",
+        "Intermedio: Implemente un forecast multi-horizonte verdadero (6, 12 y 18 pasos simultáneos), en vez del horizonte único de 6 pasos usado en este capítulo.",
+        "Compare N-BEATS con N-HiTS.",
+        "Difícil: Ejecute el mismo experimento en GPU y reporte energía y latencia frente a la ejecución CPU documentada aquí.",
+        "Ejercicio guiado (relacionado con la pregunta guía): repita la Sección 3 añadiendo una covariable estática sintética (p. ej., un ID embebido por sensor) al TFT-like. ¿Mejora el MAE por sensor de la cohorte? ¿Eso demostraría que la transferencia necesita features de identidad, o solo que el modelo memoriza el ID? Discuta la diferencia entre covariable útil y leak."
+      ]
+    },
+    {
+      "id": "slide_resultados_capitulo_07",
+      "label": "Slide - Capítulo 8 — Semana 7 · PeMS-SF · Resultados",
+      "type": "slide",
+      "group": 2,
+      "level": 2,
+      "title": "TFT-like gana por apenas 4% tras 400 segundos",
+      "kicker": "Capítulo 8 — Semana 7 · PeMS-SF · Resultados",
+      "content": [
+        "Headline: +4% sobre el baseline — TFT-like (MAE 0.013122) vs. LastValue (0.013671).",
+        "Ficha: Dominio tráfico, 963 sensores; Decisión estimar sensores nuevos; Horizonte 6 pasos (10 min); Baseline LastValue/Lag6; Riesgo transferencia vs. forecast; Métrica MAE.",
+        "Tabla: TFT-like 0.013122 (398.45s); N-BEATS 0.013360 (95.41s); LastValue 0.013671; LSTM 0.013817 (360.58s)."
+      ],
+      "source_document": "presentacion_monografia.typ"
+    },
+    {
+      "id": "slide_metodo_capitulo_07",
+      "label": "Slide - Capítulo 8 — Semana 7 · PeMS-SF · Método y lección",
+      "type": "slide",
+      "group": 2,
+      "level": 2,
+      "title": "Transferencia entre sensores: la pregunta correcta",
+      "kicker": "Capítulo 8 — Semana 7 · PeMS-SF · Método y lección",
+      "content": [
+        "Split por sensor 770/193; cohorte ejecutada 48/24 (86,256 ventanas de train).",
+        "LOOKBACK=72, HORIZON=6, escalado por ventana; N-BEATS 27,154 parámetros.",
+        "Sensibilidad: el bloque de la última hora domina (delta MAE 0.0373); bloques lejanos ~0.",
+        "Decisión: desempate por costo — N-BEATS 95.41s vs. TFT-like 398.45s; arquitecturas modernas solo si la transferencia es requisito de negocio."
+      ],
+      "source_document": "presentacion_monografia.typ"
+    }
+  ],
+  "links": [
+    {
+      "source": "capitulo_07",
+      "target": "clase_capitulo_07",
+      "relation": "contains"
+    },
+    {
+      "source": "capitulo_07",
+      "target": "diapositivas_capitulo_07",
+      "relation": "contains"
+    },
+    {
+      "source": "capitulo_07",
+      "target": "notebook_capitulo_07",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_07",
+      "target": "nb_cell_01",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_07",
+      "target": "nb_cell_02",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_07",
+      "target": "nb_cell_03",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_07",
+      "target": "nb_cell_04",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_07",
+      "target": "nb_cell_05",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_07",
+      "target": "nb_cell_06",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_07",
+      "target": "nb_cell_07",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_07",
+      "target": "nb_cell_08",
+      "relation": "contains"
+    },
+    {
+      "source": "nb_cell_01",
+      "target": "nb_cell_02",
+      "relation": "next_cell"
+    },
+    {
+      "source": "nb_cell_02",
+      "target": "nb_cell_03",
+      "relation": "next_cell"
+    },
+    {
+      "source": "nb_cell_03",
+      "target": "nb_cell_04",
+      "relation": "next_cell"
+    },
+    {
+      "source": "nb_cell_04",
+      "target": "nb_cell_05",
+      "relation": "next_cell"
+    },
+    {
+      "source": "nb_cell_05",
+      "target": "nb_cell_06",
+      "relation": "next_cell"
+    },
+    {
+      "source": "nb_cell_06",
+      "target": "nb_cell_07",
+      "relation": "next_cell"
+    },
+    {
+      "source": "nb_cell_07",
+      "target": "nb_cell_08",
+      "relation": "next_cell"
+    },
+    {
+      "source": "clase_capitulo_07",
+      "target": "nb_cell_01",
+      "relation": "executes"
+    },
+    {
+      "source": "clase_capitulo_07",
+      "target": "nb_cell_02",
+      "relation": "executes"
+    },
+    {
+      "source": "clase_capitulo_07",
+      "target": "nb_cell_03",
+      "relation": "executes"
+    },
+    {
+      "source": "clase_capitulo_07",
+      "target": "nb_cell_04",
+      "relation": "executes"
+    },
+    {
+      "source": "clase_capitulo_07",
+      "target": "nb_cell_05",
+      "relation": "executes"
+    },
+    {
+      "source": "clase_capitulo_07",
+      "target": "nb_cell_06",
+      "relation": "executes"
+    },
+    {
+      "source": "clase_capitulo_07",
+      "target": "nb_cell_07",
+      "relation": "executes"
+    },
+    {
+      "source": "clase_capitulo_07",
+      "target": "nb_cell_08",
+      "relation": "executes"
+    },
+    {
+      "source": "nb_cell_01",
+      "target": "capitulo_07",
+      "relation": "verifies"
+    },
+    {
+      "source": "nb_cell_04",
+      "target": "capitulo_07",
+      "relation": "verifies"
+    },
+    {
+      "source": "nb_cell_07",
+      "target": "capitulo_07",
+      "relation": "verifies"
+    },
+    {
+      "source": "evaluacion_capitulo_07",
+      "target": "clase_capitulo_07",
+      "relation": "assesses"
+    },
+    {
+      "source": "diapositivas_capitulo_07",
+      "target": "slide_resultados_capitulo_07",
+      "relation": "contains"
+    },
+    {
+      "source": "clase_capitulo_07",
+      "target": "slide_resultados_capitulo_07",
+      "relation": "uses"
+    },
+    {
+      "source": "diapositivas_capitulo_07",
+      "target": "slide_metodo_capitulo_07",
+      "relation": "contains"
+    },
+    {
+      "source": "clase_capitulo_07",
+      "target": "slide_metodo_capitulo_07",
+      "relation": "uses"
+    }
+  ],
+  "relation_vocabulary": [
+    "contains",
+    "executes",
+    "verifies",
+    "assesses",
+    "next_cell",
+    "supports",
+    "conditions",
+    "limits",
+    "contradicts",
+    "uses",
+    "presented_in",
+    "displays",
+    "backs_up",
+    "summarizes",
+    "cited_from",
+    "precedes",
+    "references",
+    "followed_by"
+  ],
+  "cct_schema_version": "1.0"
+}

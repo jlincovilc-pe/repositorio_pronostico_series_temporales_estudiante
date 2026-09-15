@@ -1,0 +1,706 @@
+{
+  "directed": true,
+  "multigraph": false,
+  "graph": {
+    "title": "Mapa de conocimiento — Semana 5: Modelos globales y cross-learning",
+    "chapter": "Semana 5",
+    "course": "Forecasting de Series Temporales: De Modelos Paramétricos a Deep Learning en Producción",
+    "format": "node-link",
+    "description": "Objeto pedagógico completo de la Semana 5: caso de clientes nuevos de energía (cold-start), panel de 9.7M de filas procesado por chunks, split por cliente 296/74 como contrato anti-fuga, y la lección central: la disponibilidad de historia domina sobre la arquitectura (brecha ~29x warm-start vs cold-start)."
+  },
+  "nodes": [
+    {
+      "id": "capitulo_05",
+      "label": "Semana 5: Modelos Globales y Cross-learning",
+      "type": "chapter",
+      "group": 0,
+      "level": 0,
+      "chapter_number": 5,
+      "description": "Electricity Load Diagrams: un modelo global empata con el baseline transparente hora×día en cold-start estricto; el cross-learning transfiere forma, no escala, y la historia disponible por entidad domina cualquier decisión de arquitectura.",
+      "cct": {
+        "ontologico": {
+          "nivel": "cartera de clientes (consumo agregado por entidad)",
+          "unidad_de_analisis": "cliente / serie individual",
+          "limites_de_inferencia": [
+            "No modela comportamiento de electrodomésticos ni decisiones de hogares.",
+            "La heterogeneidad de escala (media por cliente de ~4.36 a ~190,542) impide interpretar el error absoluto global sin segmentación."
+          ]
+        },
+        "epistemico": {
+          "rrl_actual": 4,
+          "rrl_esperado": 5,
+          "estado_evidencia": "ejecutado",
+          "protocolo": "Split por cliente (296 train / 74 test, entidades nunca vistas); chunked loading sobre 9.7M filas.",
+          "incertidumbre": [
+            "El split por cliente mide un piso conservador; en producción, metadatos parciales podrían mejorar el pronóstico."
+          ]
+        },
+        "pragmatico": {
+          "stakeholder": "planificador de comercializadora eléctrica",
+          "decision": "qué hacer con clientes nuevos sin historia: perfil por segmento o modelo con rezagos",
+          "traduccion_operativa": "El error de escala en cold-start puede implicar sobrecostos de capacidad contratada o subestimación de ingresos."
+        }
+      },
+      "evidence": [
+        {
+          "claim": "El modelo global captura la forma temporal pero falla en la escala bajo cold-start estricto (empate técnico con el baseline transparente).",
+          "value": {
+            "MASE_warm_start": 1.34,
+            "MASE_cold_start_strict": 38.59,
+            "ratio": "29x",
+            "MAE_perfil": 3178.72,
+            "MAE_lightgbm_global": 3178.39
+          },
+          "source_ref": "notebook:05:seccion=3",
+          "status": "ejecutado",
+          "metric_comparability_scope": "solo_capitulo_5",
+          "oracle": false
+        }
+      ],
+      "integrity": {
+        "leakage_controls": [
+          "split_por_entidad_cliente",
+          "cold_start_excluye_lags_e_identidad_aprendida"
+        ],
+        "anti_patterns_avoided": [
+          "usar_random_split_en_vez_de_split_por_cliente",
+          "inventar_metadatos_sinteticos_sin_fuente_real"
+        ],
+        "data_statement": "Electricity Load Diagrams 2011-2014 (UCI), formato long, 370 series.",
+        "ai_use": "no declarado",
+        "conflicts": "ninguno",
+        "limitations": [
+          "Los modelos globales 'resuelven' la forma, no la escala individual sin metadatos.",
+          "El perfil hora×día por segmento es un baseline razonable, no una solución definitiva.",
+          "No se extrapola a clientes industriales de escala muy distinta sin validación local."
+        ]
+      },
+      "quality": {
+        "gates": {
+          "G1_problema": "pass",
+          "G2_nivel_analisis": "pass",
+          "G3_evidencia": "pass",
+          "G4_audiencia": "pass",
+          "G5_metodo": "pass",
+          "G6_integridad": "pass",
+          "G7_trazabilidad": "pass",
+          "G8_no_sobreventa": "pass"
+        },
+        "decision": "aprobado"
+      },
+      "sources": [
+        {
+          "source_type": "monografia",
+          "locator": "monografia_timeseries_benchmarks.typ:capitulo=6"
+        },
+        {
+          "source_type": "presentacion",
+          "locator": "presentacion_monografia.typ:capitulo=6"
+        },
+        {
+          "source_type": "notebook",
+          "locator": "05_semana_5_modelos_globales_cross_learning.ipynb"
+        }
+      ],
+      "decision_ejecutiva": "Para clientes nuevos sin historia, no confiar en la escala predicha por el modelo global; usar perfil hora×día por segmento o exigir metadatos hasta acumular ventana mínima de historia.",
+      "limitations": [
+        "Los modelos globales 'resuelven' la forma, no la escala individual sin metadatos.",
+        "El perfil hora×día por segmento es un baseline razonable, no una solución definitiva.",
+        "No se extrapola a clientes industriales de escala muy distinta sin validación local."
+      ],
+      "oracle": false
+    },
+    {
+      "id": "clase_capitulo_05",
+      "label": "Clase 5: Predecir lo que nunca se vio",
+      "type": "class_plan",
+      "group": 1,
+      "level": 1,
+      "duration_minutes": 80,
+      "objective": "Entender qué transfiere un modelo global (forma del patrón) y qué no (escala sin historia), medir generalización a 74 clientes nunca vistos con un split por cliente que hace cumplir el contrato de producción, y leer la brecha ~29x entre warm-start y cold-start como criterio de decisión.",
+      "agenda": [
+        {
+          "start": 0,
+          "end": 10,
+          "duration": 10,
+          "type": "apertura",
+          "activity": "Caso y contrato: planificar capacidad para clientes sin historial",
+          "resource_refs": [],
+          "product": null
+        },
+        {
+          "start": 10,
+          "end": 20,
+          "duration": 10,
+          "type": "contexto_negocio",
+          "activity": "9.7M de filas: chunked loading y resumen por cliente",
+          "resource_refs": [],
+          "product": null
+        },
+        {
+          "start": 20,
+          "end": 35,
+          "duration": 15,
+          "type": "metodo_validacion",
+          "activity": "EDA de panel: escalas, cv y clustering de perfiles diarios",
+          "resource_refs": [],
+          "product": null
+        },
+        {
+          "start": 35,
+          "end": 50,
+          "duration": 15,
+          "type": "metodo_validacion",
+          "activity": "Split por cliente 296/74 y contrato cold-start",
+          "resource_refs": [],
+          "product": null
+        },
+        {
+          "start": 50,
+          "end": 70,
+          "duration": 20,
+          "type": "demo_practica",
+          "activity": "Baseline transparente vs. LightGBM global y cross-learning interpretado",
+          "resource_refs": [],
+          "product": null
+        },
+        {
+          "start": 70,
+          "end": 80,
+          "duration": 10,
+          "type": "cierre_decision",
+          "activity": "Diagnóstico posterior, bias por cliente y cierre",
+          "resource_refs": [],
+          "product": null
+        }
+      ],
+      "decision_ejecutiva": "Para clientes nuevos sin historia, no confiar en la escala predicha por el modelo global; usar perfil hora×día por segmento o exigir metadatos hasta acumular ventana mínima de historia."
+    },
+    {
+      "id": "diapositivas_capitulo_05",
+      "label": "Diapositivas de la Semana 5 (sincronizado con presentacion_monografia.typ)",
+      "type": "slide_deck",
+      "group": 2,
+      "level": 1,
+      "slide_count": 2,
+      "format": "slides",
+      "synced_with_source": "presentacion_monografia.typ"
+    },
+    {
+      "id": "notebook_capitulo_05",
+      "label": "Notebook: Modelos globales y cross-learning",
+      "type": "notebook",
+      "group": 3,
+      "level": 1,
+      "file": "05_semana_5_modelos_globales_cross_learning.ipynb",
+      "dataset": "Electricity Load Diagrams (UCI) — data/05_electricity/electricity_long.csv",
+      "kernel": "Python 3",
+      "purpose": "Entrenar un modelo compartido sobre 370 series, medir generalización a 74 clientes no vistos bajo contrato cold-start y trabajar eficientemente con 9.7M de filas mediante chunked loading."
+    },
+    {
+      "id": "nb_cell_01",
+      "label": "Celda 1: Chunked loading y contrato de tamaño",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "language": "python",
+      "purpose": "Procesar 9.7M de filas sin cargar el CSV completo: chunks de 500k, resúmenes acumulados y ventana en memoria desde 2014-09-03.",
+      "code_lines": [
+        "# No se carga el CSV completo sin estimar memoria.",
+        "CHUNK=500_000; cutoff=pd.Timestamp(\"2014-09-03\"); parts=[]; summaries=[]; total=0",
+        "for chunk in pd.read_csv(DATA_PATH,chunksize=CHUNK,parse_dates=[\"ds\"],dtype={\"unique_id\":\"category\",\"y\":\"float32\"}):",
+        "    total+=len(chunk); summaries.append(chunk.groupby(\"unique_id\",observed=True).y.agg([\"count\",\"mean\",\"std\",\"min\",\"max\"])); parts.append(chunk.loc[chunk.ds>=cutoff].copy())",
+        "window=pd.concat(parts); print(\"filas totales\",total,\"ventana\",window.shape,\"series\",len(summaries))"
+      ],
+      "expected_output": [
+        "filas totales 9732480 ventana (1065600, 3) series 370",
+        "           count        mean        std  min          max",
+        "unique_id",
+        "MT_001     26304   21.172592  24.176884  0.0   138.324875",
+        "MT_002     26304  110.739204  25.588779  0.0   293.029877",
+        "MT_003     26304   15.560692  49.092941  0.0   598.609924",
+        "MT_004     26304  438.210510 152.777817  0.0  1168.699219",
+        "MT_005     26304  198.566467  69.770607  0.0   545.121948"
+      ]
+    },
+    {
+      "id": "nb_cell_02",
+      "label": "Celda 2: Escalas y volatilidad por cliente",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "language": "python",
+      "purpose": "Cuantificar la heterogeneidad de escala (percentiles del consumo medio) y de forma (cv) que define el problema de cross-learning.",
+      "code_lines": [
+        "# Escalas: distribución log de consumo medio; heterogeneidad extrema entre clientes.",
+        "profile[[\"mean\",\"std\",\"max\"]].describe(percentiles=[.1,.5,.9,.99])",
+        "# cv = std/mean relativiza la dispersión respecto a la escala del cliente.",
+        "profile[\"cv\"]=profile.std/profile.mean",
+        "profile.sort_values(\"cv\").head(3)  # MT_003 triplica su desviación media: cliente errático"
+      ],
+      "expected_output": [
+        "            mean           std            max",
+        "count   370.000000    370.000000    370.000000",
+        "mean   2348.518799   1095.035555   6339.207520",
+        "50%     488.404572    197.571915   1147.785767",
+        "90%    3649.811938   1373.025269   7959.642920",
+        "99%   31877.745313  10285.769729  58102.772656",
+        "max  190542.375000 131611.179295 764000.000000",
+        "           count       mean        std  min         max        cv",
+        "unique_id",
+        "MT_003     26304  15.560692  49.092941  0.0   598.609924  3.154933",
+        "MT_178     26304 275.266876 697.065796  0.0  3423.519043  2.532327",
+        "MT_093     26304 104.150146 237.753494  0.0  1058.883301  2.282796"
+      ]
+    },
+    {
+      "id": "nb_cell_03",
+      "label": "Celda 3: Clustering de perfiles diarios",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "language": "python",
+      "purpose": "Agrupar clientes por forma de perfil diario con KMeans y conectar cada centroide con una serie real representativa.",
+      "code_lines": [
+        "# KMeans sobre perfiles diarios normalizados; silhouette para elegir k.",
+        "km=KMeans(n_clusters=k,random_state=SEED).fit(scaler.fit_transform(perfiles_24h))",
+        "centroids=pd.DataFrame(scaler.inverse_transform(km.cluster_centers_),columns=range(24))",
+        "for i,row in centroids.iterrows(): ax.plot(row.index,row,label=f\"Cluster {i}\")",
+        "# Una serie representativa por cluster: conecta el centroide abstracto con datos reales.",
+        "examples=[clusters[clusters==k].index[0] for k in sorted(clusters.unique())]",
+        "for uid in examples: g=window[window.unique_id.astype(str)==str(uid)].tail(24*7); ax.plot(g.ds,g.y,label=f\"{uid}, c{clusters.loc[uid]}\")"
+      ],
+      "expected_output": [
+        "<Figure size 1200x400 with 1 Axes>",
+        "<Figure size 1400x500 with 1 Axes>"
+      ]
+    },
+    {
+      "id": "nb_cell_04",
+      "label": "Celda 4: Split por cliente 296/74 (anti-fuga)",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "language": "python",
+      "purpose": "Barajar clientes enteros con seed (no filas) para que ninguna observación de un cliente de test aparezca en train.",
+      "code_lines": [
+        "# Selección aleatoria de IDs con seed, no de filas.",
+        "rng=np.random.default_rng(SEED); ids=np.array(sorted(window.unique_id.astype(str).unique()))",
+        "rng.shuffle(ids); train_ids=set(ids[:296]); test_ids=set(ids[296:])",
+        "assert len(train_ids & test_ids)==0",
+        "trmask=window.unique_id.astype(str).isin(train_ids); temask=~trmask",
+        "train_frame=window[trmask].copy(); test_frame=window[temask].copy()",
+        "print(len(train_ids),len(test_ids))"
+      ],
+      "expected_output": [
+        "296 74"
+      ]
+    },
+    {
+      "id": "nb_cell_05",
+      "label": "Celda 5: evaluate() — métricas macro vs ponderadas",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "language": "python",
+      "purpose": "Definir la doble familia de métricas: tabla por cliente (MASE con escala semanal propia) y dict global (MAE/WAPE ponderados, MASE_macro).",
+      "code_lines": [
+        "# MASE_i = MAE_i / mean|y_{i,t} - y_{i,t-168}|; WAPE pondera por consumo total.",
+        "def evaluate(frame: pd.DataFrame,pred: np.ndarray)->tuple[pd.DataFrame,dict]:",
+        "    z=frame[[\"unique_id\",\"ds\",\"y\"]].copy(); z[\"pred\"]=pred; rows=[]",
+        "    for uid,g in z.groupby(\"unique_id\",observed=True):",
+        "        scale=g.y.diff(168).abs().dropna().mean(); mae=(g.y-g.pred).abs().mean()",
+        "        rows.append({\"unique_id\":str(uid),\"MAE\":mae,\"MASE\":mae/scale if scale>0 else np.nan,\"WAPE_pct\":100*(g.y-g.pred).abs().sum()/g.y.abs().sum()})",
+        "    per=pd.DataFrame(rows)",
+        "    glob={\"MAE\":float((z.y-z.pred).abs().mean()),\"WAPE_pct\":float(100*(z.y-z.pred).abs().sum()/z.y.abs().sum()),\"MASE_macro\":float(per.MASE.mean())}",
+        "    return per,glob"
+      ],
+      "expected_output": []
+    },
+    {
+      "id": "nb_cell_06",
+      "label": "Celda 6: Baseline transparente hora×día",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "language": "python",
+      "purpose": "Construir el baseline global obligatorio: media de train por día×hora, aplicada a los 74 clientes nuevos sin ninguna información de identidad.",
+      "code_lines": [
+        "# Perfil hora×día de train: el baseline global transparente.",
+        "profile_hd=train_frame.assign(hour=train_frame.ds.dt.hour,dow=train_frame.ds.dt.dayofweek).groupby([\"dow\",\"hour\"]).y.mean()",
+        "baseline=np.array([profile_hd.loc[(d,h)] for d,h in zip(test_frame.ds.dt.dayofweek,test_frame.ds.dt.hour)])",
+        "base_per,base_global=evaluate(test_frame,baseline); base_global"
+      ],
+      "expected_output": [
+        "{'MAE': 3178.7236328125, 'WAPE_pct': 115.4090576171875, 'MASE_macro': 69.4380111694336}"
+      ]
+    },
+    {
+      "id": "nb_cell_07",
+      "label": "Celda 7: LightGBM global cold-start (solo calendario)",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "language": "python",
+      "purpose": "Entrenar el modelo global con features de calendario únicamente (sin unique_id, sin lags) y evaluarlo sobre los 74 clientes no vistos.",
+      "code_lines": [
+        "# Cold-start estricto prohíbe lags, ID y target encoding: solo calendario global.",
+        "Xtr=calendar_features(train_frame); Xte=calendar_features(test_frame)",
+        "global_model=LGBMRegressor(n_estimators=250,learning_rate=.05,num_leaves=31,random_state=SEED,n_jobs=-1,verbosity=-1)",
+        "t0=time.time(); global_model.fit(Xtr,train_frame.y); global_pred=global_model.predict(Xte); print(\"fit s\",time.time()-t0)",
+        "global_per,global_metrics=evaluate(test_frame,global_pred); global_metrics"
+      ],
+      "expected_output": [
+        "fit s 57.25",
+        "{'MAE': 3178.385863..., 'WAPE_pct': 115.396788..., 'MASE_macro': 69.438075...}"
+      ]
+    },
+    {
+      "id": "nb_cell_08",
+      "label": "Celda 8: Comparación cold-start y lags prohibidos",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "language": "python",
+      "purpose": "Mostrar el empate entre el global y el baseline transparente, y dejar por escrito que los lags por cliente solo sirven en el contraste local.",
+      "code_lines": [
+        "# Lags por cliente (groupby shift): requieren historia; prohibidos en cold-start estricto.",
+        "# Ojo: estos lags NO pueden usarse en el split cold-start; solo en el contraste local de 3.8.",
+        "# Comparación cold-start: baseline vs global ML.",
+        "cold_scores=pd.DataFrame([",
+        " {\"model\":\"Perfil hora×día\",**base_global},",
+        " {\"model\":\"LightGBM global\",**global_metrics}]).set_index(\"model\")",
+        "cold_scores"
+      ],
+      "expected_output": [
+        "                   MAE      WAPE_pct  MASE_macro",
+        "model",
+        "Perfil hora×día  3178.723633  115.409058   69.438011",
+        "LightGBM global  3178.385863  115.396788   69.438075"
+      ]
+    },
+    {
+      "id": "nb_cell_09",
+      "label": "Celda 9: Cross-learning interpretado (warm vs cold)",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "language": "python",
+      "purpose": "Contrastar el régimen con historia (local warm-start, 12 series) contra el régimen sin historia (global cold-start, 74 series) e identificar clientes fáciles y difíciles.",
+      "code_lines": [
+        "# El local no puede entrenarse para series jamás vistas; el global sí produce predicción, aunque sin escala individual.",
+        "print(\"Mediana MASE local warm-start:\",local_eval.MASE.median())",
+        "# ¿Quién es fácil y quién difícil para el modelo global?",
+        "rank=global_per.sort_values(\"MASE\"); easy=rank.iloc[0].unique_id; hard=rank.iloc[-1].unique_id",
+        "print(\"fácil\",easy,\"difícil\",hard)"
+      ],
+      "expected_output": [
+        "Mediana MASE local warm-start: 1.3350201388393765",
+        "fácil MT_209 difícil MT_007"
+      ]
+    },
+    {
+      "id": "nb_cell_10",
+      "label": "Celda 10: Diagnóstico posterior, bias y cierre",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "language": "python",
+      "purpose": "Detectar estructura restante (ARCH), colas pesadas (QQ) y bias sistemático por cliente; cerrar el notebook con el resumen ejecutivo.",
+      "code_lines": [
+        "# ARCH LM con 24 lags: homocedasticidad condicional de los residuos.",
+        "a=het_arch(res_t,nlags=24); pd.DataFrame([{\"test\":\"ARCH LM\",\"H0\":\"homocedasticidad\",\"stat\":a[0],\"p_value\":a[1],\"decision\":\"rechazar H0\" if a[1]<.05 else \"no rechazar H0\"}])",
+        "# Bias por cliente: algunos concentran errores muy grandes.",
+        "z=test_frame[[\"unique_id\",\"y\"]].copy(); z[\"pred\"]=global_pred",
+        "bias=z.groupby(\"unique_id\",observed=True).apply(lambda g:(g.y-g.pred).mean(),include_groups=False).sort_values()",
+        "pd.concat([bias.head(5),bias.tail(5)]).to_frame(\"bias\")",
+        "# Cierre del notebook.",
+        "print(\"Notebook 5 completado.\")",
+        "print(cold_scores)",
+        "print(\"Mediana MASE local warm-start:\",local_eval.MASE.median())"
+      ],
+      "expected_output": [
+        "   test     H0                stat         p_value  decision",
+        "0  ARCH LM  homocedasticidad  2434.533935  0.0      rechazar H0",
+        "             bias",
+        "MT_032   -2234.698100",
+        "...",
+        "MT_196   71399.588300",
+        "Notebook 5 completado.",
+        "                   MAE      WAPE_pct  MASE_macro",
+        "model",
+        "Perfil hora×día  3178.723633  115.409058   69.438011",
+        "LightGBM global  3178.385863  115.396788   69.438075",
+        "Mediana MASE local warm-start: 1.3350201388393765"
+      ]
+    },
+    {
+      "id": "evaluacion_capitulo_05",
+      "label": "Ejercicios propuestos: Semana 5",
+      "type": "assessment",
+      "group": 4,
+      "level": 1,
+      "exercises": [
+        "Fácil/few-shot: añada una semana de contexto al cliente nuevo (few-shot en vez de cold-start estricto) y mida cuánto se recupera del MASE macro.",
+        "Intermedio: compare k=3–8 clusters con silhouette y discuta si la forma agrupa también la dificultad de pronóstico.",
+        "Intermedio: entrene un modelo global warm-start con lags y contrástelo con el local de la Sección 3.8.",
+        "Intermedio con cautela: use metadatos sintéticos solo si provienen de una fuente real; no invente categorías.",
+        "Difícil/ingeniería: convierta el CSV a Parquet particionado y mida I/O frente al chunked loading."
+      ]
+    },
+    {
+      "id": "slide_resultados_capitulo_05",
+      "label": "Slide - Capítulo 6 — Semana 5 · Electricity · Resultados",
+      "type": "slide",
+      "group": 2,
+      "level": 2,
+      "title": "Sin historia del cliente, ningún modelo recupera la escala",
+      "kicker": "Capítulo 6 — Semana 5 · Electricity · Resultados",
+      "content": [
+        "Headline: 29x de diferencia — MASE mediano warm-start 1.34 vs. cold-start 38.59.",
+        "Ficha: Dominio energía, 370 clientes; Decisión ofertas a clientes nuevos; Horizonte 168h; Baseline perfil hora×día; Riesgo confiar en el modelo global; Métrica MASE macro.",
+        "Tabla: Perfil hora×día MAE 3,178.72 (MASE macro 69.44); LightGBM global 3,178.39 (69.44) — empate técnico (-0.01%)."
+      ],
+      "source_document": "presentacion_monografia.typ"
+    },
+    {
+      "id": "slide_metodo_capitulo_05",
+      "label": "Slide - Capítulo 6 — Semana 5 · Electricity · Método y lección",
+      "type": "slide",
+      "group": 2,
+      "level": 2,
+      "title": "Global no es automáticamente mejor",
+      "kicker": "Capítulo 6 — Semana 5 · Electricity · Método y lección",
+      "content": [
+        "Cold-start estricto: 296 clientes entrenan, 74 nunca vistos (solo features de calendario).",
+        "Heterogeneidad de escala: 4.36 a 190,542 (razón 43,000x); clústeres k=4 (213/119/34/4).",
+        "El modelo global transfiere la forma del patrón, no la escala individual.",
+        "Decisión: sin historia, perfil hora×día; con historia, el modelo no importa tanto como creía."
+      ],
+      "source_document": "presentacion_monografia.typ"
+    }
+  ],
+  "links": [
+    {
+      "source": "capitulo_05",
+      "target": "clase_capitulo_05",
+      "relation": "contains"
+    },
+    {
+      "source": "capitulo_05",
+      "target": "diapositivas_capitulo_05",
+      "relation": "contains"
+    },
+    {
+      "source": "capitulo_05",
+      "target": "notebook_capitulo_05",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_05",
+      "target": "nb_cell_01",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_05",
+      "target": "nb_cell_02",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_05",
+      "target": "nb_cell_03",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_05",
+      "target": "nb_cell_04",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_05",
+      "target": "nb_cell_05",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_05",
+      "target": "nb_cell_06",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_05",
+      "target": "nb_cell_07",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_05",
+      "target": "nb_cell_08",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_05",
+      "target": "nb_cell_09",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_05",
+      "target": "nb_cell_10",
+      "relation": "contains"
+    },
+    {
+      "source": "nb_cell_01",
+      "target": "nb_cell_02",
+      "relation": "next_cell"
+    },
+    {
+      "source": "nb_cell_02",
+      "target": "nb_cell_03",
+      "relation": "next_cell"
+    },
+    {
+      "source": "nb_cell_03",
+      "target": "nb_cell_04",
+      "relation": "next_cell"
+    },
+    {
+      "source": "nb_cell_04",
+      "target": "nb_cell_05",
+      "relation": "next_cell"
+    },
+    {
+      "source": "nb_cell_05",
+      "target": "nb_cell_06",
+      "relation": "next_cell"
+    },
+    {
+      "source": "nb_cell_06",
+      "target": "nb_cell_07",
+      "relation": "next_cell"
+    },
+    {
+      "source": "nb_cell_07",
+      "target": "nb_cell_08",
+      "relation": "next_cell"
+    },
+    {
+      "source": "nb_cell_08",
+      "target": "nb_cell_09",
+      "relation": "next_cell"
+    },
+    {
+      "source": "nb_cell_09",
+      "target": "nb_cell_10",
+      "relation": "next_cell"
+    },
+    {
+      "source": "clase_capitulo_05",
+      "target": "nb_cell_01",
+      "relation": "executes"
+    },
+    {
+      "source": "clase_capitulo_05",
+      "target": "nb_cell_02",
+      "relation": "executes"
+    },
+    {
+      "source": "clase_capitulo_05",
+      "target": "nb_cell_03",
+      "relation": "executes"
+    },
+    {
+      "source": "clase_capitulo_05",
+      "target": "nb_cell_04",
+      "relation": "executes"
+    },
+    {
+      "source": "clase_capitulo_05",
+      "target": "nb_cell_05",
+      "relation": "executes"
+    },
+    {
+      "source": "clase_capitulo_05",
+      "target": "nb_cell_06",
+      "relation": "executes"
+    },
+    {
+      "source": "clase_capitulo_05",
+      "target": "nb_cell_07",
+      "relation": "executes"
+    },
+    {
+      "source": "clase_capitulo_05",
+      "target": "nb_cell_08",
+      "relation": "executes"
+    },
+    {
+      "source": "clase_capitulo_05",
+      "target": "nb_cell_09",
+      "relation": "executes"
+    },
+    {
+      "source": "clase_capitulo_05",
+      "target": "nb_cell_10",
+      "relation": "executes"
+    },
+    {
+      "source": "nb_cell_04",
+      "target": "capitulo_05",
+      "relation": "verifies"
+    },
+    {
+      "source": "nb_cell_08",
+      "target": "capitulo_05",
+      "relation": "verifies"
+    },
+    {
+      "source": "nb_cell_09",
+      "target": "capitulo_05",
+      "relation": "verifies"
+    },
+    {
+      "source": "evaluacion_capitulo_05",
+      "target": "clase_capitulo_05",
+      "relation": "assesses"
+    },
+    {
+      "source": "diapositivas_capitulo_05",
+      "target": "slide_resultados_capitulo_05",
+      "relation": "contains"
+    },
+    {
+      "source": "clase_capitulo_05",
+      "target": "slide_resultados_capitulo_05",
+      "relation": "uses"
+    },
+    {
+      "source": "diapositivas_capitulo_05",
+      "target": "slide_metodo_capitulo_05",
+      "relation": "contains"
+    },
+    {
+      "source": "clase_capitulo_05",
+      "target": "slide_metodo_capitulo_05",
+      "relation": "uses"
+    }
+  ],
+  "relation_vocabulary": [
+    "contains",
+    "executes",
+    "verifies",
+    "assesses",
+    "next_cell",
+    "supports",
+    "conditions",
+    "limits",
+    "contradicts",
+    "uses",
+    "presented_in",
+    "displays",
+    "backs_up",
+    "summarizes",
+    "cited_from",
+    "precedes",
+    "references",
+    "followed_by"
+  ],
+  "cct_schema_version": "1.0"
+}

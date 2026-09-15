@@ -1,0 +1,697 @@
+{
+  "directed": true,
+  "multigraph": false,
+  "graph": {
+    "title": "Mapa de conocimiento — Semana 2: ARIMA, estacionariedad y diagnóstico",
+    "chapter": "Semana 2",
+    "course": "Forecasting de Series Temporales: De Modelos Paramétricos a Deep Learning en Producción",
+    "format": "node-link",
+    "description": "Objeto pedagógico completo de la Semana 2: plan de clase, diapositivas inferidas del flujo docente y celdas relevantes del notebook de Appliances Energy (Box–Jenkins, test sellado y diagnóstico de residuos)."
+  },
+  "nodes": [
+    {
+      "id": "capitulo_02",
+      "label": "Semana 2: ARIMA, Estacionariedad y Diagnóstico",
+      "type": "chapter",
+      "group": 0,
+      "level": 0,
+      "chapter_number": 2,
+      "description": "Consumo energético residencial: el ciclo Box–Jenkins completo contra baselines honestos. El diagnóstico de residuos delata la estacionalidad diaria que el MASE no muestra.",
+      "cct": {
+        "ontologico": {
+          "nivel": "consumo energético agregado de electrodomésticos",
+          "unidad_de_analisis": "Wh/hora por vivienda",
+          "limites_de_inferencia": [
+            "No se afirma comportamiento individual de residentes.",
+            "No se infiere causalidad entre sensores y consumo.",
+            "El error en picos tiene mayor costo operativo que el error en valles."
+          ]
+        },
+        "epistemico": {
+          "rrl_actual": 4,
+          "rrl_esperado": 4,
+          "estado_evidencia": "ejecutado",
+          "protocolo": "70% train / 15% validation / 15% test; selección por AIC en train, MAE en validation, test consultado una sola vez.",
+          "incertidumbre": [
+            "El orden ganador por AIC (1,0,2) no es el ganador en test; la estructura reaparece en lags >=20."
+          ]
+        },
+        "pragmatico": {
+          "stakeholder": "gestor de la vivienda / gestión de demanda",
+          "decision": "cuándo confiar en el modelo estadístico vs. el baseline estacional para detectar picos",
+          "traduccion_operativa": "MAE 221.71 Wh/h (ETS) vs. 293.28 Wh/h (naive) se traduce en menos falsas alertas de pico."
+        }
+      },
+      "evidence": [
+        {
+          "claim": "ETS supera a ARIMA en test aunque ARIMA gane por AIC en train.",
+          "value": {
+            "ETS_MASE": 0.681333,
+            "ETS_WAPE_pct": 38.178486,
+            "ARIMA_MASE": 0.9013
+          },
+          "source_ref": "notebook:02:seccion=3.10",
+          "status": "ejecutado",
+          "metric_comparability_scope": "solo_capitulo_2",
+          "oracle": false
+        }
+      ],
+      "integrity": {
+        "leakage_controls": [
+          "split_temporal_por_posicion",
+          "test_unica_consulta",
+          "sin_reoptimizacion_sobre_test"
+        ],
+        "data_statement": "Appliances Energy Prediction (UCI), consumo horario agregado desde intervalos de 10 min.",
+        "ai_use": "no declarado",
+        "conflicts": "ninguno",
+        "limitations": [
+          "El error se concentra en picos (≈572 Wh/h) casi el doble que en valles (≈275 Wh/h).",
+          "Los residuos muestran estructura diaria si el modelo no la captura.",
+          "Los resultados no se extrapolan a otros edificios sin validación local."
+        ]
+      },
+      "quality": {
+        "gates": {
+          "G1_problema": "pass",
+          "G2_nivel_analisis": "pass",
+          "G3_evidencia": "pass",
+          "G4_audiencia": "pass",
+          "G5_metodo": "pass",
+          "G6_integridad": "pass",
+          "G7_trazabilidad": "pass",
+          "G8_no_sobreventa": "pass"
+        },
+        "decision": "aprobado"
+      },
+      "sources": [
+        {
+          "source_type": "monografia",
+          "locator": "monografia_timeseries_benchmarks.typ:capitulo=3"
+        },
+        {
+          "source_type": "presentacion",
+          "locator": "presentacion_monografia.typ:capitulo=3"
+        },
+        {
+          "source_type": "notebook",
+          "locator": "02_semana_2_arima_estacionariedad_diagnostico.ipynb"
+        }
+      ],
+      "decision_ejecutiva": "No elegir un modelo solo por AIC/BIC; validar temporalmente, revisar residuos y consultar el test una sola vez.",
+      "limitations": [
+        "El error se concentra en picos (≈572 Wh/h) casi el doble que en valles (≈275 Wh/h).",
+        "Los residuos muestran estructura diaria si el modelo no la captura.",
+        "Los resultados no se extrapolan a otros edificios sin validación local."
+      ],
+      "oracle": false,
+      "epistemic_warning": "AIC optimiza el ajuste in-sample; la selección final debe validarse en validation y confirmarse una sola vez en test."
+    },
+    {
+      "id": "clase_capitulo_02",
+      "label": "Clase 2: ARIMA vs. modelos simples y el veredicto del test",
+      "type": "class_plan",
+      "group": 1,
+      "level": 1,
+      "duration_minutes": 80,
+      "objective": "Aplicar el ciclo Box–Jenkins con disciplina temporal (test consultado una sola vez) y descubrir que el diagnóstico de residuos y los baselines honestos importan más que la sofisticación del modelo.",
+      "agenda": [
+        {
+          "start": 0,
+          "end": 10,
+          "duration": 10,
+          "type": "apertura",
+          "activity": "Caso de negocio y contrato: agregación 10 min → hora",
+          "resource_refs": [],
+          "product": null
+        },
+        {
+          "start": 10,
+          "end": 25,
+          "duration": 15,
+          "type": "metodo_validacion",
+          "activity": "Estacionariedad en la práctica: ADF/KPSS y transformaciones",
+          "resource_refs": [],
+          "product": null
+        },
+        {
+          "start": 25,
+          "end": 45,
+          "duration": 20,
+          "type": "demo_practica",
+          "activity": "Box-Jenkins: grid en train, selección en validation",
+          "resource_refs": [],
+          "product": null
+        },
+        {
+          "start": 45,
+          "end": 60,
+          "duration": 15,
+          "type": "demo_practica",
+          "activity": "Test una sola vez: ETS vs. ARIMA vs. Theta vs. naive",
+          "resource_refs": [],
+          "product": null
+        },
+        {
+          "start": 60,
+          "end": 80,
+          "duration": 20,
+          "type": "cierre_decision",
+          "activity": "Diagnóstico de residuos y cierre con ejercicios",
+          "resource_refs": [],
+          "product": null
+        }
+      ],
+      "decision_ejecutiva": "No elegir un modelo solo por AIC/BIC; validar temporalmente, revisar residuos y consultar el test una sola vez."
+    },
+    {
+      "id": "diapositivas_capitulo_02",
+      "label": "Diapositivas de la Semana 2 (sincronizado con presentacion_monografia.typ)",
+      "type": "slide_deck",
+      "group": 2,
+      "level": 1,
+      "slide_count": 2,
+      "format": "slides",
+      "synced_with_source": "presentacion_monografia.typ"
+    },
+    {
+      "id": "notebook_capitulo_02",
+      "label": "Notebook: ARIMA, estacionariedad y diagnóstico",
+      "type": "notebook",
+      "group": 3,
+      "level": 1,
+      "file": "02_semana_2_arima_estacionariedad_diagnostico.ipynb",
+      "dataset": "Appliances Energy (UCI) — data/02_energy/energy.csv",
+      "kernel": "Python 3",
+      "purpose": "Comparar ARIMA (Box–Jenkins) contra modelos simples en consumo energético horario, con split 70/15/15, test sellado y diagnóstico de residuos."
+    },
+    {
+      "id": "nb_cell_01",
+      "label": "Celda 1: Auditoría y agregación 10-min → hora",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "language": "python",
+      "purpose": "Confirmar la frecuencia de muestreo y consolidar una serie horaria única sin imputar silenciosamente.",
+      "code_lines": [
+        "# Deltas entre timestamps consecutivos: la moda confirma la frecuencia de muestreo",
+        "delta=raw.ds.diff().dropna(); print(raw.ds.min(),raw.ds.max()); print(delta.value_counts().head())",
+        "# Columnas de energía (se suman) y sensores (se promedian) al agregar a hora",
+        "energy_cols=[\"y\",\"lights\"]; sensor_cols=[x for x in raw.columns if x not in [\"ds\",*energy_cols]]",
+        "hourly=pd.concat([raw.set_index(\"ds\")[energy_cols].resample(\"1h\").sum(),raw.set_index(\"ds\")[sensor_cols].resample(\"1h\").mean()],axis=1)",
+        "assert hourly.index.is_unique and hourly.y.notna().all()",
+        "print(hourly.shape)"
+      ],
+      "expected_output": [
+        "2016-01-11 17:00:00 2016-05-27 18:00:00",
+        "ds",
+        "0 days 00:10:00    19734",
+        "Name: count, dtype: int64",
+        "(3290, 28)"
+      ]
+    },
+    {
+      "id": "nb_cell_02",
+      "label": "Celda 2: EDA — estacionalidad diaria y cola derecha",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "language": "python",
+      "purpose": "Visualizar la serie completa y el perfil semanal para anticipar transformaciones y errores en picos.",
+      "code_lines": [
+        "# Serie completa: se aprecian estacionalidad diaria y picos",
+        "fig,ax=plt.subplots(figsize=(14,4)); ax.plot(hourly.index,hourly.y,lw=.6,label=\"Energía horaria\")",
+        "ax.set(title=\"Consumo horario de electrodomésticos\",xlabel=\"Fecha\",ylabel=\"Energía (Wh/h)\"); ax.legend(); plt.show()",
+        "# Consumo medio por día de la semana (0=lunes ... 6=domingo)",
+        "prof=hourly.assign(dow=hourly.index.dayofweek).groupby(\"dow\").y.mean()",
+        "fig,ax=plt.subplots(); ax.plot(prof.index,prof,marker=\"o\",label=\"Media\"); ax.legend(); plt.show()"
+      ],
+      "expected_output": [
+        "<Figure size 1400x400 with 1 Axes>",
+        "<Figure size 1200x400 with 1 Axes>"
+      ]
+    },
+    {
+      "id": "nb_cell_03",
+      "label": "Celda 3: Estacionariedad ADF/KPSS sobre log-diferencia",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "language": "python",
+      "purpose": "Verificar que log1p + diferencia produce una serie estacionaria modelable.",
+      "code_lines": [
+        "# log1p + diferencia: estabiliza varianza y elimina tendencia",
+        "logd=np.log1p(hourly.y).diff().dropna()",
+        "stationarity_report(logd,\"log-diferencia\")"
+      ],
+      "expected_output": [
+        "  test          series        H0            stat        p_value      decision",
+        "0  ADF   log-diferencia  raíz unitaria  -16.618455  1.706384e-29  rechazar H0",
+        "1  KPSS  log-diferencia  estacionaria     0.012783  1.000000e-01  no rechazar H0"
+      ]
+    },
+    {
+      "id": "nb_cell_04",
+      "label": "Celda 4: ACF de la diferencia — picos cada 24 h",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "language": "python",
+      "purpose": "Detectar la estacionalidad diaria restante que ARIMA simple no capturará.",
+      "code_lines": [
+        "# ACF de la diferencia regular: picos cada 24h sugieren estacionalidad restante",
+        "fig,ax=plt.subplots(figsize=(13,4)); plot_acf(d1,lags=72,zero=False,ax=ax)",
+        "ax.set(title=\"ACF de diferencia regular\",xlabel=\"Lag (horas)\",ylabel=\"Autocorrelación\"); plt.show()"
+      ],
+      "expected_output": [
+        "<Figure size 1300x400 with 1 Axes>"
+      ]
+    },
+    {
+      "id": "nb_cell_05",
+      "label": "Celda 5: Split 70/15/15 y horizonte H=24",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "language": "python",
+      "purpose": "Definir tres bloques contiguos en el tiempo con test sellado y horizonte operativo de un día.",
+      "code_lines": [
+        "# Cortes temporales por posición: 70% train, 15% validation, 15% test",
+        "n=len(hourly); i70=int(.70*n); i85=int(.85*n)",
+        "train=hourly.y.iloc[:i70]; val=hourly.y.iloc[i70:i85]; test=hourly.y.iloc[i85:]",
+        "print({\"train\":len(train),\"validation\":len(val),\"test\":len(test)})",
+        "print(train.index[-1],val.index[0],val.index[-1],test.index[0])",
+        "# Horizonte operativo de 24 horas y folds completos de test",
+        "H=24; print(\"Horizonte:\",H,\"horas; folds de test posibles:\",len(test)//H)"
+      ],
+      "expected_output": [
+        "{'train': 2303, 'validation': 493, 'test': 494}",
+        "2016-04-16 15:00:00 2016-04-16 16:00:00 2016-05-07 04:00:00 2016-05-07 05:00:00",
+        "Horizonte: 24 horas; folds de test posibles: 20"
+      ]
+    },
+    {
+      "id": "nb_cell_06",
+      "label": "Celda 6: Grid Box–Jenkins (18 órdenes) con AIC/BIC",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "language": "python",
+      "purpose": "Ajustar los 18 candidatos en train y registrar AIC, BIC y convergencia sin tocar validation ni test.",
+      "code_lines": [
+        "# Grid pequeño y transparente: p,q∈{0,1,2}, d∈{0,1}. Son 18 combinaciones.",
+        "orders=list(product(range(3),range(2),range(3))); print(\"Modelos candidatos:\",len(orders))",
+        "# Grid search: ajuste en train y registro de AIC, BIC y convergencia",
+        "grid=[]; t0=time.time()",
+        "for (p,d,q) in orders:",
+        "    ...  # ARIMA(train, order=(p,d,q)).fit() con captura de fallos",
+        "grid_df=pd.DataFrame(grid).sort_values(\"AIC\"); grid_df.head(10)"
+      ],
+      "expected_output": [
+        "Modelos candidatos: 18",
+        "    order          AIC          BIC  converged",
+        "17  (2, 1, 2)  34212.296224  34241.003892       True",
+        "14  (2, 0, 2)  34212.317157  34246.768964       True",
+        "16  (2, 1, 1)  34212.686640  34235.652774       True",
+        "13  (2, 0, 1)  34220.408396  34249.118235       True",
+        "12  (2, 0, 0)  34220.834643  34243.802515       True"
+      ]
+    },
+    {
+      "id": "nb_cell_07",
+      "label": "Celda 7: Validation desempata por MAE",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "language": "python",
+      "purpose": "Elegir el orden final con los 5 mejores por AIC evaluados en validation, ordenados por MAE.",
+      "code_lines": [
+        "# Validación: pronóstico de validation con los 5 mejores por AIC; orden por MAE",
+        "val_scores=[]",
+        "for order in grid_df.dropna().head(5).order:",
+        "    ...  # re-ajuste en train y pronóstico del bloque validation",
+        "val_df=pd.DataFrame(val_scores).sort_values(\"MAE\"); val_df"
+      ],
+      "expected_output": [
+        "   order         MAE        RMSE      MASE   WAPE_pct",
+        "0  (1, 0, 2)  301.966082  425.776004  0.887391  53.904942",
+        "2  (2, 0, 2)  302.005948  425.871732  0.887508  53.912059",
+        "4  (2, 0, 1)  302.027112  425.937447  0.887570  53.915837",
+        "3  (2, 1, 1)  302.032157  425.776979  0.887585  53.916737",
+        "1  (2, 1, 2)  302.040923  425.935406  0.887611  53.918302"
+      ]
+    },
+    {
+      "id": "nb_cell_08",
+      "label": "Celda 8: Test una sola vez — ETS vs ARIMA vs Theta",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "language": "python",
+      "purpose": "Consulta única del test con modelos congelados, incluyendo el baseline diario alineado por timestamp.",
+      "code_lines": [
+        "# Baseline diario alineado por timestamp: cada hora = valor observado 24 h antes",
+        "sn24=seasonal_naive_by_timestamp(hourly.y, test.index, season=pd.Timedelta(hours=24))",
+        "metrics(test, sn24)",
+        "# Momento clave: el test se consulta una vez para los modelos congelados.",
+        "score_table_test  # ETS, Theta y mejores ARIMA sobre el mismo test"
+      ],
+      "expected_output": [
+        "{'MAE': 271.47773279352225, 'RMSE': 489.47154019816884, ...}",
+        "        MAE        RMSE      MASE   WAPE_pct",
+        "ETS   221.713441  372.521919  0.681333  38.178486",
+        "Theta 243.263247  383.617022  ...",
+        "(2,0,2) 302.005948  425.871732  0.887508  53.912059"
+      ]
+    },
+    {
+      "id": "nb_cell_09",
+      "label": "Celda 9: Diagnóstico de residuos (Ljung–Box y Jarque–Bera)",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "language": "python",
+      "purpose": "Verificar si los residuos de ARIMA son ruido blanco: autocorrelación restante y no normalidad.",
+      "code_lines": [
+        "# Ljung–Box: autocorrelación conjunta de residuos en lags 10/20/30",
+        "lb=acorr_ljungbox(resid,lags=[10,20,30],return_df=True)",
+        "# Jarque-Bera: normalidad de residuos (asimetría y curtosis)",
+        "jb=jarque_bera(resid)",
+        "pd.DataFrame([{\"test\":\"Jarque-Bera\",\"stat\":jb[0],\"p_value\":jb[1],\"skew\":jb[2],\"kurtosis\":jb[3]}])"
+      ],
+      "expected_output": [
+        "lags   stat      p_value  decision",
+        "10     6.951762  7.299909e-01  no rechazar H0",
+        "20    44.987460  1.107798e-03  rechazar H0",
+        "30   221.908614  3.653526e-31  rechazar H0",
+        "Jarque-Bera: stat 11750.736685, p 0.0, skew 2.393216, kurtosis 11.890936 → rechazar normalidad"
+      ]
+    },
+    {
+      "id": "nb_cell_10",
+      "label": "Celda 10: Error por horizonte y zoom de 72 h",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "language": "python",
+      "purpose": "Mostrar que el error de ARIMA crece con el horizonte y que ETS sigue mejor el ciclo diario.",
+      "code_lines": [
+        "# MAE y sesgo por horizonte dentro del día de pronóstico",
+        "err=pd.DataFrame({\"error\":test-arima_pred}); err[\"horizon\"]=(np.arange(len(err))%24)+1",
+        "by_h=err.groupby(\"horizon\").error.agg(MAE=lambda x:x.abs().mean(),Bias=\"mean\")",
+        "fig,ax=plt.subplots(); ax.plot(by_h.index,by_h.MAE,marker=\"o\"); plt.show()",
+        "# Comparación visual de los cuatro modelos en las primeras 72 horas de test",
+        "z=test.index[:72]; fig,ax=plt.subplots(figsize=(14,5)); ax.plot(z,test.loc[z],color=\"black\",lw=2,label=\"Real\")",
+        "for name,p in preds.items(): ax.plot(z,p.loc[z],label=name,alpha=.8)",
+        "ax.set(title=\"Comparación de modelos: primeras 72 horas\"); ax.legend(ncol=2); plt.show()"
+      ],
+      "expected_output": [
+        "<Figure size 1200x400 with 1 Axes>",
+        "<Figure size 1400x500 with 1 Axes>"
+      ]
+    },
+    {
+      "id": "evaluacion_capitulo_02",
+      "label": "Ejercicios propuestos: Semana 2",
+      "type": "assessment",
+      "group": 4,
+      "level": 1,
+      "exercises": [
+        "Fácil: amplíe el grid a p,q≤3 y compare AIC, BIC y validation MAE.",
+        "Intermedio: agregue componente estacional SARIMA diario.",
+        "Intermedio: use t_out rezagada en ARIMAX y documente disponibilidad.",
+        "Difícil: construya intervalos bootstrap respetando bloques diarios.",
+        "Difícil: evalúe estabilidad de órdenes en tres orígenes temporales."
+      ]
+    },
+    {
+      "id": "slide_resultados_capitulo_02",
+      "label": "Slide - Capítulo 3 — Semana 2 · Appliances Energy · Resultados",
+      "type": "slide",
+      "group": 2,
+      "level": 2,
+      "title": "ARIMA sigue el protocolo correcto y aun así pierde",
+      "kicker": "Capítulo 3 — Semana 2 · Appliances Energy · Resultados",
+      "content": [
+        "Headline: MASE 0.681 — ETS gana; ARIMA(1,0,2), elegido por AIC, queda último.",
+        "Ficha: Dominio energía residencial; Decisión detectar picos; Horizonte 24 h; Baseline ETS/Theta/SN24; Riesgo elegir solo por AIC/BIC; Métrica MASE.",
+        "Tabla: ETS 0.681; Theta 0.748; SeasonalNaive24 0.834; ARIMA(1,0,2) 0.901."
+      ],
+      "source_document": "presentacion_monografia.typ"
+    },
+    {
+      "id": "slide_metodo_capitulo_02",
+      "label": "Slide - Capítulo 3 — Semana 2 · Appliances Energy · Método y lección",
+      "type": "slide",
+      "group": 2,
+      "level": 2,
+      "title": "La validación temporal decide, no el AIC",
+      "kicker": "Capítulo 3 — Semana 2 · Appliances Energy · Método y lección",
+      "content": [
+        "Grid de 18 órdenes: AIC en train, MAE en validación, test consultado una sola vez.",
+        "El orden ganador por AIC (1,0,2) pierde contra ETS, Theta y SN24 en test.",
+        "Residuos: estructura reaparece en lags >= 20 (ciclo diario); error 3x mayor en picos (572 vs. 163).",
+        "Decisión: no elegir un modelo solo por AIC/BIC; comprobar residuos y validar temporalmente."
+      ],
+      "source_document": "presentacion_monografia.typ"
+    },
+    {
+      "id": "cct_claim_residuos_cap02",
+      "label": "Los residuos deben auditarse antes de confiar en el modelo",
+      "type": "claim",
+      "claim": "Si Ljung-Box, Jarque-Bera o ARCH LM fallan, el modelo puede tener estructura sin capturar, normalidad dudosa o heterocedasticidad.",
+      "evidence_ref": "notebook:02:seccion=4",
+      "cct_axis": "epistemico",
+      "group": 5,
+      "level": 2
+    }
+  ],
+  "links": [
+    {
+      "source": "capitulo_02",
+      "target": "clase_capitulo_02",
+      "relation": "contains"
+    },
+    {
+      "source": "capitulo_02",
+      "target": "diapositivas_capitulo_02",
+      "relation": "contains"
+    },
+    {
+      "source": "capitulo_02",
+      "target": "notebook_capitulo_02",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_02",
+      "target": "nb_cell_01",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_02",
+      "target": "nb_cell_02",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_02",
+      "target": "nb_cell_03",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_02",
+      "target": "nb_cell_04",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_02",
+      "target": "nb_cell_05",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_02",
+      "target": "nb_cell_06",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_02",
+      "target": "nb_cell_07",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_02",
+      "target": "nb_cell_08",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_02",
+      "target": "nb_cell_09",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_02",
+      "target": "nb_cell_10",
+      "relation": "contains"
+    },
+    {
+      "source": "nb_cell_01",
+      "target": "nb_cell_02",
+      "relation": "next_cell"
+    },
+    {
+      "source": "nb_cell_02",
+      "target": "nb_cell_03",
+      "relation": "next_cell"
+    },
+    {
+      "source": "nb_cell_03",
+      "target": "nb_cell_04",
+      "relation": "next_cell"
+    },
+    {
+      "source": "nb_cell_04",
+      "target": "nb_cell_05",
+      "relation": "next_cell"
+    },
+    {
+      "source": "nb_cell_05",
+      "target": "nb_cell_06",
+      "relation": "next_cell"
+    },
+    {
+      "source": "nb_cell_06",
+      "target": "nb_cell_07",
+      "relation": "next_cell"
+    },
+    {
+      "source": "nb_cell_07",
+      "target": "nb_cell_08",
+      "relation": "next_cell"
+    },
+    {
+      "source": "nb_cell_08",
+      "target": "nb_cell_09",
+      "relation": "next_cell"
+    },
+    {
+      "source": "nb_cell_09",
+      "target": "nb_cell_10",
+      "relation": "next_cell"
+    },
+    {
+      "source": "clase_capitulo_02",
+      "target": "nb_cell_01",
+      "relation": "executes"
+    },
+    {
+      "source": "clase_capitulo_02",
+      "target": "nb_cell_02",
+      "relation": "executes"
+    },
+    {
+      "source": "clase_capitulo_02",
+      "target": "nb_cell_03",
+      "relation": "executes"
+    },
+    {
+      "source": "clase_capitulo_02",
+      "target": "nb_cell_04",
+      "relation": "executes"
+    },
+    {
+      "source": "clase_capitulo_02",
+      "target": "nb_cell_05",
+      "relation": "executes"
+    },
+    {
+      "source": "clase_capitulo_02",
+      "target": "nb_cell_06",
+      "relation": "executes"
+    },
+    {
+      "source": "clase_capitulo_02",
+      "target": "nb_cell_07",
+      "relation": "executes"
+    },
+    {
+      "source": "clase_capitulo_02",
+      "target": "nb_cell_08",
+      "relation": "executes"
+    },
+    {
+      "source": "clase_capitulo_02",
+      "target": "nb_cell_09",
+      "relation": "executes"
+    },
+    {
+      "source": "clase_capitulo_02",
+      "target": "nb_cell_10",
+      "relation": "executes"
+    },
+    {
+      "source": "nb_cell_03",
+      "target": "capitulo_02",
+      "relation": "verifies"
+    },
+    {
+      "source": "nb_cell_08",
+      "target": "capitulo_02",
+      "relation": "verifies"
+    },
+    {
+      "source": "nb_cell_09",
+      "target": "capitulo_02",
+      "relation": "verifies"
+    },
+    {
+      "source": "evaluacion_capitulo_02",
+      "target": "clase_capitulo_02",
+      "relation": "assesses"
+    },
+    {
+      "source": "diapositivas_capitulo_02",
+      "target": "slide_resultados_capitulo_02",
+      "relation": "contains"
+    },
+    {
+      "source": "clase_capitulo_02",
+      "target": "slide_resultados_capitulo_02",
+      "relation": "uses"
+    },
+    {
+      "source": "diapositivas_capitulo_02",
+      "target": "slide_metodo_capitulo_02",
+      "relation": "contains"
+    },
+    {
+      "source": "clase_capitulo_02",
+      "target": "slide_metodo_capitulo_02",
+      "relation": "uses"
+    },
+    {
+      "source": "cct_claim_residuos_cap02",
+      "target": "capitulo_02",
+      "relation": "supports"
+    }
+  ],
+  "relation_vocabulary": [
+    "contains",
+    "executes",
+    "verifies",
+    "assesses",
+    "next_cell",
+    "supports",
+    "conditions",
+    "limits",
+    "contradicts",
+    "uses",
+    "presented_in",
+    "displays",
+    "backs_up",
+    "summarizes",
+    "cited_from",
+    "precedes",
+    "references",
+    "followed_by"
+  ],
+  "cct_schema_version": "1.0"
+}

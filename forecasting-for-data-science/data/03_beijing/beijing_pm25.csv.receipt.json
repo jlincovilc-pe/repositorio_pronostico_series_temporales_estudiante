@@ -1,0 +1,36 @@
+{
+  "created_at_utc": "2026-08-05T21:55:17.103702+00:00",
+  "source": {
+    "url": "https://archive.ics.uci.edu/static/public/381/beijing+pm2+5+data.zip",
+    "downloaded_bytes": 2010658,
+    "source_sha256": "40cdd29c24918e855133dce280ff59779bb0b5852898e05bafcf422a4cc0a175"
+  },
+  "output": {
+    "path": "beijing_pm25.csv",
+    "bytes": 3096572,
+    "sha256": "5b7cbd60df84c05f246e69d02398bb8abd08c41dad4d77ec771ab08f4b87090c"
+  },
+  "details": {
+    "target": "pm2.5",
+    "frequency": "hourly",
+    "cleaning": "removed first 24 rows as requested; created ds; interior PM2.5 gaps retained",
+    "rows": 43800,
+    "columns": [
+      "ds",
+      "No",
+      "year",
+      "month",
+      "day",
+      "hour",
+      "pm2.5",
+      "DEWP",
+      "TEMP",
+      "PRES",
+      "cbwd",
+      "Iws",
+      "Is",
+      "Ir"
+    ],
+    "nulls": 2043
+  }
+}

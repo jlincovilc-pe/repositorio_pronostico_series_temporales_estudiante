@@ -1,0 +1,72 @@
+{
+  "created_at_utc": "2026-08-05T21:56:13.062404+00:00",
+  "source": {
+    "url": "https://data.open-power-system-data.org/time_series/2020-10-06/time_series_60min_singleindex.csv",
+    "downloaded_bytes": 130339665,
+    "source_sha256": "6a7f2bc571314cbf9c321cc03437691cd4be95c3a6f075e60ff99e8035c704c8"
+  },
+  "output": {
+    "path": "germany_energy.csv",
+    "bytes": 14880014,
+    "sha256": "b0aa46353d19a7c0d398f737b22ea4bf7a3041666ebfe208de3c7dc9782665ec"
+  },
+  "details": {
+    "frequency": "hourly",
+    "target_candidates": [
+      "DE_load_actual_entsoe_transparency",
+      "DE_50hertz_load_actual_entsoe_transparency",
+      "DE_LU_load_actual_entsoe_transparency",
+      "DE_amprion_load_actual_entsoe_transparency",
+      "DE_tennet_load_actual_entsoe_transparency",
+      "DE_transnetbw_load_actual_entsoe_transparency"
+    ],
+    "cleaning": "selected timestamp and all DE_ columns from European single-index file",
+    "rows": 50401,
+    "columns": [
+      "ds_utc",
+      "cet_cest_timestamp",
+      "DE_load_actual_entsoe_transparency",
+      "DE_load_forecast_entsoe_transparency",
+      "DE_solar_capacity",
+      "DE_solar_generation_actual",
+      "DE_solar_profile",
+      "DE_wind_capacity",
+      "DE_wind_generation_actual",
+      "DE_wind_profile",
+      "DE_wind_offshore_capacity",
+      "DE_wind_offshore_generation_actual",
+      "DE_wind_offshore_profile",
+      "DE_wind_onshore_capacity",
+      "DE_wind_onshore_generation_actual",
+      "DE_wind_onshore_profile",
+      "DE_50hertz_load_actual_entsoe_transparency",
+      "DE_50hertz_load_forecast_entsoe_transparency",
+      "DE_50hertz_solar_generation_actual",
+      "DE_50hertz_wind_generation_actual",
+      "DE_50hertz_wind_offshore_generation_actual",
+      "DE_50hertz_wind_onshore_generation_actual",
+      "DE_LU_load_actual_entsoe_transparency",
+      "DE_LU_load_forecast_entsoe_transparency",
+      "DE_LU_price_day_ahead",
+      "DE_LU_solar_generation_actual",
+      "DE_LU_wind_generation_actual",
+      "DE_LU_wind_offshore_generation_actual",
+      "DE_LU_wind_onshore_generation_actual",
+      "DE_amprion_load_actual_entsoe_transparency",
+      "DE_amprion_load_forecast_entsoe_transparency",
+      "DE_amprion_solar_generation_actual",
+      "DE_amprion_wind_onshore_generation_actual",
+      "DE_tennet_load_actual_entsoe_transparency",
+      "DE_tennet_load_forecast_entsoe_transparency",
+      "DE_tennet_solar_generation_actual",
+      "DE_tennet_wind_generation_actual",
+      "DE_tennet_wind_offshore_generation_actual",
+      "DE_tennet_wind_onshore_generation_actual",
+      "DE_transnetbw_load_actual_entsoe_transparency",
+      "DE_transnetbw_load_forecast_entsoe_transparency",
+      "DE_transnetbw_solar_generation_actual",
+      "DE_transnetbw_wind_onshore_generation_actual"
+    ],
+    "nulls": 284490
+  }
+}

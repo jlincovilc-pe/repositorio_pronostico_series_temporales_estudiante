@@ -1,0 +1,7 @@
+MIT License
+
+Copyright (c) 2025 repositorio_pronostico_series_temporales_estudiante contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of the software and documentation to use, copy, modify and distribute them, subject to inclusion of this notice. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND.
+
+This license covers repository code and original documentation only. Included datasets retain their source licenses and attribution requirements (UCI ML Repository CC BY 4.0, Open Power System Data, M3 Competition); consult each dataset README under `forecasting-for-data-science/data/`.

@@ -1,0 +1,38 @@
+{
+  "created_at_utc": "2026-08-05T21:55:17.250438+00:00",
+  "source": {
+    "url": "https://archive.ics.uci.edu/static/public/275/bike+sharing+dataset.zip",
+    "downloaded_bytes": 279992,
+    "source_sha256": "b70182d0d0508e9abbb79306ce5c0cec34869000f8220175ac83d11dbe845401"
+  },
+  "output": {
+    "path": "bike_day.csv",
+    "bytes": 56839,
+    "sha256": "75c2c56f116c9ebbd9bcb06087c2b7fffc7b8f8225dd37d388aa7e1996cf19dc"
+  },
+  "details": {
+    "target": "cnt",
+    "frequency": "daily",
+    "cleaning": "extracted day.csv; normalized headers and date",
+    "rows": 731,
+    "columns": [
+      "instant",
+      "dteday",
+      "season",
+      "yr",
+      "mnth",
+      "holiday",
+      "weekday",
+      "workingday",
+      "weathersit",
+      "temp",
+      "atemp",
+      "hum",
+      "windspeed",
+      "casual",
+      "registered",
+      "cnt"
+    ],
+    "nulls": 0
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "created_at_utc": "2026-08-05T21:56:09.978338+00:00",
+  "source": {
+    "url": "https://archive.ics.uci.edu/static/public/321/electricityloaddiagrams20112014.zip",
+    "downloaded_bytes": 261335609,
+    "source_sha256": "f6c4d0e0df12ecdb9ea008dd6eef3518adb52c559d04a9bac2e1b81dcfc8d4e1"
+  },
+  "output": {
+    "path": "electricity_long.csv",
+    "bytes": 422786351,
+    "sha256": "6d6b65eae7343dbf7b112decea4442c00f2db3b4b9fd141b436fb678563a7370"
+  },
+  "details": {
+    "rows": 9732480,
+    "columns": [
+      "ds",
+      "unique_id",
+      "y"
+    ],
+    "series": 370,
+    "timestamps": 26304,
+    "frequency": "hourly",
+    "target": "y",
+    "nulls": 0,
+    "duplicate_keys": 0,
+    "cleaning": "filtered [2012-01-01, 2015-01-01); decimal comma parsed; 15-minute values summed hourly; reindexed to 26,304 hours; melted to long"
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "created_at_utc": "2026-08-05T21:55:16.821056+00:00",
+  "source": {
+    "url": "https://archive.ics.uci.edu/static/public/374/appliances+energy+prediction.zip",
+    "downloaded_bytes": 11979507,
+    "source_sha256": "2fccf354445d886e7917620b0195db1f3e3e34d5a067a93b844694a4c561255a"
+  },
+  "output": {
+    "path": "energy.csv",
+    "bytes": 5714456,
+    "sha256": "a0031f2f9cd3b9eadad6fc5e1fd9503873607d06d6c8dbf3b0fba8643aa96cef"
+  },
+  "details": {
+    "target": "y",
+    "frequency": "10min",
+    "cleaning": "trimmed/lowercased column names; date->ds, appliances->y",
+    "rows": 19735,
+    "columns": [
+      "ds",
+      "y",
+      "lights",
+      "t1",
+      "rh_1",
+      "t2",
+      "rh_2",
+      "t3",
+      "rh_3",
+      "t4",
+      "rh_4",
+      "t5",
+      "rh_5",
+      "t6",
+      "rh_6",
+      "t7",
+      "rh_7",
+      "t8",
+      "rh_8",
+      "t9",
+      "rh_9",
+      "t_out",
+      "press_mm_hg",
+      "rh_out",
+      "windspeed",
+      "visibility",
+      "tdewpoint",
+      "rv1",
+      "rv2"
+    ],
+    "nulls": 0
+  }
+}

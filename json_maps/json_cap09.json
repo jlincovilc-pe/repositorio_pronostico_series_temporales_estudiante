@@ -1,0 +1,821 @@
+{
+  "nodes": [
+    {
+      "id": "capitulo_09",
+      "label": "Capítulo 10 — Síntesis, lecciones transversales y conclusiones",
+      "type": "chapter",
+      "group": 0,
+      "level": 0,
+      "chapter_number": 10,
+      "source_document": "monografia_timeseries_benchmarks.typ",
+      "description": "Tabla sinóptica de los ocho experimentos, respuesta a las tres preguntas de investigación, análisis transversal de la asimetría de palancas, jerarquía de palancas, cuatro lecciones transversales, matriz de decisión, limitaciones, deudas prioritarias y recomendación operativa. No tiene notebook propio: cierra la monografía sintetizando json_cap01..json_cap08.",
+      "cct": {
+        "tipo_artefacto": "sintesis_meta_analitica",
+        "ontologico": {
+          "nivel": "meta-nivel: síntesis de ocho dominios industriales",
+          "unidad_de_analisis": "palancas metodológicas transversales, no métricas individuales",
+          "limites_de_inferencia": [
+            "Las conclusiones de síntesis no exceden lo que cada capítulo individual sostiene.",
+            "La jerarquía de palancas es un ordenamiento por magnitud verificada, no una ley universal.",
+            "Los números-tótem no son comparables entre capítulos; solo las palancas lo son."
+          ]
+        },
+        "epistemico": {
+          "rrl_sintesis": "mínimo RRL de los capítulos componentes (principio del eslabón más débil)",
+          "rrl_declarado": 4,
+          "estado_evidencia": "sintesis_de_evidencia_ejecutada",
+          "protocolo": "tabla especificado vs. ejecutado + declaración RRL + asteriscos de condición",
+          "incertidumbre": [
+            "Deudas prioritarias no ejecutadas (ablation DE_load_forecast, split completo PeMS-SF, few-shot, DeepAR).",
+            "La contingencia de los hallazgos es lo que les da credibilidad, no su generalidad."
+          ]
+        },
+        "pragmatico": {
+          "stakeholder": "profesional de industria que debe priorizar inversión en forecasting",
+          "decision": "cuatro acciones ordenadas + lo que no se debe hacer (empezar por la arquitectura)",
+          "traduccion_operativa": "Reordenar prioridades: protocolo > features > historia > covariables > arquitectura > calibración"
+        }
+      },
+      "quality": {
+        "gates": {
+          "G1_sintesis_pregunta": "pass",
+          "G2_nivel_meta": "pass",
+          "G3_evidencia_cruzada": "pass",
+          "G4_audiencia": "pass",
+          "G5_metodo_sintesis": "pass",
+          "G6_integridad": "pass",
+          "G7_trazabilidad": "pass",
+          "G8_no_sobreventa": "pass"
+        },
+        "decision": "aprobado_sin_cambios"
+      },
+      "integrity": {
+        "honesty_table": "especificado vs. ejecutado (secciones 10.7-10.8)",
+        "rrl_declaration": "RRL 4, con elementos de RRL 5 en Caps. 4, 5, 7",
+        "ai_use": "redacción/edición asistidas por IA bajo supervisión humana; ninguna métrica generada por IA",
+        "data_statement": "datasets públicos o de competencia con licencias documentadas; sin datos sensibles",
+        "conflicts": "ninguno declarado",
+        "unexecuted_specs": [
+          "Split completo PeMS-SF 770/193 (Cap. 8)",
+          "DeepAR sobre M3 (Cap. 9)",
+          "Few-shot 1 semana de historia (Cap. 6)",
+          "Ablation sin DE_load_forecast (Cap. 7)"
+        ],
+        "policy": "Cuando una especificación no se ejecuta, se documenta como tal — no se reescribe como resultado."
+      },
+      "session_model": {
+        "type": "sesion_cierre_ejecutivo",
+        "duration_minutes": 80,
+        "agenda": [
+          {
+            "start": 0,
+            "end": 10,
+            "duration": 10,
+            "type": "apertura",
+            "activity": "Recap de tres preguntas transversales",
+            "resource_refs": [
+              "slide_cap10_preguntas"
+            ],
+            "product": null
+          },
+          {
+            "start": 10,
+            "end": 25,
+            "duration": 15,
+            "type": "contexto_negocio",
+            "activity": "Tabla sinóptica: ocho experimentos por palanca",
+            "resource_refs": [
+              "slide_cap10_sinopsis",
+              "tabla_sinoptica_cap10"
+            ],
+            "product": null
+          },
+          {
+            "start": 25,
+            "end": 40,
+            "duration": 15,
+            "type": "metodo_validacion",
+            "activity": "Jerarquía de palancas y magnitudes verificadas",
+            "resource_refs": [
+              "slide_cap10_jerarquia",
+              "jerarquia_palancas_cap10"
+            ],
+            "product": null
+          },
+          {
+            "start": 40,
+            "end": 55,
+            "duration": 15,
+            "type": "discusion_limites",
+            "activity": "Honestidad: especificado vs. ejecutado + RRL + deudas",
+            "resource_refs": [
+              "slide_cap10_honestidad",
+              "honestidad_rrl_cap10"
+            ],
+            "product": null
+          },
+          {
+            "start": 55,
+            "end": 70,
+            "duration": 15,
+            "type": "demo_practica",
+            "activity": "Anexos: respaldo al 0.234, al 4%, incomparabilidad métrica",
+            "resource_refs": [
+              "slide_anexo_0234",
+              "slide_anexo_4pct",
+              "slide_anexo_incomparabilidad"
+            ],
+            "product": null
+          },
+          {
+            "start": 70,
+            "end": 80,
+            "duration": 10,
+            "type": "cierre_decision",
+            "activity": "Cuatro acciones + lo que no se debe hacer + declaración de integridad",
+            "resource_refs": [
+              "slide_cierre_acciones",
+              "slide_gracias_integridad"
+            ],
+            "product": null
+          }
+        ]
+      }
+    },
+    {
+      "id": "tabla_sinoptica_cap10",
+      "label": "Sección 10.1 — Tabla sinóptica de los ocho experimentos",
+      "type": "synthesis_table",
+      "group": 1,
+      "level": 1,
+      "section": "10.1",
+      "rows": [
+        {
+          "cap": 2,
+          "familia": "SeasonalNaive168",
+          "numero_totem": "MASE 0.916",
+          "palanca": "Protocolo",
+          "condicion": "Random split inválido: error menor",
+          "source_ref": "json_cap01.json:evidence",
+          "metric_comparability_scope": "solo_capitulo_2",
+          "oracle": false,
+          "has_validity_condition": false
+        },
+        {
+          "cap": 3,
+          "familia": "ETS (no ARIMA)",
+          "numero_totem": "0.681 vs. 0.901",
+          "palanca": "Selección",
+          "condicion": "AIC no garantiza test",
+          "source_ref": "json_cap02.json:evidence",
+          "metric_comparability_scope": "solo_capitulo_3",
+          "oracle": false,
+          "has_validity_condition": false
+        },
+        {
+          "cap": 4,
+          "familia": "SARIMAX",
+          "numero_totem": "-18.36% MAE (*)",
+          "palanca": "Covariables",
+          "condicion": "Techo oracle: clima observado",
+          "source_ref": "json_cap03.json:evidence",
+          "metric_comparability_scope": "solo_capitulo_4",
+          "oracle": true,
+          "has_validity_condition": true
+        },
+        {
+          "cap": 5,
+          "familia": "LightGBM",
+          "numero_totem": "MASE 0.457 (*)",
+          "palanca": "Features",
+          "condicion": "37 features con embargo",
+          "source_ref": "json_cap04.json:evidence",
+          "metric_comparability_scope": "solo_capitulo_5",
+          "oracle": false,
+          "has_validity_condition": true
+        },
+        {
+          "cap": 6,
+          "familia": "Empate 0.01%",
+          "numero_totem": "1.34 vs. 38.59 (29x)",
+          "palanca": "Historia",
+          "condicion": "Sin historia, sin escala",
+          "source_ref": "json_cap05.json:evidence",
+          "metric_comparability_scope": "solo_capitulo_6",
+          "oracle": false,
+          "has_validity_condition": false
+        },
+        {
+          "cap": 7,
+          "familia": "LightGBM",
+          "numero_totem": "MASE 0.234 (*)",
+          "palanca": "Covariables",
+          "condicion": "Atribución abierta: DE_load_forecast",
+          "source_ref": "json_cap06.json:evidence",
+          "metric_comparability_scope": "solo_capitulo_7",
+          "oracle": false,
+          "has_validity_condition": true
+        },
+        {
+          "cap": 8,
+          "familia": "TFT-like / N-BEATS",
+          "numero_totem": "+4% MAE (*)",
+          "palanca": "Arquitectura",
+          "condicion": "Cohorte 48/24, no 770/193",
+          "source_ref": "json_cap07.json:evidence",
+          "metric_comparability_scope": "solo_capitulo_8",
+          "oracle": false,
+          "has_validity_condition": true
+        },
+        {
+          "cap": 9,
+          "familia": "LightGBM Quantile",
+          "numero_totem": "-43.2% CRPS",
+          "palanca": "Calibración",
+          "condicion": "8/8 Jarque-Bera; 78.9% vs. 80%",
+          "source_ref": "json_cap08.json:evidence",
+          "metric_comparability_scope": "solo_capitulo_9",
+          "oracle": false,
+          "has_validity_condition": false
+        }
+      ],
+      "note": "(*) asterisco de condición de validez visible. Métricas no comparables entre capítulos — compárense las palancas, no los números.",
+      "metric_comparability_scope": "no_comparable_entre_capitulos",
+      "comparability_rule": "Solo las palancas son comparables; los números-tótem son condicionales a cada capítulo.",
+      "validity_condition": "asterisco visible en presentación; condición de validez específica por capítulo"
+    },
+    {
+      "id": "jerarquia_palancas_cap10",
+      "label": "Sección 10.4 — Jerarquía de palancas, no de técnicas",
+      "type": "ranked_list",
+      "group": 1,
+      "level": 1,
+      "section": "10.4",
+      "items": [
+        {
+          "rango": 1,
+          "palanca": "Protocolo",
+          "decision": "Split temporal + embargo + test consultado una sola vez",
+          "evidencia": "Random split en Cap. 2 produjo error menor",
+          "magnitud": "condición necesaria",
+          "capitulos": [
+            2,
+            5,
+            9
+          ],
+          "source_refs": [
+            "json_cap01.json:evidence",
+            "json_cap04.json:evidence",
+            "json_cap08.json:evidence"
+          ]
+        },
+        {
+          "rango": 2,
+          "palanca": "Features",
+          "decision": "Tabular riguroso + checklist anti-leakage",
+          "evidencia": "LightGBM con 37 features en Cap. 5",
+          "magnitud": "MASE 0.457",
+          "capitulos": [
+            5
+          ],
+          "source_refs": [
+            "json_cap04.json:evidence"
+          ]
+        },
+        {
+          "rango": 3,
+          "palanca": "Historia",
+          "decision": "Warm-start vs. cold-start",
+          "evidencia": "MASE mediano 1.34 vs. 38.59",
+          "magnitud": "29x",
+          "capitulos": [
+            6
+          ],
+          "source_refs": [
+            "json_cap05.json:evidence"
+          ]
+        },
+        {
+          "rango": 4,
+          "palanca": "Covariables",
+          "decision": "Disponibilidad futura real, no oracle",
+          "evidencia": "DE_load_forecast legítimo",
+          "magnitud": "0.234 (*)",
+          "capitulos": [
+            4,
+            7
+          ],
+          "source_refs": [
+            "json_cap03.json:evidence",
+            "json_cap06.json:evidence"
+          ]
+        },
+        {
+          "rango": 5,
+          "palanca": "Arquitectura",
+          "decision": "Cambio de familia de modelo",
+          "evidencia": "LightGBM vs. LSTM (Cap. 7); TFT-like (Cap. 8)",
+          "magnitud": "máx. 44%",
+          "capitulos": [
+            5,
+            7,
+            8
+          ],
+          "source_refs": [
+            "json_cap04.json:evidence",
+            "json_cap06.json:evidence",
+            "json_cap07.json:evidence"
+          ]
+        },
+        {
+          "rango": 6,
+          "palanca": "Calibración",
+          "decision": "Puntual → probabilístico",
+          "evidencia": "Cobertura 78.9% vs. 80%; intervalos 28% más angostos",
+          "magnitud": "-43.2% CRPS",
+          "capitulos": [
+            9
+          ],
+          "source_refs": [
+            "json_cap08.json:evidence"
+          ]
+        }
+      ],
+      "headline": "44% máximo por modelo vs. 2 900% por régimen de datos (asimetría de palancas, ver advertencia en portada).",
+      "headline_incomparability_flag": true,
+      "headline_warning": "Magnitudes de naturaleza distinta: mejora porcentual de modelo vs. ratio de régimen de datos. Ver anexo de incomparabilidad.",
+      "source_refs": [
+        "json_cap05.json:evidence",
+        "json_cap06.json:evidence"
+      ]
+    },
+    {
+      "id": "honestidad_rrl_cap10",
+      "label": "Sección 10.8 — Honestidad como política (tabla especificado vs. ejecutado) + declaración RRL",
+      "type": "integrity_table",
+      "group": 1,
+      "level": 1,
+      "section": "10.7-10.8",
+      "rows": [
+        {
+          "especificado": "Split completo PeMS-SF 770/193",
+          "ejecutado": "Cohorte 48/24",
+          "cap": 8,
+          "estatus": "Recortado por costo de cómputo",
+          "source_ref": "json_cap07.json:slide_resultados_capitulo_07",
+          "status": "especificado_no_ejecutado"
+        },
+        {
+          "especificado": "DeepAR sobre M3",
+          "ejecutado": "No entrenado",
+          "cap": 9,
+          "estatus": "Caso emblema de honestidad documental",
+          "source_ref": "json_cap08.json:slide_resultados_capitulo_8",
+          "status": "especificado_no_ejecutado"
+        },
+        {
+          "especificado": "Few-shot 1 semana de historia",
+          "ejecutado": "No ejecutado",
+          "cap": 6,
+          "estatus": "Punto ciego warm/cold-start",
+          "source_ref": "json_cap05.json:slide_resultados_capitulo_05",
+          "status": "especificado_no_ejecutado"
+        },
+        {
+          "especificado": "Ablation sin DE_load_forecast",
+          "ejecutado": "No ejecutado",
+          "cap": 7,
+          "estatus": "Condiciona atribución del 0.234",
+          "source_ref": "json_cap06.json:slide_resultados_capitulo_06",
+          "status": "especificado_no_ejecutado"
+        },
+        {
+          "especificado": "GRU como comparador LSTM",
+          "ejecutado": "No entrenada",
+          "cap": 7,
+          "estatus": "Sustituta omitida por presupuesto",
+          "source_ref": "json_cap06.json:slide_resultados_capitulo_06",
+          "status": "especificado_no_ejecutado"
+        },
+        {
+          "especificado": "Ablation pronóstico oficial OPSD",
+          "ejecutado": "No ejecutado",
+          "cap": 7,
+          "estatus": "Deuda prioritaria",
+          "source_ref": "json_cap06.json:slide_resultados_capitulo_06",
+          "status": "especificado_no_ejecutado"
+        }
+      ],
+      "policy_note": "Cuando una especificación no se ejecuta, se documenta como tal — no se reescribe como resultado.",
+      "rrl_declaration": {
+        "rrl_alcanzado": 4,
+        "rrl_elementos_superiores": {
+          "caps": [
+            4,
+            5,
+            7
+          ],
+          "razon": "experimentos multi-fold"
+        },
+        "rrl_no_declarado": "No se declara una madurez mayor a la evidenciada.",
+        "principio": "eslabon_mas_debil"
+      },
+      "added_in_revision": [
+        "rrl_declaration"
+      ],
+      "rrl_declaration_text": "Madurez epistémica alcanzada: evidencia verificada en entorno relevante (RRL 4), con elementos del escalón superior en los experimentos multi-fold (Caps. 4, 5, 7). No se declara una madurez mayor a la evidenciada."
+    },
+    {
+      "id": "apendice_f_bibliografia",
+      "label": "Apéndice F — Bibliografía",
+      "type": "bibliography",
+      "group": 2,
+      "level": 0,
+      "source_document": "monografia_timeseries_benchmarks.typ",
+      "description": "Sección agregada en la revisión CCT de la monografía. No existía previamente; el documento prometía una bibliografía consolidada que no estaba presente.",
+      "added_in_revision": true,
+      "subsections": [
+        {
+          "name": "Referencias metodológicas y de herramientas",
+          "references": [
+            "Box, G. E. P., Jenkins, G. M., Reinsel, G. C., & Ljung, G. M. (2015). Time series analysis: Forecasting and control (5th ed.). Wiley.",
+            "Chen, T., & Guestrin, C. (2016). XGBoost: A scalable tree boosting system. Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining, 785-794. https://doi.org/10.1145/2939672.2939785",
+            "Chollet, F. (2021). Deep learning with Python (2nd ed.). Manning Publications.",
+            "Gneiting, T., & Katzfuss, M. (2014). Probabilistic forecasting. Annual Review of Statistics and Its Application, 1, 125-151. https://doi.org/10.1146/annurev-statistics-062713-085831",
+            "Lazzeri, F. (2020). Machine learning for time series forecasting with Python. Wiley.",
+            "Lim, B., Arık, S. Ö., Loeff, N., & Pfister, T. (2021). Temporal fusion transformers for interpretable multi-horizon time series forecasting. International Journal of Forecasting, 37(4), 1748-1764. https://doi.org/10.1016/j.ijforecast.2021.03.012",
+            "Nielsen, A. (2019). Practical time series analysis: Prediction with statistics and machine learning. O'Reilly Media.",
+            "Oreshkin, B. N., Carpov, D., Chapados, N., & Bengio, Y. (2020). N-BEATS: Neural basis expansion analysis for interpretable time series forecasting. International Conference on Learning Representations (ICLR).",
+            "Shumway, R. H., & Stoffer, D. S. (2017). Time series analysis and its applications: With R examples (4th ed.). Springer.",
+            "Treveil, M., Omont, N., Stenac, C., Lefevre, K., Phan, D., Zentici, J., Lavoillotte, A., Miyazaki, M., & Heidmann, L. (2020). Introducing MLOps. O'Reilly Media."
+          ]
+        },
+        {
+          "name": "Fuentes de los datasets",
+          "references": [
+            "Candanedo, L. M., Feldheim, V., & Deramaix, D. (2017). Data driven prediction models of energy use of appliances in a low-energy house. Energy and Buildings, 140, 81-97. https://doi.org/10.1016/j.enbuild.2017.01.083",
+            "Chen, C., Petty, K., Skabardonis, A., Varaiya, P., & Jia, Z. (2001). Freeway Performance Measurement System: Mining loop detector data. Transportation Research Record, 1748, 96-102. https://doi.org/10.3141/1748-12",
+            "Fanaee-T, H., & Gama, J. (2014). Event labeling combining ensemble detectors and background knowledge. Progress in Artificial Intelligence, 2, 113-127. https://doi.org/10.1007/s13748-013-0040-3 (dataset: https://doi.org/10.24432/C5W894)",
+            "Liang, X., Zou, T., Guo, B., Li, S., Zhang, H., Zhang, S., Huang, H., & Chen, S. X. (2015). Assessing Beijing's PM2.5 pollution. Proceedings of the Royal Society A, 471, 20150257. https://doi.org/10.1098/rspa.2015.0257 (dataset: https://doi.org/10.24432/C5JS49)",
+            "Makridakis, S., & Hibon, M. (2000). The M3-Competition: Results, conclusions and implications. International Journal of Forecasting, 16(4), 451-476. https://doi.org/10.1016/S0169-2070(00)00057-1 (dataset: https://doi.org/10.5281/zenodo.4656298)",
+            "UCI Machine Learning Repository. (n.d.). Metro Interstate Traffic Volume. https://archive.ics.uci.edu/dataset/492/metro+interstate+traffic+volume",
+            "UCI Machine Learning Repository. (n.d.). ElectricityLoadDiagrams20112014. https://archive.ics.uci.edu/dataset/321/electricityloaddiagrams20112014",
+            "Wiese, F., Schlecht, I., Bunke, W.-D., Gerbaulet, C., Hirth, L., Jahn, M., Kunz, F., Lorenz, C., Mühlenpfordt, J., Reimann, J., & Schill, W.-P. (2019). Open Power System Data. Applied Energy, 236, 401-409. https://doi.org/10.1016/j.apenergy.2018.11.097"
+          ]
+        }
+      ],
+      "total_references": 18,
+      "links_verified": true,
+      "note": "Las URLs/DOIs de esta bibliografía son hipervínculos reales (#link) en el PDF compilado, verificados contra las anotaciones /URI del documento.",
+      "cct_role": "referencias_de_soporte_para_sintesis_metodologica",
+      "categories": {
+        "metodologicas": "Box-Jenkins, XGBoost, N-BEATS, TFT, MLOps, Probabilistic Forecasting",
+        "datasets": "Fuentes originales de los ocho datasets"
+      },
+      "verification": "links_verified: true; 18 referencias totales",
+      "revision_reason": "El documento prometía una bibliografía consolidada que no estaba presente; se agregó en la revisión CCT."
+    },
+    {
+      "id": "slide_cap10_sinopsis",
+      "label": "Slide - Capítulo 10 · Síntesis · Sinopsis",
+      "type": "slide",
+      "group": 3,
+      "level": 1,
+      "title": "Ocho experimentos por palanca, no por métrica",
+      "content": [
+        "Tabla de 8 filas, una por capítulo técnico, con familia ganadora, número-tótem, palanca y condición de validez."
+      ],
+      "cct_axis": "pragmatico",
+      "audience": "profesional de industria",
+      "decision_enabled": "meta-decisión sobre prioridades de inversión en forecasting",
+      "metric_comparability_scope": "no_comparable_entre_capitulos"
+    },
+    {
+      "id": "slide_cap10_campeon",
+      "label": "Slide - Capítulo 10 · Síntesis · Campeón de cuatro actos",
+      "type": "slide",
+      "group": 3,
+      "level": 1,
+      "title": "LightGBM: el arco más elocuente del documento",
+      "content": [
+        "Acto 1 — Cap. 5 (victoria): MASE 0.457 vs. 0.818 del lineal.",
+        "Acto 2 — Cap. 6 (humillación): empate 0.01% contra perfil hora×día.",
+        "Acto 3 — Cap. 7 (validación condicionada): MASE 0.234, atribución abierta a DE_load_forecast.",
+        "Acto 4 — Cap. 9 (coronación cuantílica): CRPS -43.2%; cobertura 78.9% vs. 80% nominal."
+      ],
+      "notes": "El Acto 3 se llamaba 'redención con asterisco' en la versión previa; se cambió a 'validación condicionada' por ser ontológicamente más preciso (menos antropomórfico), preservando el asterisco como referencia a la atribución abierta.",
+      "edited_in_revision": [
+        "acto_3_wording"
+      ],
+      "cct_axis": "pragmatico",
+      "audience": "profesional de industria",
+      "decision_enabled": "meta-decisión sobre prioridades de inversión en forecasting",
+      "metric_comparability_scope": "no_comparable_entre_capitulos",
+      "acto_3": {
+        "original": "redención con asterisco",
+        "revisado": "validación condicionada",
+        "razon": "ontológicamente más preciso (menos antropomórfico), preservando el asterisco como referencia a la atribución abierta",
+        "edited_in_revision": [
+          "acto_3_wording"
+        ]
+      }
+    },
+    {
+      "id": "slide_cap10_jerarquia",
+      "label": "Slide - Capítulo 10 · Síntesis · Jerarquía de palancas",
+      "type": "slide",
+      "group": 3,
+      "level": 1,
+      "title": "Las palancas que la evidencia sostiene",
+      "content": [
+        "Tabla de 6 palancas ordenadas por magnitud verificada, de Protocolo (condición necesaria) a Calibración (-43.2% CRPS)."
+      ],
+      "cct_axis": "pragmatico",
+      "audience": "profesional de industria",
+      "decision_enabled": "meta-decisión sobre prioridades de inversión en forecasting",
+      "metric_comparability_scope": "no_comparable_entre_capitulos"
+    },
+    {
+      "id": "slide_cap10_preguntas",
+      "label": "Slide - Capítulo 10 · Síntesis · Preguntas",
+      "type": "slide",
+      "group": 3,
+      "level": 1,
+      "title": "Tres preguntas, tres respuestas",
+      "content": [
+        "¿Cuándo paga la complejidad? Solo con estructura explotable (Caps. 5, 9); en 4 de 8 el modelo más sofisticado iguala o apenas supera al simple.",
+        "¿Qué papel cumplen las exógenas? Ayudan solo con disponibilidad futura real u oracle declarado (Caps. 4, 7).",
+        "¿Qué hacer con residuos no gaussianos? Jarque-Bera rechaza normalidad en 100% de los capítulos → cuantiles empíricos (Cap. 9)."
+      ],
+      "cct_axis": "pragmatico",
+      "audience": "profesional de industria",
+      "decision_enabled": "meta-decisión sobre prioridades de inversión en forecasting",
+      "metric_comparability_scope": "no_comparable_entre_capitulos"
+    },
+    {
+      "id": "slide_cap10_honestidad",
+      "label": "Slide - Capítulo 10 · Síntesis · Honestidad como política",
+      "type": "slide",
+      "group": 3,
+      "level": 1,
+      "title": "Lo que no ejecuté: tabla especificado vs. ejecutado",
+      "content": [
+        "Ver honestidad_rrl_cap10 para la tabla completa y la declaración RRL."
+      ],
+      "added_in_revision": [
+        "declaracion_rrl"
+      ],
+      "cct_axis": "epistemico",
+      "function": "comunicar limitaciones con la misma claridad que hallazgos",
+      "rrl_declaration_ref": "honestidad_rrl_cap10"
+    },
+    {
+      "id": "slide_cierre_acciones",
+      "label": "Slide - Cierre · Cuatro acciones",
+      "type": "slide",
+      "group": 3,
+      "level": 1,
+      "title": "Cuatro acciones en orden — y lo que no haría",
+      "content": [
+        "1. Calcular siempre un baseline alineado por timestamp antes de cualquier modelo complejo.",
+        "2. Auditar features y covariables antes de elegir arquitectura.",
+        "3. Validación temporal obligatoria con test consultado una sola vez.",
+        "4. Pasar a cuantiles empíricos como salida estándar.",
+        "Lo que no haría: empezar por la arquitectura — es la palanca de menor magnitud verificada."
+      ]
+    },
+    {
+      "id": "slide_anexo_0234",
+      "label": "Anexo · Respaldar al 0.234",
+      "type": "slide",
+      "group": 4,
+      "level": 1,
+      "title": "¿Cuánto del 0.234 es LightGBM y cuánto es DE_load_forecast?",
+      "content": [
+        "Deuda prioritaria: entrenar LightGBM sin DE_load_forecast y comparar."
+      ],
+      "cct_axis": "epistemico",
+      "function": "condicionar y respaldar los números-tótem más importantes",
+      "cross_file_refs": {
+        "slide_anexo_0234": "json_cap07.json"
+      }
+    },
+    {
+      "id": "slide_anexo_4pct",
+      "label": "Anexo · Respaldar al 4%",
+      "type": "slide",
+      "group": 4,
+      "level": 1,
+      "title": "¿Es el 4% de mejora real o un artefacto de la cohorte 48/24?",
+      "content": [
+        "Deuda: re-ejecutar la cohorte completa 770/193."
+      ],
+      "cct_axis": "epistemico",
+      "function": "condicionar y respaldar los números-tótem más importantes",
+      "cross_file_refs": {
+        "slide_anexo_4pct": "json_cap08.json"
+      }
+    },
+    {
+      "id": "slide_anexo_incomparabilidad",
+      "label": "Anexo · Incomparabilidad métrica (diapositiva 28)",
+      "type": "slide",
+      "group": 4,
+      "level": 1,
+      "title": "¿Por qué no se pueden comparar 0.916 con 0.234 con 0.013?",
+      "content": [
+        "Datasets, protocolos, estadísticos y escalas de target distintos entre los ocho capítulos.",
+        "Decisión: compárense las palancas, no los números."
+      ],
+      "referenced_from": "portada_presentacion (advertencia del subtítulo)",
+      "cct_axis": "epistemico",
+      "function": "condicionar y respaldar los números-tótem más importantes",
+      "cross_file_refs": {
+        "slide_anexo_incomparabilidad": "tabla_sinoptica_cap10"
+      }
+    },
+    {
+      "id": "slide_gracias_integridad",
+      "label": "Slide - Cierre · Gracias — preguntas y discusión",
+      "type": "slide",
+      "group": 4,
+      "level": 1,
+      "title": "Gracias — preguntas y discusión",
+      "content": [
+        "44% vs. 2 900%: la asimetría que organiza todo el documento.",
+        "Declaración de integridad: datasets públicos o de competencia con licencias documentadas; sin datos sensibles; redacción/edición asistidas por IA (Claude, Anthropic) bajo supervisión humana; ninguna métrica generada por IA; sin conflictos de interés declarados."
+      ],
+      "added_in_revision": [
+        "declaracion_integridad_etica_ia"
+      ],
+      "declaracion_integridad": {
+        "datasets": "públicos o de competencia con licencias documentadas",
+        "datos_sensibles": "ninguno",
+        "ia_use": "redacción/edición asistidas por IA bajo supervisión humana; ninguna métrica generada por IA",
+        "conflictos": "ninguno declarado",
+        "added_in_revision": [
+          "declaracion_integridad_etica_ia"
+        ]
+      }
+    }
+  ],
+  "links": [
+    {
+      "source": "capitulo_09",
+      "target": "tabla_sinoptica_cap10",
+      "relation": "contains"
+    },
+    {
+      "source": "capitulo_09",
+      "target": "jerarquia_palancas_cap10",
+      "relation": "contains"
+    },
+    {
+      "source": "capitulo_09",
+      "target": "honestidad_rrl_cap10",
+      "relation": "contains"
+    },
+    {
+      "source": "capitulo_09",
+      "target": "apendice_f_bibliografia",
+      "relation": "followed_by"
+    },
+    {
+      "source": "capitulo_09",
+      "target": "slide_cap10_sinopsis",
+      "relation": "presented_in"
+    },
+    {
+      "source": "capitulo_09",
+      "target": "slide_cap10_campeon",
+      "relation": "presented_in"
+    },
+    {
+      "source": "capitulo_09",
+      "target": "slide_cap10_jerarquia",
+      "relation": "presented_in"
+    },
+    {
+      "source": "capitulo_09",
+      "target": "slide_cap10_preguntas",
+      "relation": "presented_in"
+    },
+    {
+      "source": "capitulo_09",
+      "target": "slide_cap10_honestidad",
+      "relation": "presented_in"
+    },
+    {
+      "source": "capitulo_09",
+      "target": "slide_cierre_acciones",
+      "relation": "presented_in"
+    },
+    {
+      "source": "capitulo_09",
+      "target": "slide_gracias_integridad",
+      "relation": "presented_in"
+    },
+    {
+      "source": "slide_cap10_honestidad",
+      "target": "honestidad_rrl_cap10",
+      "relation": "displays"
+    },
+    {
+      "source": "slide_cap10_sinopsis",
+      "target": "tabla_sinoptica_cap10",
+      "relation": "displays"
+    },
+    {
+      "source": "slide_cap10_jerarquia",
+      "target": "jerarquia_palancas_cap10",
+      "relation": "displays"
+    },
+    {
+      "source": "slide_anexo_0234",
+      "target": "capitulo_07",
+      "relation": "backs_up",
+      "cross_file": true,
+      "target_file": "json_cap07.json"
+    },
+    {
+      "source": "slide_anexo_4pct",
+      "target": "capitulo_8",
+      "relation": "backs_up",
+      "cross_file": true,
+      "target_file": "json_cap08.json"
+    },
+    {
+      "source": "slide_anexo_incomparabilidad",
+      "target": "tabla_sinoptica_cap10",
+      "relation": "backs_up"
+    },
+    {
+      "source": "slide_gracias_integridad",
+      "target": "etica_ia_capitulo_01",
+      "relation": "summarizes",
+      "cross_file": true,
+      "target_file": "json_cap00.json"
+    },
+    {
+      "source": "apendice_f_bibliografia",
+      "target": "capitulo_00",
+      "relation": "cited_from",
+      "cross_file": true,
+      "target_file": "json_cap00.json"
+    }
+  ],
+  "cross_file_validation": {
+    "links": [
+      {
+        "source": "slide_anexo_0234",
+        "target": "capitulo_07",
+        "target_file": "json_cap07.json",
+        "relation": "backs_up",
+        "validation": "verificar que el nodo capitulo_07 existe en json_cap07.json"
+      },
+      {
+        "source": "slide_anexo_4pct",
+        "target": "capitulo_8",
+        "target_file": "json_cap08.json",
+        "relation": "backs_up",
+        "validation": "verificar que el nodo capitulo_8 existe en json_cap08.json"
+      },
+      {
+        "source": "slide_gracias_integridad",
+        "target": "etica_ia_capitulo_01",
+        "target_file": "json_cap00.json",
+        "relation": "summarizes",
+        "validation": "verificar que el nodo etica_ia_capitulo_01 existe en json_cap00.json"
+      },
+      {
+        "source": "apendice_f_bibliografia",
+        "target": "capitulo_00",
+        "target_file": "json_cap00.json",
+        "relation": "cited_from",
+        "validation": "verificar que el nodo capitulo_00 existe en json_cap00.json"
+      }
+    ],
+    "rule": "La síntesis no puede introducir claims que no estén respaldados por los capítulos vinculados."
+  },
+  "relation_vocabulary": [
+    "contains",
+    "executes",
+    "verifies",
+    "assesses",
+    "next_cell",
+    "supports",
+    "conditions",
+    "limits",
+    "contradicts",
+    "uses",
+    "presented_in",
+    "displays",
+    "backs_up",
+    "summarizes",
+    "cited_from",
+    "precedes",
+    "references",
+    "followed_by"
+  ],
+  "cct_schema_version": "1.0"
+}

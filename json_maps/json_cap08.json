@@ -1,0 +1,682 @@
+{
+  "directed": true,
+  "multigraph": false,
+  "graph": {
+    "title": "Mapa de conocimiento — Semana 8: Forecasting probabilístico y MLOps",
+    "chapter": "Semana 8",
+    "course": "Forecasting de Series Temporales: De Modelos Paramétricos a Deep Learning en Producción",
+    "format": "node-link",
+    "description": "Objeto pedagógico completo de la Semana 8: M3 Monthly (1,428 series, horizonte oficial de 18 meses), tres generadores de cuantiles (baseline empírico, LightGBM cuantílico, ETS empírico) evaluados con CRPS aproximado y cobertura P10-P90, la decisión ejecutiva de desplegar el baseline por robustez y explicabilidad aunque no tenga la mejor métrica, y el cierre del curso con monitoreo de drift (PSI) y una Model Card."
+  },
+  "nodes": [
+    {
+      "id": "capitulo_8",
+      "label": "Capítulo 8 - Semana 8: Forecasting Probabilístico y MLOps",
+      "type": "chapter",
+      "group": 0,
+      "level": 0,
+      "chapter_number": 8,
+      "description": "M3 Monthly: LightGBM cuantílico logra el mejor CRPS aproximado (356.27) y la cobertura P10-P90 más cercana a la nominal (0.789) frente al baseline empírico (627.38 / 0.699) y a ETS empírico en cohorte de 200 series (1,121.37 / 0.449). Pese a eso, la decisión ejecutiva despliega el baseline empírico por robustez y explicabilidad, dejando LightGBM como candidato a mejorar la calibración. Cierra el curso con drift simulado, un detector PSI, reglas de monitoreo explícitas y una Model Card.",
+      "cct": {
+        "ontologico": {
+          "nivel": "planeación mensual agregada (S&OP)",
+          "unidad_de_analisis": "serie mensual de demanda (benchmark M3)",
+          "limites_de_inferencia": [
+            "No aplica para decisiones intradía o de corto plazo.",
+            "Los resultados aplican al benchmark M3, no garantizan calibración universal en cualquier dominio."
+          ]
+        },
+        "epistemico": {
+          "rrl_actual": 4,
+          "rrl_esperado": 4,
+          "estado_evidencia": "ejecutado",
+          "protocolo": "Horizonte oficial H=18 meses; checkpoint anti-leakage; SEED=42 sobre 1,428 series.",
+          "incertidumbre": [
+            "CRPS es aproximado a partir de cuantiles finitos, no integral exacta.",
+            "LocalTrend200 evaluado en subconjunto de 200 series, no comparable directamente."
+          ]
+        },
+        "pragmatico": {
+          "stakeholder": "planificador de demanda / S&OP",
+          "decision": "qué motor probabilístico promover a producción y con qué reglas de monitoreo",
+          "traduccion_operativa": "Intervalos más angostos con cobertura adecuada reducen directamente el capital inmovilizado en stock de seguridad."
+        }
+      },
+      "evidence": [
+        {
+          "claim": "LightGBMQuantile logra doble win: mejor calibración (cobertura más cercana a la nominal) y mejor sharpness (intervalos más angostos) que el baseline empírico.",
+          "value": {
+            "CRPS_approx": 356.27,
+            "coverage_80": 0.7887,
+            "width_80": 1547.86,
+            "baseline_CRPS": 627.38,
+            "baseline_coverage_80": 0.6993,
+            "baseline_width_80": 2152.56
+          },
+          "source_ref": "notebook:08:seccion=3",
+          "status": "ejecutado",
+          "metric_comparability_scope": "solo_capitulo_8",
+          "oracle": false
+        },
+        {
+          "claim": "DeepAR fue especificado metodológicamente pero no ejecutado por restricciones de entorno.",
+          "value": null,
+          "source_ref": "notebook:08:nb_cell_deepar_spec",
+          "status": "especificado_no_ejecutado",
+          "metric_comparability_scope": "no_aplica",
+          "oracle": false,
+          "epistemic_warning": "Ninguna métrica de DeepAR debe citarse, compararse ni interpretarse como resultado."
+        }
+      ],
+      "integrity": {
+        "leakage_controls": [
+          "sin_fugas_en_cuantiles",
+          "validacion_temporal_mensual",
+          "holdout_oficial_18_meses"
+        ],
+        "mlops_monitoring": [
+          "cobertura_empirica_movil",
+          "ancho_medio_de_intervalos",
+          "PSI_de_demanda",
+          "antiguedad_del_ultimo_reentrenamiento"
+        ],
+        "data_statement": "M3 Competition Monthly (Zenodo), 1,428 series, sin covariables.",
+        "ai_use": "no declarado",
+        "conflicts": "ninguno",
+        "limitations": [
+          "CRPS es aproximado a partir de cinco cuantiles, no integral exacta.",
+          "LocalTrend200 fue evaluado en subconjunto menor; no comparar directamente con el set completo sin advertencia.",
+          "La cobertura global puede ocultar series con mala calibración individual."
+        ]
+      },
+      "quality": {
+        "gates": {
+          "G1_problema": "pass",
+          "G2_nivel_analisis": "pass",
+          "G3_evidencia": "pass",
+          "G4_audiencia": "pass",
+          "G5_metodo": "pass",
+          "G6_integridad": "pass",
+          "G7_trazabilidad": "pass",
+          "G8_no_sobreventa": "pass"
+        },
+        "decision": "aprobado"
+      },
+      "sources": [
+        {
+          "source_type": "monografia",
+          "locator": "monografia_timeseries_benchmarks.typ:capitulo=9"
+        },
+        {
+          "source_type": "presentacion",
+          "locator": "presentacion_monografia.typ:capitulo=9"
+        },
+        {
+          "source_type": "notebook",
+          "locator": "08_semana_8_forecasting_probabilistico_mlops.ipynb"
+        }
+      ],
+      "decision_ejecutiva": "Promover LightGBMQuantile como salida estándar para stock de seguridad; monitorear cobertura empírica móvil y PSI, y disparar recalibración o fallback a EmpiricalNaive si la cobertura cae sostenidamente.",
+      "limitations": [
+        "CRPS es aproximado a partir de cinco cuantiles, no integral exacta.",
+        "LocalTrend200 fue evaluado en subconjunto menor; no comparar directamente con el set completo sin advertencia.",
+        "La cobertura global puede ocultar series con mala calibración individual."
+      ],
+      "oracle": false
+    },
+    {
+      "id": "clase_capitulo_8",
+      "label": "Clase del Capítulo 8",
+      "type": "class_plan",
+      "group": 1,
+      "level": 1,
+      "duration_minutes": 80,
+      "objective": "Producir cuantiles calibrados (P10-P90) evaluados con la métrica correcta (CRPS aproximado, cobertura), decidir qué modelo pasa a producción priorizando robustez y explicabilidad sobre la mejor métrica puntual, y diseñar un pipeline mínimo de monitoreo de drift (PSI) con Model Card.",
+      "agenda": [
+        {
+          "start": 0,
+          "end": 10,
+          "duration": 10,
+          "type": "apertura",
+          "activity": "Caso de negocio: por qué un intervalo estrecho pero descalibrado es peor que uno ancho y calibrado",
+          "resource_refs": [],
+          "product": null
+        },
+        {
+          "start": 10,
+          "end": 20,
+          "duration": 10,
+          "type": "contexto_negocio",
+          "activity": "Análisis previo: STL, estacionariedad, outliers sobre M3 Monthly",
+          "resource_refs": [],
+          "product": null
+        },
+        {
+          "start": 20,
+          "end": 30,
+          "duration": 10,
+          "type": "metodo_validacion",
+          "activity": "Estrategia de validación: horizonte oficial H=18, checkpoint anti-leakage",
+          "resource_refs": [],
+          "product": null
+        },
+        {
+          "start": 30,
+          "end": 55,
+          "duration": 25,
+          "type": "demo_practica",
+          "activity": "Modelado: baseline empírico, LightGBM cuantílico, ETS empírico; pinball, CRPS, reliability, PIT",
+          "resource_refs": [],
+          "product": null
+        },
+        {
+          "start": 55,
+          "end": 70,
+          "duration": 15,
+          "type": "discusion_limites",
+          "activity": "Decisión ejecutiva y MLOps: drift simulado, PSI, reglas de monitoreo, Model Card",
+          "resource_refs": [],
+          "product": null
+        },
+        {
+          "start": 70,
+          "end": 80,
+          "duration": 10,
+          "type": "cierre_decision",
+          "activity": "Lecciones metodológicas y ejercicios",
+          "resource_refs": [],
+          "product": null
+        }
+      ],
+      "decision_ejecutiva": "Promover LightGBMQuantile como salida estándar para stock de seguridad; monitorear cobertura empírica móvil y PSI, y disparar recalibración o fallback a EmpiricalNaive si la cobertura cae sostenidamente."
+    },
+    {
+      "id": "diapositivas_capitulo_8",
+      "label": "Diapositivas del Capítulo 8 (sincronizado con presentacion_monografia.typ)",
+      "type": "slide_deck",
+      "group": 2,
+      "level": 1,
+      "slide_count": 2,
+      "format": "slides",
+      "synced_with_source": "presentacion_monografia.typ"
+    },
+    {
+      "id": "notebook_capitulo_8",
+      "label": "Notebook del Capítulo 8",
+      "type": "notebook",
+      "group": 3,
+      "level": 1,
+      "file": "08_semana_8_forecasting_probabilistico_mlops.ipynb",
+      "dataset": "M3 Monthly (M Competition) — data/08_m3/m3_monthly.csv",
+      "kernel": "Python 3",
+      "purpose": "Producir cuantiles calibrados (P10-P90) con tres generadores distintos, decidir qué modelo pasa a producción y simular un pipeline mínimo de detección de drift con Model Card."
+    },
+    {
+      "id": "nb_cell_01",
+      "label": "Celda 1: Split oficial M3 (H=18)",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "purpose": "Reconstruir el holdout oficial de M3 Monthly: las últimas 18 filas de cada serie como test.",
+      "code_lines": [
+        "# Horizonte oficial de M3 Monthly: H=18 meses.",
+        "H=18",
+        "# Rango desde el final por serie: 0 = última observación, 1 = penúltima, ...",
+        "rank_from_end=df.groupby('unique_id').cumcount(ascending=False)",
+        "# Train: filas con rango >= H (historia); Test: últimas H filas por serie.",
+        "train=df.loc[rank_from_end>=H,['unique_id','ds','y']].copy()",
+        "test=df.loc[rank_from_end<H,['unique_id','ds','y']].copy()",
+        "print(train.shape,test.shape,test.unique_id.nunique())"
+      ],
+      "expected_output": [
+        "(141858, 3) (25704, 3) 1428"
+      ]
+    },
+    {
+      "id": "nb_cell_02",
+      "label": "Celda 2: Checkpoint anti-leakage",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "purpose": "Verificar que cada serie aporta exactamente H=18 filas de test, sin solapamiento con train, y que ambos reconstruyen el dataset completo.",
+      "code_lines": [
+        "# --- Checkpoint anti-leakage: la partición debe ser temporal y completa ---",
+        "n_test_per_series = test.groupby('unique_id').size()",
+        "assert (n_test_per_series == H).all(), 'El test debe tener H=18 filas por serie'",
+        "keys_train = set(zip(train.unique_id, train.ds))",
+        "keys_test = set(zip(test.unique_id, test.ds))",
+        "assert keys_train.isdisjoint(keys_test), 'Leakage: solapamiento temporal train/test'",
+        "assert len(keys_train) + len(keys_test) == df.shape[0], 'La partición no cubre todo el dataset'",
+        "print('Checkpoint superado: %d filas train + %d filas test, sin solapamiento' % (train.shape[0], test.shape[0]))"
+      ],
+      "expected_output": [
+        "Checkpoint superado: 141858 filas train + 25704 filas test, sin solapamiento"
+      ]
+    },
+    {
+      "id": "nb_cell_03",
+      "label": "Celda 3: Métricas probabilísticas (pinball, CRPS, cobertura)",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "purpose": "Definir el pinball loss asimétrico y las métricas resumen (CRPS aproximado, cobertura P10-P90, ancho) reutilizadas por los tres modelos.",
+      "code_lines": [
+        "# QUANTILES: niveles que definen el pronóstico probabilístico (P10, P25, P50, P75, P90).",
+        "QUANTILES=[.1,.25,.5,.75,.9]",
+        "# Pinball asimétrico: penaliza distinto errar por arriba que por abajo según tau.",
+        "def pinball(a,q,tau): return float(np.mean(np.maximum(tau*(a-q),(tau-1)*(a-q))))",
+        "def prob_metrics(a,p):",
+        "    out={f'pinball_{q}':pinball(a,p[q],q) for q in QUANTILES}",
+        "    # CRPS aproximado = 2 * promedio del pinball sobre los cuantiles (cuadratura).",
+        "    out['CRPS_approx']=2*np.mean(list(out.values()))",
+        "    # Cobertura empírica del intervalo nominal 80% (P10-P90).",
+        "    out['coverage_80']=float(np.mean((a>=p[.1])&(a<=p[.9])))",
+        "    out['width_80']=float(np.mean(p[.9]-p[.1]))",
+        "    return out"
+      ],
+      "expected_output": []
+    },
+    {
+      "id": "nb_cell_04",
+      "label": "Celda 4: Baseline empírico (Naive + cuantiles del error estacional)",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "purpose": "Generar cuantiles combinando el pronóstico Naive con los cuantiles empíricos del error estacional (lag 12) de cada serie.",
+      "code_lines": [
+        "baseline={q:[] for q in QUANTILES}; actual=[]; ids_out=[]",
+        "# Por cada serie: pronóstico Naive (último valor) + cuantiles de errores estacionales.",
+        "for uid,gtr in train.groupby('unique_id'):",
+        "    gte=test[test.unique_id==uid]",
+        "    last=gtr.y.iloc[-1]                 # punto Naive: último valor observado",
+        "    err=gtr.y-gtr.y.shift(12)           # errores estacionales (mismo mes del año previo)",
+        "    qs=err.dropna().quantile(QUANTILES) # cuantiles empíricos del error en train",
+        "    for y in gte.y:",
+        "        actual.append(y); ids_out.append(uid)",
+        "        [baseline[q].append(last+qs.loc[q]) for q in QUANTILES]",
+        "prob_metrics(actual,baseline)"
+      ],
+      "expected_output": [
+        "{'pinball_0.1': 231.14, 'pinball_0.25': 356.14, 'pinball_0.5': 417.83, 'pinball_0.75': 346.22, 'pinball_0.9': 217.11,",
+        " 'CRPS_approx': 627.3787278490348, 'coverage_80': 0.6992685963274199, 'width_80': 2152.5616623224}"
+      ]
+    },
+    {
+      "id": "nb_cell_05",
+      "label": "Celda 5: LightGBM cuantílico (P10-P90)",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "purpose": "Entrenar un LGBMRegressor por cuantil sobre lags/rolling/calendario, ordenar cuantiles para impedir cruces y evaluar sobre las 1,428 series.",
+      "code_lines": [
+        "# Un LGBMRegressor por cuantil: objective='quantile' minimiza pinball para alpha=q.",
+        "models = {}; lgb_pred = {}",
+        "for q in QUANTILES:",
+        "    model = LGBMRegressor(objective='quantile', alpha=q, n_estimators=180, learning_rate=.05,",
+        "                           num_leaves=31, random_state=SEED, n_jobs=-1, verbosity=-1)",
+        "    model.fit(train_tab[features], train_tab.y)",
+        "    models[q] = model; lgb_pred[q] = model.predict(test_tab[features])",
+        "# Ordenar cuantiles por fila para impedir cruces (monotonicidad P10<=P25<=...<=P90).",
+        "mat = np.sort(np.column_stack([lgb_pred[q] for q in QUANTILES]), axis=1)",
+        "lgb_pred = {q: mat[:, i] for i, q in enumerate(QUANTILES)}",
+        "prob_metrics(test_tab.y.values, lgb_pred)"
+      ],
+      "expected_output": [
+        "{'pinball_0.1': 114.20, 'pinball_0.25': 196.10, 'pinball_0.5': 246.76, 'pinball_0.75': 207.76, 'pinball_0.9': 125.87,",
+        " 'CRPS_approx': 356.2704135857398, 'coverage_80': 0.7887488328664799, 'width_80': 1547.8555472868466}"
+      ]
+    },
+    {
+      "id": "nb_cell_06",
+      "label": "Celda 6: ETS empírico (cohorte de 200 series)",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "purpose": "Tercer generador de cuantiles (tendencia local + residuo empírico) evaluado en una cohorte fija de 200 series por costo computacional.",
+      "code_lines": [
+        "# Cohorte fija de 200 series por CPU: mismo criterio -> mismas series (reproducible).",
+        "cohort=sorted(df.unique_id.unique())[:200]; ets_pred={q:[] for q in QUANTILES}; ets_actual=[]",
+        "for uid in cohort:",
+        "    gtr=train[train.unique_id==uid]; gte=test[test.unique_id==uid]",
+        "    x=np.arange(len(gtr))",
+        "    # Tendencia local: recta de mínimos cuadrados sobre los últimos 36 meses.",
+        "    slope,intercept=np.polyfit(x[-36:],gtr.y.values[-36:],1)",
+        "    point=intercept+slope*np.arange(len(gtr),len(gtr)+H)",
+        "    resid=gtr.y.values-(intercept+slope*x)",
+        "    qs=np.quantile(resid,QUANTILES)",
+        "    ets_actual.extend(gte.y)",
+        "    [ets_pred[q].extend(point+qs[i]) for i,q in enumerate(QUANTILES)]",
+        "prob_metrics(ets_actual,ets_pred)"
+      ],
+      "expected_output": [
+        "{'pinball_0.1': 436.20, 'pinball_0.25': 646.81, 'pinball_0.5': 795.72, 'pinball_0.75': 578.03, 'pinball_0.9': 346.67,",
+        " 'CRPS_approx': 1121.3695619230332, 'coverage_80': 0.44916666666666666, 'width_80': 3081.467976485078}"
+      ]
+    },
+    {
+      "id": "nb_cell_07",
+      "label": "Celda 7: Drift simulado e impacto en el error",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "purpose": "Simular un +20% de incremento en el último tercio de las observaciones reales y medir el impacto en el MAE del baseline desplegado.",
+      "code_lines": [
+        "# Simulación de drift: +20% en el último tercio de las observaciones reales.",
+        "drifted=actual.copy()",
+        "drifted[int(.67*len(drifted)):]*=1.2",
+        "base_mae=np.mean(abs(actual-baseline[.5]))",
+        "drift_mae=np.mean(abs(drifted-baseline[.5]))",
+        "print(base_mae,drift_mae,(drift_mae/base_mae-1)*100)"
+      ],
+      "expected_output": [
+        "835.6628992061098 1067.902486790818 27.791061180930576"
+      ]
+    },
+    {
+      "id": "nb_cell_08",
+      "label": "Celda 8: Detector de drift (PSI)",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "purpose": "Calcular el PSI (Population Stability Index) del error absoluto entre una referencia y un periodo con drift simulado.",
+      "code_lines": [
+        "# PSI: mide el cambio de distribución entre referencia y actual (bins por cuantiles).",
+        "def psi(reference: np.ndarray,current: np.ndarray,bins: int=10)->float:",
+        "    edges=np.unique(np.quantile(reference,np.linspace(0,1,bins+1)))",
+        "    r=np.histogram(reference,bins=edges)[0]/len(reference)",
+        "    q=np.histogram(current,bins=edges)[0]/len(current)",
+        "    r=np.clip(r,1e-6,None); q=np.clip(q,1e-6,None)",
+        "    return float(np.sum((q-r)*np.log(q/r)))",
+        "e0=abs(actual-baseline[.5]); e1=abs(drifted-baseline[.5])",
+        "print('PSI',psi(e0[:len(e0)//2],e1[len(e1)//2:]))"
+      ],
+      "expected_output": [
+        "PSI 0.34883885465668"
+      ]
+    },
+    {
+      "id": "nb_cell_09",
+      "label": "Celda 9: Model Card del modelo desplegado",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "purpose": "Documentar el modelo en producción (baseline empírico) con datos, métricas verificadas del holdout, limitaciones, owner y criterio de reentrenamiento.",
+      "code_lines": [
+        "# Model Card del modelo en producción: transparencia sobre datos, métricas, owner y retrain.",
+        "model_card={",
+        "    'name':'Empirical Seasonal-Error Quantiles',",
+        "    'version':'1.0',",
+        "    'data':'M3 Monthly 1428 series',",
+        "    'horizon':18,",
+        "    'outputs':'P10/P25/P50/P75/P90',",
+        "    'intended_use':'benchmark and teaching',",
+        "    'limitations':'no exogenous variables; empirical tails; not causal',",
+        "    'metrics':prob_metrics(actual,baseline),",
+        "    'owner':'Forecasting course team',",
+        "    'retrain':'on new complete monthly cycle after drift review'}",
+        "print(json.dumps(model_card,indent=2))"
+      ],
+      "expected_output": [
+        "{\"name\": \"Empirical Seasonal-Error Quantiles\", \"version\": \"1.0\", \"data\": \"M3 Monthly 1428 series\", \"horizon\": 18,",
+        " \"outputs\": \"P10/P25/P50/P75/P90\", \"intended_use\": \"benchmark and teaching\",",
+        " \"limitations\": \"no exogenous variables; empirical tails; not causal\",",
+        " \"metrics\": {\"CRPS_approx\": 627.3787278490348, \"coverage_80\": 0.6992685963274199, \"width_80\": 2152.5616623224},",
+        " \"owner\": \"Forecasting course team\", \"retrain\": \"on new complete monthly cycle after drift review\"}"
+      ]
+    },
+    {
+      "id": "evaluacion_capitulo_8",
+      "label": "Ejercicios Propuestos: Semana 8",
+      "type": "assessment",
+      "group": 4,
+      "level": 1,
+      "exercises": [
+        "Calibre cuantiles por conformalización.",
+        "Use más niveles para aproximar CRPS.",
+        "Compare cobertura por longitud/dominio si obtiene metadatos.",
+        "Implemente DeepAR con dependencia opcional.",
+        "Construya CI que bloquee promociones por pérdida de cobertura."
+      ]
+    },
+    {
+      "id": "slide_resultados_capitulo_8",
+      "label": "Slide - Capítulo 9 — Semana 8 · M3 Monthly · Resultados",
+      "type": "slide",
+      "group": 2,
+      "level": 2,
+      "title": "Doble win: calibrada Y más angosta",
+      "kicker": "Capítulo 9 — Semana 8 · M3 Monthly · Resultados",
+      "content": [
+        "Headline: -43.2% de CRPS — LightGBMQuantile vs. EmpiricalNaive, 1,428 series.",
+        "Ficha: Dominio planeamiento mensual; Decisión stock/presupuesto; Horizonte 18 meses oficiales; Baseline EmpiricalNaive; Riesgo bandas gaussianas sin verificar; Métrica CRPS aprox.",
+        "Tabla: EmpiricalNaive CRPS 627.38 (cobertura 69.9%, ancho 2,152.56); LightGBMQuantile 356.27 (78.9%, 1,547.86).",
+        "Nota: DeepAR quedó especificado en el contrato del capítulo, sin métrica inventada; ejecutarlo es trabajo pendiente."
+      ],
+      "source_document": "presentacion_monografia.typ"
+    },
+    {
+      "id": "slide_metodo_capitulo_8",
+      "label": "Slide - Capítulo 9 — Semana 8 · M3 Monthly · Método y lección",
+      "type": "slide",
+      "group": 2,
+      "level": 2,
+      "title": "Cuantiles calibrados + gobierno MLOps",
+      "kicker": "Capítulo 9 — Semana 8 · M3 Monthly · Método y lección",
+      "content": [
+        "Pinball loss (proper scoring rule); cuantiles P10-P90 ordenados post hoc.",
+        "Cobertura 78.9% vs. nominal 80% (baseline 69.9%); la cobertura se verifica, no se asume.",
+        "Reglas MLOps: drift MAE >25%, cobertura fuera 0.75-0.85, PSI >0.25, antigüedad >1 periodo.",
+        "Decisión: entregar cuantiles calibrados y monitorear cobertura, drift y antigüedad de datos."
+      ],
+      "source_document": "presentacion_monografia.typ"
+    }
+  ],
+  "links": [
+    {
+      "source": "capitulo_8",
+      "target": "clase_capitulo_8",
+      "relation": "contains"
+    },
+    {
+      "source": "capitulo_8",
+      "target": "diapositivas_capitulo_8",
+      "relation": "contains"
+    },
+    {
+      "source": "capitulo_8",
+      "target": "notebook_capitulo_8",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_8",
+      "target": "nb_cell_01",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_8",
+      "target": "nb_cell_02",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_8",
+      "target": "nb_cell_03",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_8",
+      "target": "nb_cell_04",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_8",
+      "target": "nb_cell_05",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_8",
+      "target": "nb_cell_06",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_8",
+      "target": "nb_cell_07",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_8",
+      "target": "nb_cell_08",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_8",
+      "target": "nb_cell_09",
+      "relation": "contains"
+    },
+    {
+      "source": "nb_cell_01",
+      "target": "nb_cell_02",
+      "relation": "next_cell"
+    },
+    {
+      "source": "nb_cell_02",
+      "target": "nb_cell_03",
+      "relation": "next_cell"
+    },
+    {
+      "source": "nb_cell_03",
+      "target": "nb_cell_04",
+      "relation": "next_cell"
+    },
+    {
+      "source": "nb_cell_04",
+      "target": "nb_cell_05",
+      "relation": "next_cell"
+    },
+    {
+      "source": "nb_cell_05",
+      "target": "nb_cell_06",
+      "relation": "next_cell"
+    },
+    {
+      "source": "nb_cell_06",
+      "target": "nb_cell_07",
+      "relation": "next_cell"
+    },
+    {
+      "source": "nb_cell_07",
+      "target": "nb_cell_08",
+      "relation": "next_cell"
+    },
+    {
+      "source": "nb_cell_08",
+      "target": "nb_cell_09",
+      "relation": "next_cell"
+    },
+    {
+      "source": "clase_capitulo_8",
+      "target": "nb_cell_01",
+      "relation": "executes"
+    },
+    {
+      "source": "clase_capitulo_8",
+      "target": "nb_cell_02",
+      "relation": "executes"
+    },
+    {
+      "source": "clase_capitulo_8",
+      "target": "nb_cell_03",
+      "relation": "executes"
+    },
+    {
+      "source": "clase_capitulo_8",
+      "target": "nb_cell_04",
+      "relation": "executes"
+    },
+    {
+      "source": "clase_capitulo_8",
+      "target": "nb_cell_05",
+      "relation": "executes"
+    },
+    {
+      "source": "clase_capitulo_8",
+      "target": "nb_cell_06",
+      "relation": "executes"
+    },
+    {
+      "source": "clase_capitulo_8",
+      "target": "nb_cell_07",
+      "relation": "executes"
+    },
+    {
+      "source": "clase_capitulo_8",
+      "target": "nb_cell_08",
+      "relation": "executes"
+    },
+    {
+      "source": "clase_capitulo_8",
+      "target": "nb_cell_09",
+      "relation": "executes"
+    },
+    {
+      "source": "nb_cell_02",
+      "target": "capitulo_8",
+      "relation": "verifies"
+    },
+    {
+      "source": "nb_cell_05",
+      "target": "capitulo_8",
+      "relation": "verifies"
+    },
+    {
+      "source": "nb_cell_09",
+      "target": "capitulo_8",
+      "relation": "verifies"
+    },
+    {
+      "source": "evaluacion_capitulo_8",
+      "target": "clase_capitulo_8",
+      "relation": "assesses"
+    },
+    {
+      "source": "diapositivas_capitulo_8",
+      "target": "slide_resultados_capitulo_8",
+      "relation": "contains"
+    },
+    {
+      "source": "clase_capitulo_8",
+      "target": "slide_resultados_capitulo_8",
+      "relation": "uses"
+    },
+    {
+      "source": "diapositivas_capitulo_8",
+      "target": "slide_metodo_capitulo_8",
+      "relation": "contains"
+    },
+    {
+      "source": "clase_capitulo_8",
+      "target": "slide_metodo_capitulo_8",
+      "relation": "uses"
+    }
+  ],
+  "relation_vocabulary": [
+    "contains",
+    "executes",
+    "verifies",
+    "assesses",
+    "next_cell",
+    "supports",
+    "conditions",
+    "limits",
+    "contradicts",
+    "uses",
+    "presented_in",
+    "displays",
+    "backs_up",
+    "summarizes",
+    "cited_from",
+    "precedes",
+    "references",
+    "followed_by"
+  ],
+  "cct_schema_version": "1.0"
+}

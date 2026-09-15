@@ -1,0 +1,26 @@
+{
+  "created_at_utc": "2026-08-05T21:57:35.670152+00:00",
+  "source": {
+    "url": "https://zenodo.org/api/records/4656298/files/m3_monthly_dataset.zip/content",
+    "downloaded_bytes": 336324,
+    "source_sha256": "80b0c1c92b6273f12d346256d3ee29489a7b081823430ad8b3a1cc01e06ccafd"
+  },
+  "output": {
+    "path": "m3_monthly.csv",
+    "bytes": 4179589,
+    "sha256": "c0f4cc7e33f88f77d2892b2cd92f4275d56066fa4cee6b0e381c397d9d4b937d"
+  },
+  "details": {
+    "target": "y",
+    "frequency": "monthly",
+    "series": 1428,
+    "cleaning": "parsed public Zenodo TSF via datasetsforecast M3.load(group=Monthly)",
+    "rows": 167562,
+    "columns": [
+      "unique_id",
+      "ds",
+      "y"
+    ],
+    "nulls": 0
+  }
+}

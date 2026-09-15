@@ -1,0 +1,711 @@
+{
+  "directed": true,
+  "multigraph": false,
+  "graph": {
+    "title": "Mapa de conocimiento — Semana 4: Feature engineering y machine learning",
+    "chapter": "Semana 4",
+    "course": "Forecasting de Series Temporales: De Modelos Paramétricos a Deep Learning en Producción",
+    "format": "node-link",
+    "description": "Objeto pedagógico completo de la Semana 4: caso de rebalanceo de bicicletas compartidas, tabularización sin fuga (shift(1)+rolling, aserciones ejecutables), walk-forward con embargo de 24 h y comparación Linear/Ridge/RandomForest/LightGBM."
+  },
+  "nodes": [
+    {
+      "id": "capitulo_04",
+      "label": "Semana 4: Feature Engineering Temporal y Validación",
+      "type": "chapter",
+      "group": 0,
+      "level": 0,
+      "chapter_number": 4,
+      "description": "Bike sharing: convertir la serie horaria en un problema supervisado sin filtrar el futuro; el checklist anti-leakage se vuelve código ejecutable y LightGBM gana con MASE 0.457 sin cerrar el caso (picos y autocorrelación remanente).",
+      "cct": {
+        "ontologico": {
+          "nivel": "demanda agregada de alquileres por hora",
+          "unidad_de_analisis": "alquileres/hora (estación × hora)",
+          "limites_de_inferencia": [
+            "No se modela comportamiento individual de usuarios.",
+            "No se extrapola a otras ciudades sin validación local.",
+            "Las features de calendario y clima deben estar disponibles ex-ante."
+          ]
+        },
+        "epistemico": {
+          "rrl_actual": 4,
+          "rrl_esperado": 4,
+          "estado_evidencia": "ejecutado",
+          "protocolo": "Walk-forward con train expansivo, embargo de 24 horas y test de 168 horas; escalador ajustado solo con train.",
+          "incertidumbre": [
+            "El modelo elegido se selecciona por MASE medio en 3 folds, nunca sobre un test concreto."
+          ]
+        },
+        "pragmatico": {
+          "stakeholder": "operador de bicicletas compartidas (rebalanceo de flota)",
+          "decision": "cuándo confiar en el pronóstico para decidir rebalanceo vs. usar juicio humano",
+          "traduccion_operativa": "MASE 0.457 reduce el error del naive semanal a 45.7%; la pregunta es si eso justifica el pipeline de ML."
+        }
+      },
+      "evidence": [
+        {
+          "claim": "LightGBM mejora los baselines cuando el feature engineering es riguroso y la validación es temporal.",
+          "value": {
+            "LightGBM_MASE": 0.457018,
+            "RandomForest_MASE": 0.471,
+            "Linear_MASE": 0.818
+          },
+          "source_ref": "notebook:04:seccion=3",
+          "status": "ejecutado",
+          "metric_comparability_scope": "solo_capitulo_4",
+          "oracle": false
+        }
+      ],
+      "integrity": {
+        "leakage_controls": [
+          "shift1_en_lags",
+          "rolling_pasado",
+          "sin_rolling_centrada_en_features",
+          "sin_componentes_del_target",
+          "embargo_24h"
+        ],
+        "data_statement": "Bike Sharing (UCI), datasets horario y diario.",
+        "ai_use": "no declarado",
+        "conflicts": "ninguno",
+        "limitations": [
+          "El mejor modelo no debe reoptimizarse sobre test.",
+          "El error debe segmentarse por pico/valle antes de desplegar.",
+          "La identidad cnt = casual + registered se usa para auditoría, no como feature."
+        ]
+      },
+      "quality": {
+        "gates": {
+          "G1_problema": "pass",
+          "G2_nivel_analisis": "pass",
+          "G3_evidencia": "pass",
+          "G4_audiencia": "pass",
+          "G5_metodo": "pass",
+          "G6_integridad": "pass",
+          "G7_trazabilidad": "pass",
+          "G8_no_sobreventa": "pass"
+        },
+        "decision": "aprobado"
+      },
+      "sources": [
+        {
+          "source_type": "monografia",
+          "locator": "monografia_timeseries_benchmarks.typ:capitulo=5"
+        },
+        {
+          "source_type": "presentacion",
+          "locator": "presentacion_monografia.typ:capitulo=5"
+        },
+        {
+          "source_type": "notebook",
+          "locator": "04_semana_4_feature_engineering_ml.ipynb"
+        }
+      ],
+      "decision_ejecutiva": "El ML tabular se adopta solo si supera baselines bajo walk-forward, sin fuga y con traducción operativa del error.",
+      "limitations": [
+        "El mejor modelo no debe reoptimizarse sobre test.",
+        "El error debe segmentarse por pico/valle antes de desplegar.",
+        "La identidad cnt = casual + registered se usa para auditoría, no como feature."
+      ],
+      "oracle": false
+    },
+    {
+      "id": "clase_capitulo_04",
+      "label": "Clase 4: Tabularizar sin fuga y validar con embargo",
+      "type": "class_plan",
+      "group": 1,
+      "level": 1,
+      "duration_minutes": 80,
+      "objective": "Construir features temporales sin fuga (lags con shift, rolling sobre pasado estricto, aserciones ejecutables) y evaluar cuatro modelos bajo walk-forward con embargo de 24 h, justificando qué nivel de complejidad paga.",
+      "agenda": [
+        {
+          "start": 0,
+          "end": 10,
+          "duration": 10,
+          "type": "apertura",
+          "activity": "Caso y granularidad: por qué la hora manda sobre el día",
+          "resource_refs": [],
+          "product": null
+        },
+        {
+          "start": 10,
+          "end": 20,
+          "duration": 10,
+          "type": "contexto_negocio",
+          "activity": "Contrato de datos e identidad del target cnt = casual + registered",
+          "resource_refs": [],
+          "product": null
+        },
+        {
+          "start": 20,
+          "end": 40,
+          "duration": 20,
+          "type": "metodo_validacion",
+          "activity": "Tabularización sin fuga: shift(1)+rolling vs. rolling centrada",
+          "resource_refs": [],
+          "product": null
+        },
+        {
+          "start": 40,
+          "end": 60,
+          "duration": 20,
+          "type": "demo_practica",
+          "activity": "Walk-forward con embargo 24h y cuatro modelos",
+          "resource_refs": [],
+          "product": null
+        },
+        {
+          "start": 60,
+          "end": 80,
+          "duration": 20,
+          "type": "cierre_decision",
+          "activity": "Análisis posterior: picos, residuos y decisión de reentrenamiento",
+          "resource_refs": [],
+          "product": null
+        }
+      ],
+      "decision_ejecutiva": "El ML tabular se adopta solo si supera baselines bajo walk-forward, sin fuga y con traducción operativa del error."
+    },
+    {
+      "id": "diapositivas_capitulo_04",
+      "label": "Diapositivas de la Semana 4 (sincronizado con presentacion_monografia.typ)",
+      "type": "slide_deck",
+      "group": 2,
+      "level": 1,
+      "slide_count": 2,
+      "format": "slides",
+      "synced_with_source": "presentacion_monografia.typ"
+    },
+    {
+      "id": "notebook_capitulo_04",
+      "label": "Notebook: Feature engineering y machine learning",
+      "type": "notebook",
+      "group": 3,
+      "level": 1,
+      "file": "04_semana_4_feature_engineering_ml.ipynb",
+      "dataset": "Bike Sharing (UCI) — data/04_bike/bike_hour.csv y bike_day.csv",
+      "kernel": "Python 3",
+      "purpose": "Tabularizar la serie horaria sin fuga, construir 37 features y comparar Linear/Ridge/RandomForest/LightGBM con walk-forward y embargo de 24 h."
+    },
+    {
+      "id": "nb_cell_01",
+      "label": "Celda 1: Rutas portables y contrato de dimensiones",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "language": "python",
+      "purpose": "Cargar ambos CSV y hacer cumplir el contrato de dimensiones antes de cualquier análisis.",
+      "code_lines": [
+        "# Rutas portables: resolve() busca relativo a notebooks/ o a la raíz del curso.",
+        "HOUR_PATH=resolve(\"data/04_bike/bike_hour.csv\"); DAY_PATH=resolve(\"data/04_bike/bike_day.csv\")",
+        "# Contrato de datos: 17 379 filas horarias × 17 columnas y 731 filas diarias × 16 columnas.",
+        "hour_raw=pd.read_csv(HOUR_PATH,parse_dates=[\"dteday\"]); day_raw=pd.read_csv(DAY_PATH,parse_dates=[\"dteday\"])",
+        "assert hour_raw.shape==(17_379,17); assert day_raw.shape==(731,16)",
+        "print(hour_raw.shape,day_raw.shape)"
+      ],
+      "expected_output": [
+        "(17379, 17) (731, 16)"
+      ]
+    },
+    {
+      "id": "nb_cell_02",
+      "label": "Celda 2: Dilema de granularidad hora vs día",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "language": "python",
+      "purpose": "Mostrar que el agregado diario suaviza la volatilidad pero no soporta la decisión horaria de rebalanceo.",
+      "code_lines": [
+        "# Comparación de granularidad: filas, coeficiente de variación y soporte intradiario.",
+        "comp=pd.DataFrame([",
+        " {\"dataset\":\"hour\",\"rows\":len(hour_raw),\"target_cv\":round(hour_raw.cnt.std()/hour_raw.cnt.mean(),6),\"supports_intraday\":True},",
+        " {\"dataset\":\"day\",\"rows\":len(day_raw),\"target_cv\":round(day_raw.cnt.std()/day_raw.cnt.mean(),6),\"supports_intraday\":False}])",
+        "comp"
+      ],
+      "expected_output": [
+        "  dataset   rows  target_cv  supports_intraday",
+        "0  hour  17379   0.957377   True",
+        "1  day     731   0.430076   False"
+      ]
+    },
+    {
+      "id": "nb_cell_03",
+      "label": "Celda 3: STL diaria, outliers robustos y CUSUM",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "language": "python",
+      "purpose": "Descomponer la serie con periodo 24, marcar candidatos a outliers con MAD y fechar el cambio estructural más fuerte.",
+      "code_lines": [
+        "# STL robusta con periodo 24 sobre 2012: tendencia, estacionalidad diaria y residuo.",
+        "stl=STL(y_eda.loc[\"2012-01-01\":\"2012-12-31\"],period=24,robust=True).fit()",
+        "# Outliers robustos sobre residuos STL: |z| MAD > 4.5; 1887 candidatos en 2012.",
+        "med=np.median(stl.resid); mad=np.median(np.abs(stl.resid-med)); rz=.6745*(stl.resid-med)/mad; out=stl.resid[np.abs(rz)>4.5]",
+        "print(len(out))",
+        "# CUSUM de residuos estandarizados: máximo absoluto marca el cambio estructural más fuerte.",
+        "z=(stl.resid-stl.resid.mean())/stl.resid.std(); cs=z.cumsum(); print(cs.abs().idxmax())"
+      ],
+      "expected_output": [
+        "1887",
+        "2012-03-31 09:00:00"
+      ]
+    },
+    {
+      "id": "nb_cell_04",
+      "label": "Celda 4: Estacionariedad ADF/KPSS sobre diferencia diaria",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "language": "python",
+      "purpose": "Verificar con ambos tests, leídos en conjunto, que la serie diferenciada es modelable.",
+      "code_lines": [
+        "# ADF H₀: raíz unitaria. KPSS H₀: estacionariedad. α=0.05 sobre la diferencia diaria.",
+        "report=stationarity_report(d1,\"diferencia diaria\")",
+        "report"
+      ],
+      "expected_output": [
+        "  test          serie               H0            stat        p_value  decision",
+        "0  ADF   diferencia diaria  raíz unitaria  -22.530182  0.0        rechazar H0",
+        "1  KPSS  diferencia diaria  estacionaria     0.013861  0.1        no rechazar H0"
+      ]
+    },
+    {
+      "id": "nb_cell_05",
+      "label": "Celda 5: Walk-forward con embargo (documentación ejecutable)",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "language": "python",
+      "purpose": "Generar tres folds con train expansivo, embargo de 24 h y test de 168 h, y verificar visualmente la estructura.",
+      "code_lines": [
+        "# Función reutilizable: walk-forward con embargo (documentación ejecutable).",
+        "def build_walk_forward_folds(n_rows: int, test_h: int = 168, embargo_h: int = 24, spacing_h: int = 720, n_folds: int = 3) -> list[dict]:",
+        "    \"\"\"Genera n_folds con train expansivo, embargo temporal y test de test_h horas.\"\"\"",
+        "    origins = [n_rows - test_h - spacing_h * i for i in range(n_folds - 1, -1, -1)]",
+        "    ...",
+        "folds=build_walk_forward_folds(len(model_df))",
+        "# Diagrama train| embargo (rojo)| test (negro): verificación visual de la estructura walk-forward.",
+        "fig,ax=plt.subplots(figsize=(14,3))",
+        "for f in folds:",
+        "    ax.plot(model_df.index[:f[\"train_end\"]],[f[\"fold\"]]*f[\"train_end\"],lw=4,label=f\"Train F{f['fold']}\"); ax.plot(model_df.index[f[\"embargo_start\"]:f[\"test_start\"]],[f[\"fold\"]]*EMBARGO,lw=8,color=\"crimson\"); ax.plot(model_df.index[f[\"test_start\"]:f[\"test_end\"]],[f[\"fold\"]]*H,lw=8,color=\"black\")",
+        "ax.set(title=\"Walk-forward: train| embargo 24 h| test 168 h\",xlabel=\"Fecha\",ylabel=\"Fold\"); ax.legend(ncol=3); plt.show()"
+      ],
+      "expected_output": [
+        "<Figure size 1400x300 with 1 Axes>"
+      ]
+    },
+    {
+      "id": "nb_cell_06",
+      "label": "Celda 6: Checkpoint anti-leakage como aserciones",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "language": "python",
+      "purpose": "Convertir el checklist metodológico en invariantes ejecutables: identidad del target y rolling segura vs centrada.",
+      "code_lines": [
+        "# Checkpoint anti-leakage: convertimos el checklist metodológico en invariantes ejecutables.",
+        "# (1) El target es exactamente casual + registered; esas columnas no pueden ser features.",
+        "assert np.array_equal(hour_raw.cnt.values, (hour_raw.casual + hour_raw.registered).values)",
+        "# (3) La rolling \"segura\" promedia solo el pasado estricto [t-24, t-1] (shift(1) primero).",
+        "safe_m = model_df.cnt.shift(1).rolling(24, min_periods=24).mean()",
+        "assert np.isclose(safe_m.iloc[t], model_df.cnt.iloc[t - 24:t].mean())",
+        "# (4) La rolling centrada incluye el presente y el futuro [t-12, t+11]: fuga demostrable.",
+        "leak_m = model_df.cnt.rolling(24, center=True, min_periods=24).mean()",
+        "assert np.isclose(leak_m.iloc[t], model_df.cnt.iloc[t - 12:t + 12].mean())",
+        "assert not np.isclose(leak_m.iloc[t], safe_m.iloc[t])",
+        "print(\"Checkpoint anti-leakage superado: las features usan solo información del pasado.\")"
+      ],
+      "expected_output": [
+        "Checkpoint anti-leakage superado: las features usan solo información del pasado."
+      ]
+    },
+    {
+      "id": "nb_cell_07",
+      "label": "Celda 7: 37 features y dataset modelable",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "language": "python",
+      "purpose": "Excluir target, identificador y componentes del target, y recortar filas sin 168 h de historia.",
+      "code_lines": [
+        "# DROP: target (cnt), identificador (instant), año (yr) y codificaciones redundantes (mnth, hr).",
+        "DROP=[\"cnt\",\"instant\",\"yr\",\"mnth\",\"hr\"]",
+        "FEATURES=[x for x in features.columns if x not in DROP]",
+        "print(len(FEATURES),FEATURES)",
+        "# Dataset modelable: se eliminan gaps y filas sin historia de 168 h.",
+        "model_df=features.dropna(subset=[\"cnt\",*FEATURES]).copy()",
+        "print(model_df.shape,model_df.index.min(),model_df.index.max())"
+      ],
+      "expected_output": [
+        "37 ['season', 'holiday', 'weekday', 'workingday', 'weathersit', 'temp', 'atemp', 'hum', 'windspeed', 'lag_1', 'lag_2', 'lag_3', 'lag_6', 'lag_12', 'lag_24', 'lag_48', 'lag_168', 'roll_mean_24', 'roll_std_24', 'roll_min_24', 'roll_max_24', 'roll_mean_48', 'roll_std_48', 'roll_min_48', 'roll_max_48', 'roll_mean_168', 'roll_std_168', 'roll_min_168', 'roll_max_168', 'hour_sin', 'hour_cos', 'dow_sin', 'dow_cos', 'month_sin', 'month_cos', 'temp_x_hour', 'holiday_x_season']",
+        "(11840, 42) 2011-04-04 05:00:00 2012-12-24 03:00:00"
+      ]
+    },
+    {
+      "id": "nb_cell_08",
+      "label": "Celda 8: Walk-forward de cuatro modelos y cierre",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "language": "python",
+      "purpose": "Ajustar Linear, Ridge, RandomForest y LightGBM en cada fold con scaler solo en train, y resumir el mejor modelo.",
+      "code_lines": [
+        "# Walk-forward: se ajustan cuatro modelos en cada fold; el scaler se ajusta solo en train.",
+        "for f in folds:",
+        "    tr,te=split_fold(model_df,f)",
+        "    models=build_models()  # {Linear, Ridge, RandomForest, LightGBM}",
+        "    ...",
+        "# Cierre del notebook: resumen del mejor modelo y sus métricas medias entre folds.",
+        "print(\"Notebook 4 completado.\")",
+        "print(\"Mejor modelo:\",best_name)",
+        "print(summary.loc[best_name])"
+      ],
+      "expected_output": [
+        "Notebook 4 completado.",
+        "Mejor modelo: LightGBM",
+        "MAE mean 27.552860 / std 6.006900",
+        "RMSE mean 42.836713 / std 11.553779",
+        "MASE mean 0.457018 / std 0.116569",
+        "R2 mean 0.956830 / std 0.002218",
+        "fit_seconds mean 110.952542 / std 188.473447"
+      ]
+    },
+    {
+      "id": "nb_cell_09",
+      "label": "Celda 9: Residuos — Ljung-Box, Jarque-Bera y ARCH LM",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "language": "python",
+      "purpose": "Diagnosticar autocorrelación remanente, no normalidad y heterocedasticidad condicional de los residuos del mejor modelo.",
+      "code_lines": [
+        "# Ljung-Box por fold con lag 24: autocorrelación remanente de los residuos.",
+        "rows=[]",
+        "for fold,g in residual_df.groupby(\"fold\"):",
+        "    lb=acorr_ljungbox(g.residual,lags=[24],return_df=True).iloc[0]",
+        "    rows.append({\"fold\":fold,\"test\":\"Ljung-Box\",\"H0\":\"sin autocorrelación\",\"stat\":lb.lb_stat,\"p_value\":lb.lb_pvalue,\"decision\":\"rechazar H0\" if lb.lb_pvalue<.05 else \"no rechazar H0\"})",
+        "pd.DataFrame(rows)",
+        "# ARCH LM con 24 lags: homocedasticidad condicional de los residuos.",
+        "a=het_arch(residual_df.residual,nlags=24)",
+        "pd.DataFrame([{\"test\":\"ARCH LM\",\"H0\":\"homocedasticidad\",\"stat\":a[0],\"p_value\":a[1],\"decision\":\"rechazar H0\" if a[1]<.05 else \"no rechazar H0\"}])"
+      ],
+      "expected_output": [
+        "   fold  test        H0                   stat        p_value       decision",
+        "0  1     Ljung-Box  sin autocorrelación  7.881358    9.991932e-01  no rechazar H0",
+        "1  2     Ljung-Box  sin autocorrelación  104.737279  4.623693e-12  rechazar H0",
+        "2  3     Ljung-Box  sin autocorrelación  166.739236  2.418428e-23  rechazar H0",
+        "   test     H0                stat       p_value   decision",
+        "0  ARCH LM  homocedasticidad  25.06571   0.402197  no rechazar H0"
+      ]
+    },
+    {
+      "id": "nb_cell_10",
+      "label": "Celda 10: Error por segmento de negocio y por horizonte",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "language": "python",
+      "purpose": "Segmentar el error en picos de demanda (7-9, 16-19) vs valle y trazar la degradación del MAE con el horizonte.",
+      "code_lines": [
+        "# Segmentación pico (7-9, 16-19) vs valle: error absoluto por segmento de negocio.",
+        "seg=[]",
+        "for f in folds:",
+        "    te=...; err=...",
+        "    seg.append(pd.DataFrame({\"segment\":np.where(te.index.hour.isin([7,8,9,16,17,18,19]),\"pico\",\"valle/resto\"),\"abs_error\":err}))",
+        "pd.concat(seg).groupby(\"segment\").abs_error.agg([\"mean\",\"median\",\"count\"])",
+        "# MAE por horizonte (1..168 h): cómo se degrada el error con la distancia al origen.",
+        "h=[]",
+        "for f in folds:",
+        "    te=model_df.iloc[f[\"test_start\"]:f[\"test_end\"]; err=(te.cnt-predictions[(f[\"fold\"],best_name)]).abs().values",
+        "    for i,e in enumerate(err,1): h.append({\"horizon\":i,\"abs_error\":e})"
+      ],
+      "expected_output": [
+        "             mean       median     count",
+        "segment",
+        "pico         43.667748  35.455445  148",
+        "valle/resto  20.853412  11.688882  356"
+      ]
+    },
+    {
+      "id": "evaluacion_capitulo_04",
+      "label": "Ejercicios propuestos: Semana 4",
+      "type": "assessment",
+      "group": 4,
+      "level": 1,
+      "exercises": [
+        "Fácil: entrene LightGBM solo con features de calendario y compare el MASE por fold contra el bloque completo (lags + rolling).",
+        "Intermedio: cambie el embargo a 0, 12 y 48 h y cuantifique el impacto sobre el MASE de test.",
+        "Intermedio: añada features de Fourier (periodos 24 y 168) y verifique si mejoran validation sin tocar el test.",
+        "Difícil: construya intervalos P10–P90 con quantile regression y verifique cobertura empírica en pico y valle."
+      ]
+    },
+    {
+      "id": "slide_resultados_capitulo_04",
+      "label": "Slide - Capítulo 5 — Semana 4 · Bike Sharing · Resultados",
+      "type": "slide",
+      "group": 2,
+      "level": 2,
+      "title": "−44% con feature store auditado: la victoria es del protocolo",
+      "kicker": "Capítulo 5 — Semana 4 · Bike Sharing · Resultados",
+      "content": [
+        "Headline: -44% de MASE — LightGBM/RandomForest vs. modelos lineales.",
+        "Ficha: Dominio micromovilidad; Decisión rebalanceo de flota; Horizonte horaria; Baseline lineales con features; Riesgo leakage; Métrica MASE.",
+        "Tabla: LightGBM MASE 0.457; RandomForest 0.471; Ridge/Linear ~0.818."
+      ],
+      "source_document": "presentacion_monografia.typ"
+    },
+    {
+      "id": "slide_metodo_capitulo_04",
+      "label": "Slide - Capítulo 5 — Semana 4 · Bike Sharing · Método y lección",
+      "type": "slide",
+      "group": 2,
+      "level": 2,
+      "title": "El leakage se cuantifica, no se asume",
+      "kicker": "Capítulo 5 — Semana 4 · Bike Sharing · Método y lección",
+      "content": [
+        "cnt = casual + registered excluido: fuga directa del target.",
+        "Walk-forward de 3 folds expansivos + embargo 24h; escalador ajustado solo con train.",
+        "37 features finales: lags, ventanas 24/48/168h, codificación cíclica e interacciones.",
+        "Decisión: el ML tabular gana cuando el feature engineering es riguroso y la validación es temporal."
+      ],
+      "source_document": "presentacion_monografia.typ"
+    },
+    {
+      "id": "cct_claim_antileakage_cap04",
+      "label": "Tabularización sin fuga",
+      "type": "claim",
+      "claim": "Las features usan shift(1) + rolling pasado; la rolling centrada se muestra solo como anti-patrón demostrable.",
+      "evidence_ref": "notebook:04:seccion=2.3",
+      "cct_axis": "epistemico",
+      "group": 5,
+      "level": 2
+    }
+  ],
+  "links": [
+    {
+      "source": "capitulo_04",
+      "target": "clase_capitulo_04",
+      "relation": "contains"
+    },
+    {
+      "source": "capitulo_04",
+      "target": "diapositivas_capitulo_04",
+      "relation": "contains"
+    },
+    {
+      "source": "capitulo_04",
+      "target": "notebook_capitulo_04",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_04",
+      "target": "nb_cell_01",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_04",
+      "target": "nb_cell_02",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_04",
+      "target": "nb_cell_03",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_04",
+      "target": "nb_cell_04",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_04",
+      "target": "nb_cell_05",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_04",
+      "target": "nb_cell_06",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_04",
+      "target": "nb_cell_07",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_04",
+      "target": "nb_cell_08",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_04",
+      "target": "nb_cell_09",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_04",
+      "target": "nb_cell_10",
+      "relation": "contains"
+    },
+    {
+      "source": "nb_cell_01",
+      "target": "nb_cell_02",
+      "relation": "next_cell"
+    },
+    {
+      "source": "nb_cell_02",
+      "target": "nb_cell_03",
+      "relation": "next_cell"
+    },
+    {
+      "source": "nb_cell_03",
+      "target": "nb_cell_04",
+      "relation": "next_cell"
+    },
+    {
+      "source": "nb_cell_04",
+      "target": "nb_cell_05",
+      "relation": "next_cell"
+    },
+    {
+      "source": "nb_cell_05",
+      "target": "nb_cell_06",
+      "relation": "next_cell"
+    },
+    {
+      "source": "nb_cell_06",
+      "target": "nb_cell_07",
+      "relation": "next_cell"
+    },
+    {
+      "source": "nb_cell_07",
+      "target": "nb_cell_08",
+      "relation": "next_cell"
+    },
+    {
+      "source": "nb_cell_08",
+      "target": "nb_cell_09",
+      "relation": "next_cell"
+    },
+    {
+      "source": "nb_cell_09",
+      "target": "nb_cell_10",
+      "relation": "next_cell"
+    },
+    {
+      "source": "clase_capitulo_04",
+      "target": "nb_cell_01",
+      "relation": "executes"
+    },
+    {
+      "source": "clase_capitulo_04",
+      "target": "nb_cell_02",
+      "relation": "executes"
+    },
+    {
+      "source": "clase_capitulo_04",
+      "target": "nb_cell_03",
+      "relation": "executes"
+    },
+    {
+      "source": "clase_capitulo_04",
+      "target": "nb_cell_04",
+      "relation": "executes"
+    },
+    {
+      "source": "clase_capitulo_04",
+      "target": "nb_cell_05",
+      "relation": "executes"
+    },
+    {
+      "source": "clase_capitulo_04",
+      "target": "nb_cell_06",
+      "relation": "executes"
+    },
+    {
+      "source": "clase_capitulo_04",
+      "target": "nb_cell_07",
+      "relation": "executes"
+    },
+    {
+      "source": "clase_capitulo_04",
+      "target": "nb_cell_08",
+      "relation": "executes"
+    },
+    {
+      "source": "clase_capitulo_04",
+      "target": "nb_cell_09",
+      "relation": "executes"
+    },
+    {
+      "source": "clase_capitulo_04",
+      "target": "nb_cell_10",
+      "relation": "executes"
+    },
+    {
+      "source": "nb_cell_05",
+      "target": "capitulo_04",
+      "relation": "verifies"
+    },
+    {
+      "source": "nb_cell_06",
+      "target": "capitulo_04",
+      "relation": "verifies"
+    },
+    {
+      "source": "nb_cell_08",
+      "target": "capitulo_04",
+      "relation": "verifies"
+    },
+    {
+      "source": "evaluacion_capitulo_04",
+      "target": "clase_capitulo_04",
+      "relation": "assesses"
+    },
+    {
+      "source": "diapositivas_capitulo_04",
+      "target": "slide_resultados_capitulo_04",
+      "relation": "contains"
+    },
+    {
+      "source": "clase_capitulo_04",
+      "target": "slide_resultados_capitulo_04",
+      "relation": "uses"
+    },
+    {
+      "source": "diapositivas_capitulo_04",
+      "target": "slide_metodo_capitulo_04",
+      "relation": "contains"
+    },
+    {
+      "source": "clase_capitulo_04",
+      "target": "slide_metodo_capitulo_04",
+      "relation": "uses"
+    },
+    {
+      "source": "cct_claim_antileakage_cap04",
+      "target": "capitulo_04",
+      "relation": "supports"
+    }
+  ],
+  "relation_vocabulary": [
+    "contains",
+    "executes",
+    "verifies",
+    "assesses",
+    "next_cell",
+    "supports",
+    "conditions",
+    "limits",
+    "contradicts",
+    "uses",
+    "presented_in",
+    "displays",
+    "backs_up",
+    "summarizes",
+    "cited_from",
+    "precedes",
+    "references",
+    "followed_by"
+  ],
+  "cct_schema_version": "1.0"
+}

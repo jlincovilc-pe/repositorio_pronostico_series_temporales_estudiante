@@ -1,0 +1,720 @@
+{
+  "directed": true,
+  "multigraph": false,
+  "graph": {
+    "title": "Mapa de conocimiento — Semana 3: SARIMAX y variables exógenas",
+    "chapter": "Semana 3",
+    "course": "Forecasting de Series Temporales: De Modelos Paramétricos a Deep Learning en Producción",
+    "format": "node-link",
+    "description": "Objeto pedagógico completo de la Semana 3: caso de alertas de calidad del aire (Beijing PM2.5), imputación causal por fold, rolling-origin de 3 folds y la lectura del escenario oracle (SARIMAX gana en MAE pero con AIC peor)."
+  },
+  "nodes": [
+    {
+      "id": "capitulo_03",
+      "label": "Semana 3: SARIMAX y Variables Exógenas",
+      "type": "chapter",
+      "group": 0,
+      "level": 0,
+      "chapter_number": 3,
+      "description": "PM2.5 en Beijing: el valor marginal de la meteorología bajo un protocolo rolling-origin, y la detección del escenario oracle como competencia central de la semana.",
+      "cct": {
+        "ontologico": {
+          "nivel": "calidad del aire agregada por estación/hora",
+          "unidad_de_analisis": "concentración PM2.5 horaria",
+          "limites_de_inferencia": [
+            "No se afirma causalidad meteorológica.",
+            "No se extrapolan alertas sanitarias sin validación de dominio.",
+            "La asociación entre clima y PM2.5 es predictiva, no mecanicista."
+          ]
+        },
+        "epistemico": {
+          "rrl_actual": 4,
+          "rrl_esperado": 4,
+          "estado_evidencia": "ejecutado",
+          "protocolo": "Rolling-origin de 3 folds: train 180 días, test 168h, orígenes separados 30 días; imputación causal ffill(24h)+mediana de train recalculada por fold.",
+          "incertidumbre": [
+            "Coeficientes de PRES e Iws muestran alta inestabilidad relativa entre folds."
+          ]
+        },
+        "pragmatico": {
+          "stakeholder": "autoridad ambiental / equipo de alertas",
+          "decision": "activar, calibrar o rechazar el uso de covariables meteorológicas",
+          "traduccion_operativa": "Una mejora de MAE (~18.7 µg/m³) debe evaluarse contra el umbral operativo de alerta de PM2.5."
+        }
+      },
+      "evidence": [
+        {
+          "claim": "SARIMAX reduce el MAE medio de SARIMA en 18.36% bajo rolling-origin, en escenario oracle (clima observado).",
+          "value": {
+            "improvement_pct": 18.36099124618855,
+            "MAE_SARIMA": 103.661267,
+            "MAE_SARIMAX": 84.986279
+          },
+          "source_ref": "notebook:03:celda=10",
+          "status": "ejecutado",
+          "metric_comparability_scope": "solo_capitulo_3",
+          "oracle": true
+        }
+      ],
+      "integrity": {
+        "leakage_controls": [
+          "rolling_origin_3_folds",
+          "imputacion_causal_ffill_por_fold",
+          "mediana_train_recalculada_por_fold"
+        ],
+        "data_statement": "Beijing PM2.5 (UCI), licencia CC BY 4.0.",
+        "ai_use": "no declarado",
+        "conflicts": "ninguno",
+        "limitations": [
+          "PRES e Iws muestran alta inestabilidad relativa entre folds.",
+          "La mejora de SARIMAX depende de disponibilidad y estabilidad de covariables.",
+          "El escenario oracle no equivale a despliegue productivo."
+        ]
+      },
+      "quality": {
+        "gates": {
+          "G1_problema": "pass",
+          "G2_nivel_analisis": "pass",
+          "G3_evidencia": "pass",
+          "G4_audiencia": "pass",
+          "G5_metodo": "pass",
+          "G6_integridad": "pass",
+          "G7_trazabilidad": "pass",
+          "G8_no_sobreventa": "pass"
+        },
+        "decision": "aprobado"
+      },
+      "sources": [
+        {
+          "source_type": "monografia",
+          "locator": "monografia_timeseries_benchmarks.typ:capitulo=4"
+        },
+        {
+          "source_type": "presentacion",
+          "locator": "presentacion_monografia.typ:capitulo=4"
+        },
+        {
+          "source_type": "notebook",
+          "locator": "03_semana_3_sarimax_variables_exogenas.ipynb"
+        }
+      ],
+      "decision_ejecutiva": "Usar una exógena solo si mejora la validación, es estable entre folds y estará disponible ex-ante en producción.",
+      "limitations": [
+        "PRES e Iws muestran alta inestabilidad relativa entre folds.",
+        "La mejora de SARIMAX depende de disponibilidad y estabilidad de covariables.",
+        "El escenario oracle no equivale a despliegue productivo."
+      ],
+      "oracle": true,
+      "epistemic_warning": "El 18.36% es un techo oracle. En producción, la mejora real será menor o nula si el pronóstico meteorológico disponible tiene error.",
+      "oracle_scenario": {
+        "is_oracle": true,
+        "reason": "SARIMAX usa clima observado, no disponible ex-ante en producción.",
+        "production_condition": "Para producción se requiere un pronóstico meteorológico externo o covariables disponibles ex-ante."
+      },
+      "discrepancy": {
+        "readme_value": "20.7%",
+        "executed_value": "18.36%",
+        "rule": "La cifra válida para el artefacto es la ejecución real del notebook.",
+        "source_ref": "notebook:03:celda=10"
+      }
+    },
+    {
+      "id": "clase_capitulo_03",
+      "label": "Clase 3: Exógenas, imputación causal y el escenario oracle",
+      "type": "class_plan",
+      "group": 1,
+      "level": 1,
+      "duration_minutes": 80,
+      "objective": "Cuantificar el valor marginal de las exógenas meteorológicas en un SARIMAX con imputación causal y rolling-origin por fold, y aprender a detectar un escenario oracle: mejora de MAE con AIC peor y clima observado en test.",
+      "agenda": [
+        {
+          "start": 0,
+          "end": 10,
+          "duration": 10,
+          "type": "apertura",
+          "activity": "Caso: alertas de calidad del aire y costo asimétrico del error",
+          "resource_refs": [],
+          "product": null
+        },
+        {
+          "start": 10,
+          "end": 20,
+          "duration": 10,
+          "type": "contexto_negocio",
+          "activity": "Contrato de datos: rejilla completa con 2,043 nulos en el target",
+          "resource_refs": [],
+          "product": null
+        },
+        {
+          "start": 20,
+          "end": 40,
+          "duration": 20,
+          "type": "metodo_validacion",
+          "activity": "Imputación causal y rolling-origin de 3 folds",
+          "resource_refs": [],
+          "product": null
+        },
+        {
+          "start": 40,
+          "end": 60,
+          "duration": 20,
+          "type": "demo_practica",
+          "activity": "Backtesting SARIMA vs. SARIMAX: la lectura oracle",
+          "resource_refs": [],
+          "product": null
+        },
+        {
+          "start": 60,
+          "end": 80,
+          "duration": 20,
+          "type": "cierre_decision",
+          "activity": "Matriz de disponibilidad de covariables y cierre",
+          "resource_refs": [],
+          "product": null
+        }
+      ],
+      "decision_ejecutiva": "Usar una exógena solo si mejora la validación, es estable entre folds y estará disponible ex-ante en producción."
+    },
+    {
+      "id": "diapositivas_capitulo_03",
+      "label": "Diapositivas de la Semana 3 (sincronizado con presentacion_monografia.typ)",
+      "type": "slide_deck",
+      "group": 2,
+      "level": 1,
+      "slide_count": 2,
+      "format": "slides",
+      "synced_with_source": "presentacion_monografia.typ"
+    },
+    {
+      "id": "notebook_capitulo_03",
+      "label": "Notebook: SARIMAX y variables exógenas",
+      "type": "notebook",
+      "group": 3,
+      "level": 1,
+      "file": "03_semana_3_sarimax_variables_exogenas.ipynb",
+      "dataset": "Beijing PM2.5 (UCI) — data/03_beijing/beijing_pm25.csv",
+      "kernel": "Python 3",
+      "purpose": "Comparar SARIMA vs SARIMAX con rolling-origin de 3 folds, imputación causal por fold y lectura explícita del escenario oracle."
+    },
+    {
+      "id": "nb_cell_01",
+      "label": "Celda 1: Ruta portable, carga y contrato de schema",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "language": "python",
+      "purpose": "Garantizar que el dataset existe, tiene 43,800 × 14 y que el target pm2.5 concentra los nulos.",
+      "code_lines": [
+        "# Rutas candidatas: desde la raiz del repo o desde notebooks/.",
+        "CANDIDATES=[Path(\"data/03_beijing/beijing_pm25.csv\"),Path(\"../data/03_beijing/beijing_pm25.csv\")]",
+        "DATA_PATH=next((p for p in CANDIDATES if p.exists()),None)",
+        "assert DATA_PATH is not None; print(DATA_PATH.resolve())",
+        "# Carga del CSV; el contrato exige 43,800 filas x 14 columnas.",
+        "raw=pd.read_csv(DATA_PATH,parse_dates=[\"ds\"]); assert raw.shape==(43_800,14),raw.shape",
+        "TARGET=\"pm2.5\"; EXOG_NUM=[\"DEWP\",\"TEMP\",\"PRES\",\"Iws\",\"Is\",\"Ir\"]",
+        "print(\"Schema OK\")"
+      ],
+      "expected_output": [
+        "/home/enrique/Escritorio/Curso_pronostico_series_temporales/course-timeseries-benchmarks-pro/data/03_beijing/beijing_pm25.csv",
+        "pm2.5  41757 non-null float64  (2,043 ausencias)",
+        "Schema OK"
+      ]
+    },
+    {
+      "id": "nb_cell_02",
+      "label": "Celda 2: Auditoría temporal — rejilla completa, nulos de valor",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "language": "python",
+      "purpose": "Separar huecos de timestamps de valores ausentes: aquí la rejilla es perfecta y el problema son 2,043 nulos del target.",
+      "code_lines": [
+        "# Rango temporal y diferencias entre timestamps consecutivos.",
+        "print(raw.ds.min(),raw.ds.max()); delta=raw.ds.diff().dropna(); print(delta.value_counts().head())",
+        "# Rejilla esperada vs timestamps presentes: separa huecos de valores ausentes.",
+        "expected=pd.date_range(raw.ds.min(),raw.ds.max(),freq=\"h\"); missing_ts=expected.difference(raw.ds)",
+        "print(\"Timestamps faltantes:\",len(missing_ts),\"PM2.5 faltantes:\",raw[TARGET].isna().sum())"
+      ],
+      "expected_output": [
+        "2010-01-02 00:00:00 2014-12-31 23:00:00",
+        "ds",
+        "0 days 01:00:00    43799",
+        "Name: count, dtype: int64",
+        "Timestamps faltantes: 0 PM2.5 faltantes: 2043"
+      ]
+    },
+    {
+      "id": "nb_cell_03",
+      "label": "Celda 3: Climatología mensual y perfil semanal",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "language": "python",
+      "purpose": "Mostrar el ciclo anual fuerte (inviernos contaminados) que obliga a leer los folds por separado.",
+      "code_lines": [
+        "# Perfil mensual: mediana por mes (climatologia).",
+        "prof=raw.assign(m=raw.ds.dt.month).groupby(\"m\")[TARGET].median()",
+        "fig,ax=plt.subplots(); ax.plot(prof.index,prof,marker=\"o\",label=\"Mediana\")",
+        "ax.set(title=\"Perfil mensual de PM2.5\",xlabel=\"Mes\",ylabel=\"Concentración\"); ax.legend(); plt.show()",
+        "# Perfil semanal: media por dia de la semana (0=Lunes).",
+        "prof=raw.assign(dow=raw.ds.dt.dayofweek).groupby(\"dow\")[TARGET].mean()",
+        "fig,ax=plt.subplots(); ax.plot(prof.index,prof,marker=\"o\",label=\"Media\")",
+        "ax.set(title=\"Perfil semanal de PM2.5\",xlabel=\"0=Lunes, 6=Domingo\"); ax.legend(); plt.show()"
+      ],
+      "expected_output": [
+        "<Figure size 1200x400 with 1 Axes>",
+        "<Figure size 1200x400 with 1 Axes>"
+      ]
+    },
+    {
+      "id": "nb_cell_04",
+      "label": "Celda 4: Imputación — causal vs bilateral alrededor del gap",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "language": "python",
+      "purpose": "Comparar visual y tabularmente tres estrategias de imputación y dejar claro cuál es causal.",
+      "code_lines": [
+        "# Primer gap interior y ventana de comparacion (12 h antes, 24 h despues).",
+        "s=raw.set_index(\"ds\")[TARGET]; first_gap=s[s.isna()].index[0]",
+        "window=s.loc[first_gap-pd.Timedelta(hours=12):first_gap+pd.Timedelta(hours=24)]",
+        "# Tres estrategias: original, forward-fill causal e interpolacion bilateral (usa futuro).",
+        "compare=pd.DataFrame({\"original\":window,\"ffill\":window.ffill(),\"interpolate_bilateral\":window.interpolate(\"time\")})",
+        "compare.head(20)"
+      ],
+      "expected_output": [
+        "                     original  ffill  interpolate_bilateral",
+        "2010-01-23 16:00:00      22.0   22.0                   22.0",
+        "2010-01-23 17:00:00       NaN   22.0                   22.0",
+        "...  (horas del gap: original NaN; ffill arrastra 22.0)",
+        "2010-01-24 00:00:00       NaN   22.0                   22.0"
+      ]
+    },
+    {
+      "id": "nb_cell_05",
+      "label": "Celda 5: Coordenadas de folds y diagrama rolling-origin",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "language": "python",
+      "purpose": "Materializar los 3 folds (180 días train, 168 h test, orígenes cada 30 días) y visualizarlos sobre la línea temporal.",
+      "code_lines": [
+        "# Coordenadas de los 3 folds: 180 dias de train, 168 h de test, origenes cada 30 dias.",
+        "folds=rolling_origin_folds(n=len(raw), h=168, train_hours=180*24, step=30*24, n_folds=3)",
+        "pd.DataFrame(folds)",
+        "# Diagrama: bloques de train (colores) y test (negro) sobre la linea temporal.",
+        "fig,ax=plt.subplots(figsize=(14,3))",
+        "for f in folds:",
+        "    ax.plot(raw.ds.iloc[f[\"train_start\"]:f[\"train_end\"]],[f[\"fold\"]]*TRAIN_HOURS,lw=5,label=f\"Train F{f['fold']}\")",
+        "    ax.plot(raw.ds.iloc[f[\"test_start\"]:f[\"test_end\"]],[f[\"fold\"]]*H,lw=8,color=\"black\")",
+        "ax.set(title=\"Rolling-origin: 180 días train + 7 días test\"); ax.legend(ncol=3); plt.show()"
+      ],
+      "expected_output": [
+        "   fold  train_start  train_end  test_start  test_end",
+        "0     1        37872      42192       42192     42360",
+        "1     2        38592      42912       42912     43080",
+        "2     3        39312      43632       43632     43800",
+        "<Figure size 1400x300 with 1 Axes>"
+      ]
+    },
+    {
+      "id": "nb_cell_06",
+      "label": "Celda 6: prepare_fold — la pieza anti-leakage central",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "language": "python",
+      "purpose": "Imputar el target dentro de cada fold solo con información pasada: ffill ≤ 24 h y mediana de train; test con fallback al último valor de train.",
+      "code_lines": [
+        "def prepare_fold(df: pd.DataFrame,f: dict)->tuple[pd.DataFrame,pd.DataFrame]:",
+        "    tr=df.iloc[f[\"train_start\"]:f[\"train_end\"]].copy(); te=df.iloc[f[\"test_start\"]:f[\"test_end\"]].copy()",
+        "    med=float(tr[TARGET].median()); tr[TARGET]=tr[TARGET].ffill(limit=24).fillna(med)",
+        "    last=float(tr[TARGET].iloc[-1]); te[TARGET]=te[TARGET].ffill(limit=24).fillna(last)",
+        "    return tr,te",
+        "# Verificacion de tamanos (train, test) por fold.",
+        "[(len(prepare_fold(raw,f)[0]),len(prepare_fold(raw,f)[1])) for f in folds]"
+      ],
+      "expected_output": [
+        "[(4320, 168), (4320, 168), (4320, 168)]"
+      ]
+    },
+    {
+      "id": "nb_cell_07",
+      "label": "Celda 7: Backtesting SARIMA vs SARIMAX (3 folds, 107.8 s)",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "language": "python",
+      "purpose": "Ajustar SARIMA (baseline obligatorio) y SARIMAX (clima observado) en cada fold, registrando MAE, RMSE, WAPE y AIC.",
+      "code_lines": [
+        "# Backtesting: ajusta SARIMA y SARIMAX en cada fold y guarda metricas, AIC, coeficientes y residuos.",
+        "results=[]; forecasts={}; coef_rows=[]; residuals={}; intervals={}; t0=time.time()",
+        "for f in folds:",
+        "    tr,te=prepare_fold(raw,f)",
+        "    # SARIMA (1,0,1)x(1,0,0,24) sin exogenas; SARIMAX con exogenas estandarizadas de train",
+        "    ...",
+        "result_df=pd.DataFrame(results); result_df"
+      ],
+      "expected_output": [
+        "   fold   model         MAE        RMSE   WAPE_pct          AIC",
+        "0     1  SARIMA   105.732705  129.684123  99.435146  35974.622870",
+        "1     1  SARIMAX   84.654339  102.683578  79.612231  36155.671730",
+        "2     2  SARIMA   113.049916  143.677308  74.717282  35854.927414",
+        "3     2  SARIMAX   99.275783  138.238718  65.613642  36597.794784",
+        "4     3  SARIMA    92.201181  120.641862  76.072087  36840.259729",
+        "5     3  SARIMAX   71.028714  102.441659  58.603398  37827.710138"
+      ]
+    },
+    {
+      "id": "nb_cell_08",
+      "label": "Celda 8: Estabilidad de coeficientes estandarizados por fold",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "language": "python",
+      "purpose": "Medir cuán inestables son los coeficientes de las exógenas entre folds: PRES e Iws lideran la inestabilidad relativa.",
+      "code_lines": [
+        "# Coeficientes estandarizados de SARIMAX por fold (top-10 por magnitud media).",
+        "coef=pd.DataFrame(coef_rows)",
+        "stab=coef.groupby(\"feature\").agg(mean=(\"coef\",\"mean\"),std=(\"coef\",\"std\"))",
+        "stab[\"relative_instability\"]=stab.std/stab.mean.abs()",
+        "stab.sort_values(\"relative_instability\",ascending=False).head(10)"
+      ],
+      "expected_output": [
+        "             mean       std  relative_instability",
+        "feature",
+        "PRES    -1.725926  6.070681              3.517347",
+        "Iws      0.690328  1.883039              2.727746",
+        "cbwd_NW  0.179141  0.393720              2.197827",
+        "Is      -0.046857  0.081158              1.732051",
+        "cbwd_SE  0.379265  0.591758              1.560274"
+      ]
+    },
+    {
+      "id": "nb_cell_09",
+      "label": "Celda 9: Error por nivel y bias por fold",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "language": "python",
+      "purpose": "Segmentar el error de SARIMAX por nivel de contaminación y mostrar el subpronóstico sistemático en los folds 2 y 3.",
+      "code_lines": [
+        "# Error por nivel de PM2.5: cuartiles del test por fold.",
+        "segments=[]",
+        "for f in folds:",
+        "    _,tef=prepare_fold(raw,f); p=forecasts[(f[\"fold\"],\"SARIMAX\")].values",
+        "    q1,q3=tef[TARGET].quantile([.25,.75])",
+        "    label=pd.cut(tef[TARGET],[-np.inf,q1,q3,np.inf],labels=[\"bajo\",\"medio\",\"alto\"])",
+        "    segments.append(pd.DataFrame({\"segment\":label,\"abs_error\":np.abs(tef[TARGET].values-p)}))",
+        "pd.concat(segments).groupby(\"segment\",observed=True).abs_error.agg([\"mean\",\"median\",\"count\"])",
+        "# Bias por fold: media de (real - pronostico); positivo = subpronostico.",
+        "bias=[]",
+        "for f in folds:",
+        "    _,tef=prepare_fold(raw,f); p=forecasts[(f[\"fold\"],\"SARIMAX\")].values",
+        "    bias.append({\"fold\":f[\"fold\"],\"bias\":float(np.mean(tef[TARGET].values-p))})",
+        "pd.DataFrame(bias)"
+      ],
+      "expected_output": [
+        "          mean      median  count",
+        "segment",
+        "bajo     57.984295   37.168585    131",
+        "medio    52.956298   39.942900    250",
+        "alto    178.846076  163.355191    123",
+        "   fold       bias",
+        "0     1  -4.418912",
+        "1     2  84.429271",
+        "2     3  49.679435"
+      ]
+    },
+    {
+      "id": "nb_cell_10",
+      "label": "Celda 10: Cierre — mejora media 18.36% (techo oracle)",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "language": "python",
+      "purpose": "Resumen final: SARIMAX reduce el MAE medio de 103.66 a 84.99 (18.36%), cifra que debe etiquetarse como escenario oracle.",
+      "code_lines": [
+        "# Cierre: resumen final y mejora media de SARIMAX sobre SARIMA.",
+        "print(\"Notebook 3 completado.\")",
+        "print(result_df.groupby(\"model\").MAE.mean())",
+        "print(\"Mejora media SARIMAX (%):\",pivot.improvement_pct.mean())"
+      ],
+      "expected_output": [
+        "Notebook 3 completado.",
+        "model",
+        "SARIMA     103.661267",
+        "SARIMAX     84.986279",
+        "Name: MAE, dtype: float64",
+        "Mejora media SARIMAX (%): 18.36099124618855"
+      ]
+    },
+    {
+      "id": "evaluacion_capitulo_03",
+      "label": "Ejercicios propuestos: Semana 3",
+      "type": "assessment",
+      "group": 4,
+      "level": 1,
+      "exercises": [
+        "Fácil: compare ffill límite 6, 12 y 24.",
+        "Intermedio: incluya estacionalidad semanal mediante Fourier.",
+        "Intermedio: construya la matriz de disponibilidad de covariables (histórico, disponible ex-ante, plan si falta).",
+        "Difícil: reemplace el clima observado por un pronóstico rezagado 24 h y mida cuánto survives la mejora de SARIMAX."
+      ]
+    },
+    {
+      "id": "slide_resultados_capitulo_03",
+      "label": "Slide - Capítulo 4 — Semana 3 · Beijing PM2.5 · Resultados",
+      "type": "slide",
+      "group": 2,
+      "level": 2,
+      "title": "Las exógenas mejoran 18.36% — bajo un escenario oracle",
+      "kicker": "Capítulo 4 — Semana 3 · Beijing PM2.5 · Resultados",
+      "content": [
+        "Headline: -18.36% de MAE — SARIMAX vs. SARIMA, promedio de 3 folds rolling-origin.",
+        "Ficha: Dominio calidad del aire; Decisión alertas/restricciones; Horizonte 168 h; Baseline SARIMA sin exógenas; Riesgo oracle (clima observado); Métrica MAE.",
+        "Tabla: SARIMA MAE medio 103.66 (desv. 10.58); SARIMAX 84.99 (desv. 14.13)."
+      ],
+      "source_document": "presentacion_monografia.typ"
+    },
+    {
+      "id": "slide_metodo_capitulo_03",
+      "label": "Slide - Capítulo 4 — Semana 3 · Beijing PM2.5 · Método y lección",
+      "type": "slide",
+      "group": 2,
+      "level": 2,
+      "title": "Exógenas: promesa con tres condiciones",
+      "kicker": "Capítulo 4 — Semana 3 · Beijing PM2.5 · Método y lección",
+      "content": [
+        "Discrepancia README (20.7%) vs. notebook recalculado (18.36%): evidencia de ejecución real.",
+        "Rolling-origin de 3 folds: train 180 días, test 168 h, orígenes separados 30 días.",
+        "Imputación causal ffill (límite 24h) + mediana de train, recalculada por fold; SARIMAX menos estable (desv. 14.13 vs. 10.58).",
+        "Decisión: usar una exógena solo si mejora la validación, es estable entre folds y estará disponible en producción."
+      ],
+      "source_document": "presentacion_monografia.typ"
+    }
+  ],
+  "links": [
+    {
+      "source": "capitulo_03",
+      "target": "clase_capitulo_03",
+      "relation": "contains"
+    },
+    {
+      "source": "capitulo_03",
+      "target": "diapositivas_capitulo_03",
+      "relation": "contains"
+    },
+    {
+      "source": "capitulo_03",
+      "target": "notebook_capitulo_03",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_03",
+      "target": "nb_cell_01",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_03",
+      "target": "nb_cell_02",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_03",
+      "target": "nb_cell_03",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_03",
+      "target": "nb_cell_04",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_03",
+      "target": "nb_cell_05",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_03",
+      "target": "nb_cell_06",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_03",
+      "target": "nb_cell_07",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_03",
+      "target": "nb_cell_08",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_03",
+      "target": "nb_cell_09",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_03",
+      "target": "nb_cell_10",
+      "relation": "contains"
+    },
+    {
+      "source": "nb_cell_01",
+      "target": "nb_cell_02",
+      "relation": "next_cell"
+    },
+    {
+      "source": "nb_cell_02",
+      "target": "nb_cell_03",
+      "relation": "next_cell"
+    },
+    {
+      "source": "nb_cell_03",
+      "target": "nb_cell_04",
+      "relation": "next_cell"
+    },
+    {
+      "source": "nb_cell_04",
+      "target": "nb_cell_05",
+      "relation": "next_cell"
+    },
+    {
+      "source": "nb_cell_05",
+      "target": "nb_cell_06",
+      "relation": "next_cell"
+    },
+    {
+      "source": "nb_cell_06",
+      "target": "nb_cell_07",
+      "relation": "next_cell"
+    },
+    {
+      "source": "nb_cell_07",
+      "target": "nb_cell_08",
+      "relation": "next_cell"
+    },
+    {
+      "source": "nb_cell_08",
+      "target": "nb_cell_09",
+      "relation": "next_cell"
+    },
+    {
+      "source": "nb_cell_09",
+      "target": "nb_cell_10",
+      "relation": "next_cell"
+    },
+    {
+      "source": "clase_capitulo_03",
+      "target": "nb_cell_01",
+      "relation": "executes"
+    },
+    {
+      "source": "clase_capitulo_03",
+      "target": "nb_cell_02",
+      "relation": "executes"
+    },
+    {
+      "source": "clase_capitulo_03",
+      "target": "nb_cell_03",
+      "relation": "executes"
+    },
+    {
+      "source": "clase_capitulo_03",
+      "target": "nb_cell_04",
+      "relation": "executes"
+    },
+    {
+      "source": "clase_capitulo_03",
+      "target": "nb_cell_05",
+      "relation": "executes"
+    },
+    {
+      "source": "clase_capitulo_03",
+      "target": "nb_cell_06",
+      "relation": "executes"
+    },
+    {
+      "source": "clase_capitulo_03",
+      "target": "nb_cell_07",
+      "relation": "executes"
+    },
+    {
+      "source": "clase_capitulo_03",
+      "target": "nb_cell_08",
+      "relation": "executes"
+    },
+    {
+      "source": "clase_capitulo_03",
+      "target": "nb_cell_09",
+      "relation": "executes"
+    },
+    {
+      "source": "clase_capitulo_03",
+      "target": "nb_cell_10",
+      "relation": "executes"
+    },
+    {
+      "source": "nb_cell_04",
+      "target": "capitulo_03",
+      "relation": "verifies"
+    },
+    {
+      "source": "nb_cell_07",
+      "target": "capitulo_03",
+      "relation": "verifies"
+    },
+    {
+      "source": "nb_cell_09",
+      "target": "capitulo_03",
+      "relation": "verifies"
+    },
+    {
+      "source": "evaluacion_capitulo_03",
+      "target": "clase_capitulo_03",
+      "relation": "assesses"
+    },
+    {
+      "source": "diapositivas_capitulo_03",
+      "target": "slide_resultados_capitulo_03",
+      "relation": "contains"
+    },
+    {
+      "source": "clase_capitulo_03",
+      "target": "slide_resultados_capitulo_03",
+      "relation": "uses"
+    },
+    {
+      "source": "diapositivas_capitulo_03",
+      "target": "slide_metodo_capitulo_03",
+      "relation": "contains"
+    },
+    {
+      "source": "clase_capitulo_03",
+      "target": "slide_metodo_capitulo_03",
+      "relation": "uses"
+    }
+  ],
+  "relation_vocabulary": [
+    "contains",
+    "executes",
+    "verifies",
+    "assesses",
+    "next_cell",
+    "supports",
+    "conditions",
+    "limits",
+    "contradicts",
+    "uses",
+    "presented_in",
+    "displays",
+    "backs_up",
+    "summarizes",
+    "cited_from",
+    "precedes",
+    "references",
+    "followed_by"
+  ],
+  "cct_schema_version": "1.0"
+}

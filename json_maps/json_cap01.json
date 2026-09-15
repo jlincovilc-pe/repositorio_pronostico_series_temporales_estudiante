@@ -1,0 +1,480 @@
+{
+  "nodes": [
+    {
+      "id": "capitulo_01",
+      "label": "Semana 1: EDA, Baselines y Estacionalidad",
+      "type": "chapter",
+      "group": 0,
+      "level": 0,
+      "chapter_number": 1,
+      "description": "Introducción a la cultura del baseline, auditoría de calidad de datos temporales y el riesgo de las fugas de información.",
+      "cct": {
+        "ontologico": {
+          "nivel": "flujo vehicular agregado por hora",
+          "unidad_de_analisis": "vehículos/hora por corredor (I-94)",
+          "limites_de_inferencia": [
+            "No se infiere comportamiento individual de conductores.",
+            "Los candidatos de anomalía (CUSUM/MAD) son puntos a investigar, no conclusiones causales.",
+            "Las conclusiones aplican a decisiones de operación de la vía, no a conductores específicos."
+          ]
+        },
+        "epistemico": {
+          "rrl_actual": 4,
+          "rrl_esperado": 4,
+          "estado_evidencia": "ejecutado",
+          "protocolo": "Split temporal 80/20; contraste didáctico contra random split; SEED=42.",
+          "incertidumbre": [
+            "Gaps de 2014-2015 (11,976 h) requieren alineación por timestamp, no imputación ciega."
+          ]
+        },
+        "pragmatico": {
+          "stakeholder": "autoridad vial (operación del corredor I-94)",
+          "decision": "cuándo habilitar carriles adicionales y asignar personal de incidentes",
+          "traduccion_operativa": "MAE ~365.7 vehículos/hora es el margen de holgura que se pierde para anticipar congestión."
+        }
+      },
+      "evidence": [
+        {
+          "claim": "SeasonalNaive168 alcanza MASE 0.916 en el test temporal y ningún baseline lo supera.",
+          "value": {
+            "MASE": 0.916195,
+            "MAE": 365.680099,
+            "WAPE_pct": 11.049198
+          },
+          "source_ref": "notebook:01:nb_cell_04",
+          "status": "ejecutado",
+          "metric_comparability_scope": "solo_capitulo_1",
+          "oracle": false
+        },
+        {
+          "claim": "El random split subestima el error de producción frente al split temporal.",
+          "value": {
+            "MAE_aleatorio": 251.66,
+            "MAE_temporal": 287.55
+          },
+          "source_ref": "notebook:01:nb_cell_02",
+          "status": "ejecutado",
+          "metric_comparability_scope": "solo_capitulo_1",
+          "oracle": false
+        }
+      ],
+      "integrity": {
+        "leakage_controls": [
+          "split_temporal",
+          "alineacion_por_timestamp_en_seasonal_naive",
+          "random_split_descartado_como_estimacion"
+        ],
+        "data_statement": "Metro Interstate Traffic Volume (UCI), licencia CC BY 4.0.",
+        "ai_use": "no declarado",
+        "conflicts": "ninguno",
+        "limitations": [
+          "Los gaps de 2014-2015 afectan continuidad y deben auditarse antes de modelar.",
+          "Los outliers candidatos (MAD) no deben eliminarse automáticamente.",
+          "El CUSUM es descriptivo, no una prueba formal de cambio estructural."
+        ]
+      },
+      "quality": {
+        "gates": {
+          "G1_problema": "pass",
+          "G2_nivel_analisis": "pass",
+          "G3_evidencia": "pass",
+          "G4_audiencia": "pass",
+          "G5_metodo": "pass",
+          "G6_integridad": "pass",
+          "G7_trazabilidad": "pass",
+          "G8_no_sobreventa": "pass"
+        },
+        "decision": "aprobado"
+      },
+      "sources": [
+        {
+          "source_type": "monografia",
+          "locator": "monografia_timeseries_benchmarks.typ:capitulo=2"
+        },
+        {
+          "source_type": "presentacion",
+          "locator": "presentacion_monografia.typ:capitulo=2"
+        },
+        {
+          "source_type": "notebook",
+          "locator": "01_semana_1_eda_baselines_estacionalidad.ipynb"
+        }
+      ],
+      "decision_ejecutiva": "Adoptar SeasonalNaive168 como piso de rendimiento (MASE 0.916); cualquier modelo complejo debe superarlo bajo el mismo test temporal para justificar su costo.",
+      "limitations": [
+        "Los gaps de 2014-2015 afectan continuidad y deben auditarse antes de modelar.",
+        "Los outliers candidatos (MAD) no deben eliminarse automáticamente.",
+        "El CUSUM es descriptivo, no una prueba formal de cambio estructural."
+      ],
+      "oracle": false
+    },
+    {
+      "id": "clase_capitulo_01",
+      "label": "Clase 1: Cultura del Baseline y Validación Temporal",
+      "type": "class_plan",
+      "group": 1,
+      "level": 1,
+      "duration_minutes": 80,
+      "objective": "Evitar el data leakage (random split), establecer el Seasonal Naive 168 como piso de rendimiento y auditar la calidad temporal de los datos (gaps y duplicados).",
+      "agenda": [
+        {
+          "start": 0,
+          "end": 15,
+          "duration": 15,
+          "type": "apertura",
+          "activity": "Contrato de datos y auditoría de calidad (gaps 2014-2015)",
+          "resource_refs": [],
+          "product": null
+        },
+        {
+          "start": 15,
+          "end": 30,
+          "duration": 15,
+          "type": "metodo_validacion",
+          "activity": "El anti-patrón de la semana: random split vs. temporal split",
+          "resource_refs": [],
+          "product": null
+        },
+        {
+          "start": 30,
+          "end": 45,
+          "duration": 15,
+          "type": "demo_practica",
+          "activity": "Análisis exploratorio: estacionalidad semanal (STL 168h)",
+          "resource_refs": [],
+          "product": null
+        },
+        {
+          "start": 45,
+          "end": 65,
+          "duration": 20,
+          "type": "demo_practica",
+          "activity": "La tiranía del baseline: Naive vs. Seasonal Naive vs. ETS",
+          "resource_refs": [],
+          "product": null
+        },
+        {
+          "start": 65,
+          "end": 80,
+          "duration": 15,
+          "type": "cierre_decision",
+          "activity": "Diagnóstico de residuos y ejercicios",
+          "resource_refs": [],
+          "product": null
+        }
+      ],
+      "decision_ejecutiva": "Adoptar SeasonalNaive168 como piso de rendimiento (MASE 0.916); cualquier modelo complejo debe superarlo bajo el mismo test temporal para justificar su costo."
+    },
+    {
+      "id": "diapositivas_capitulo_01",
+      "label": "Diapositivas de la Semana 1 (sincronizado con presentacion_monografia.typ)",
+      "type": "slide_deck",
+      "group": 2,
+      "level": 1,
+      "slide_count": 2,
+      "format": "slides",
+      "synced_with_source": "presentacion_monografia.typ"
+    },
+    {
+      "id": "notebook_capitulo_01",
+      "label": "Notebook: EDA, Baselines y Estacionalidad",
+      "type": "notebook",
+      "group": 3,
+      "level": 1,
+      "file": "01_semana_1_eda_baselines_estacionalidad.ipynb",
+      "dataset": "Metro Interstate Traffic Volume (UCI)",
+      "kernel": "Python 3",
+      "purpose": "Establecer el piso de rendimiento con baselines y demostrar el riesgo del random split."
+    },
+    {
+      "id": "nb_cell_01",
+      "label": "Celda 1: Auditoría de Gaps y Duplicados",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "language": "python",
+      "purpose": "Demostrar que el dataset tiene 11,976 horas faltantes (gaps) que obligan a usar alineación por timestamp.",
+      "code_lines": [
+        "# Duplicados exactos vs. timestamps repetidos: dos problemas distintos.",
+        "print('Filas duplicadas exactas:', raw.duplicated().sum())",
+        "print('Timestamps duplicados:', raw['ds'].duplicated().sum())",
+        "# Reindexado a la rejilla completa; los gaps quedan como NaN.",
+        "hourly = hourly_observed.reindex(full_index)",
+        "hourly['y_observed'] = hourly['y'].notna()",
+        "hourly['y_eda'] = hourly['y'].interpolate(method='time').ffill().bfill()",
+        "print(hourly[['y', 'y_eda']].isna().sum())"
+      ],
+      "expected_output": [
+        "Filas duplicadas exactas: 17",
+        "Timestamps duplicados: 7629",
+        "y        11976",
+        "y_eda        0",
+        "dtype: int64"
+      ]
+    },
+    {
+      "id": "nb_cell_02",
+      "label": "Celda 2: El Anti-patrón (Random Split vs Temporal)",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "language": "python",
+      "purpose": "Entrenar el mismo Random Forest con split aleatorio y temporal para evidenciar la fuga de información.",
+      "code_lines": [
+        "# ANTI-PATRÓN (didáctico): split aleatorio mezcla futuro en train.",
+        "X_tr_r,X_te_r,y_tr_r,y_te_r=train_test_split(X,y,test_size=.2,random_state=SEED,shuffle=True)",
+        "model_r=RandomForestRegressor(n_estimators=60,max_depth=12,min_samples_leaf=5,n_jobs=-1,random_state=SEED).fit(X_tr_r,y_tr_r)",
+        "mae_random=mean_absolute_error(y_te_r,model_r.predict(X_te_r))",
+        "# Contraste: mismo modelo con corte temporal (80/20).",
+        "X_train_t,X_test_t=X.iloc[:cut],X.iloc[cut:]; y_train_t,y_test_t=y.iloc[:cut],y.iloc[cut:]",
+        "model_t=RandomForestRegressor(...).fit(X_train_t,y_train_t)",
+        "mae_temporal=mean_absolute_error(y_test_t,model_t.predict(X_test_t))"
+      ],
+      "expected_output": [
+        "             split        MAE",
+        "0  aleatorio (inválido)  251.659601",
+        "1          temporal  287.549525"
+      ]
+    },
+    {
+      "id": "nb_cell_03",
+      "label": "Celda 3: Descomposición STL (168h)",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "language": "python",
+      "purpose": "Aislar la tendencia, el ciclo semanal y el residuo para justificar el baseline estacional.",
+      "code_lines": [
+        "# STL con periodo 168 separa tendencia, ciclo semanal y residuo.",
+        "stl = STL(y_eda, period=168, robust=True)",
+        "res = stl.fit()",
+        "fig, axes = plt.subplots(4, 1, figsize=(14, 10), sharex=True)",
+        "axes[0].plot(y_eda.index, y_eda, label='Serie'); axes[0].legend()",
+        "axes[1].plot(res.trend.index, res.trend, label='Tendencia'); axes[1].legend()",
+        "axes[2].plot(res.seasonal.index, res.seasonal, label='Estacionalidad (168h)'); axes[2].legend()",
+        "axes[3].plot(res.resid.index, res.resid, label='Residuo'); axes[3].legend()"
+      ],
+      "expected_output": [
+        "<Figure size 1400x1000 with 4 Axes>"
+      ]
+    },
+    {
+      "id": "nb_cell_04",
+      "label": "Celda 4: Ranking de Baselines por MASE",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "language": "python",
+      "purpose": "Comparar Naive, Medias Móviles, ETS y Seasonal Naive usando MASE como métrica reina.",
+      "code_lines": [
+        "# Contenedor común de predicciones (mismo índice test).",
+        "preds=pd.DataFrame(index=test.index)",
+        "preds['Naive']=train.y.iloc[-1]",
+        "preds['SeasonalNaive168'] = test.index.map(lambda t: hourly_observed.loc[t - pd.Timedelta(hours=168), 'y'] if (t - pd.Timedelta(hours=168)) in hourly_observed.index else np.nan)",
+        "# ... (cálculo de MA7, MA30, MA90, ETS)",
+        "# Ranking de baselines por MASE (menor = mejor).",
+        "score_table=pd.DataFrame({name:metrics(test.y,preds[name],train_regular) for name in preds}).T.sort_values('MASE')",
+        "score_table"
+      ],
+      "expected_output": [
+        "                      MAE        RMSE      MASE      WAPE_pct",
+        "SeasonalNaive168   365.68     734.59     0.916      11.05",
+        "ETS                785.23     950.38     1.967      23.73",
+        "MA90              1731.82    2030.14     4.339      52.33",
+        "MA30              1776.28    2160.39     4.450      53.67",
+        "MA7               2529.78    3125.83     6.338      76.44",
+        "Naive             3101.35    3660.75     7.770      93.71"
+      ]
+    },
+    {
+      "id": "nb_cell_05",
+      "label": "Celda 5: Diagnóstico Robusto de Residuos",
+      "type": "notebook_code",
+      "group": 3,
+      "level": 2,
+      "language": "python",
+      "purpose": "Identificar outliers o cambios de régimen usando z-score robusto (MAD) sobre los residuos del STL.",
+      "code_lines": [
+        "# z robusto basado en MAD: marca candidatos, no errores automáticos.",
+        "med=np.median(stl.resid); mad=np.median(np.abs(stl.resid-med))",
+        "robust_z=.6745*(stl.resid-med)/mad",
+        "outliers=stl.resid[np.abs(robust_z)>4.5]",
+        "print('Candidatos:',len(outliers),'de',len(stl.resid))",
+        "fig,ax=plt.subplots(figsize=(14,4))",
+        "ax.plot(stl.resid.index,stl.resid,lw=.5,label='Residuo STL')",
+        "ax.scatter(outliers.index,outliers,color='crimson',s=10,label='|z robusto|>4.5')"
+      ],
+      "expected_output": [
+        "Candidatos: 2121 de 17544",
+        "<Figure size 1400x400 with 1 Axes>"
+      ]
+    },
+    {
+      "id": "evaluacion_capitulo_01",
+      "label": "Ejercicios Propuestos: Semana 1",
+      "type": "assessment",
+      "group": 4,
+      "level": 1,
+      "exercises": [
+        "Fácil: Compare seasonal naive de 24 y 168 horas con el mismo test.",
+        "Intermedio: Construya intervalos por cuantiles empíricos de error condicionados a hora del día.",
+        "Intermedio: Elimine duplicados con otra regla y mida sensibilidad de resultados.",
+        "Difícil: Cree un modelo de regresión con feriados y clima pronosticado, no observado.",
+        "Difícil: Implemente rolling-origin mensual y reporte distribución de MASE."
+      ]
+    },
+    {
+      "id": "slide_resultados_capitulo_01",
+      "label": "Slide - Capítulo 2 — Semana 1 · Metro Traffic · Resultados",
+      "type": "slide",
+      "group": 2,
+      "level": 2,
+      "title": "El baseline estacional gana: MASE 0.916",
+      "kicker": "Capítulo 2 — Semana 1 · Metro Traffic · Resultados",
+      "content": [
+        "Headline: MASE 0.916 — SeasonalNaive168, nadie lo supera en este capítulo.",
+        "Ficha: Dominio tráfico vehicular; Decisión turnos/carriles; Horizonte 8,115 h (~11 meses); Baseline SeasonalNaive168; Riesgo random split inválido; Métrica MASE.",
+        "Tabla: SeasonalNaive168 MASE 0.916 (WAPE 11.05%); ETS 1.967 (23.73%); Naive 7.770 (93.71%)."
+      ],
+      "source_document": "presentacion_monografia.typ"
+    },
+    {
+      "id": "slide_metodo_capitulo_01",
+      "label": "Slide - Capítulo 2 — Semana 1 · Metro Traffic · Método y lección",
+      "type": "slide",
+      "group": 2,
+      "level": 2,
+      "title": "El random split es inválido: filtra el futuro",
+      "kicker": "Capítulo 2 — Semana 1 · Metro Traffic · Método y lección",
+      "content": [
+        "Split temporal 80/20: 8,115 h de test (~11 meses); el aleatorio 'espía' el futuro (MAE 251.66 vs. 287.55).",
+        "Residuos del baseline: Ljung-Box, Jarque-Bera y ARCH LM rechazan independencia, normalidad y homocedasticidad.",
+        "Decisión: en series temporales validar siempre con división temporal; el random split no estima el error de producción."
+      ],
+      "source_document": "presentacion_monografia.typ"
+    }
+  ],
+  "links": [
+    {
+      "source": "capitulo_01",
+      "target": "clase_capitulo_01",
+      "relation": "contains"
+    },
+    {
+      "source": "capitulo_01",
+      "target": "diapositivas_capitulo_01",
+      "relation": "contains"
+    },
+    {
+      "source": "capitulo_01",
+      "target": "notebook_capitulo_01",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_01",
+      "target": "nb_cell_01",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_01",
+      "target": "nb_cell_02",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_01",
+      "target": "nb_cell_03",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_01",
+      "target": "nb_cell_04",
+      "relation": "contains"
+    },
+    {
+      "source": "notebook_capitulo_01",
+      "target": "nb_cell_05",
+      "relation": "contains"
+    },
+    {
+      "source": "clase_capitulo_01",
+      "target": "nb_cell_01",
+      "relation": "executes"
+    },
+    {
+      "source": "clase_capitulo_01",
+      "target": "nb_cell_02",
+      "relation": "executes"
+    },
+    {
+      "source": "clase_capitulo_01",
+      "target": "nb_cell_03",
+      "relation": "executes"
+    },
+    {
+      "source": "clase_capitulo_01",
+      "target": "nb_cell_04",
+      "relation": "executes"
+    },
+    {
+      "source": "clase_capitulo_01",
+      "target": "nb_cell_05",
+      "relation": "executes"
+    },
+    {
+      "source": "nb_cell_02",
+      "target": "capitulo_01",
+      "relation": "verifies"
+    },
+    {
+      "source": "nb_cell_04",
+      "target": "capitulo_01",
+      "relation": "verifies"
+    },
+    {
+      "source": "evaluacion_capitulo_01",
+      "target": "clase_capitulo_01",
+      "relation": "assesses"
+    },
+    {
+      "source": "diapositivas_capitulo_01",
+      "target": "slide_resultados_capitulo_01",
+      "relation": "contains"
+    },
+    {
+      "source": "clase_capitulo_01",
+      "target": "slide_resultados_capitulo_01",
+      "relation": "uses"
+    },
+    {
+      "source": "diapositivas_capitulo_01",
+      "target": "slide_metodo_capitulo_01",
+      "relation": "contains"
+    },
+    {
+      "source": "clase_capitulo_01",
+      "target": "slide_metodo_capitulo_01",
+      "relation": "uses"
+    }
+  ],
+  "relation_vocabulary": [
+    "contains",
+    "executes",
+    "verifies",
+    "assesses",
+    "next_cell",
+    "supports",
+    "conditions",
+    "limits",
+    "contradicts",
+    "uses",
+    "presented_in",
+    "displays",
+    "backs_up",
+    "summarizes",
+    "cited_from",
+    "precedes",
+    "references",
+    "followed_by"
+  ],
+  "cct_schema_version": "1.0"
+}

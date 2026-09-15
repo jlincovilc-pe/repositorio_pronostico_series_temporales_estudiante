@@ -1,0 +1,189 @@
+{
+  "nodes": [
+    {
+      "id": "capitulo_00",
+      "label": "Capítulo 1 — Marco teórico-metodológico y fundamentos",
+      "type": "chapter",
+      "group": 0,
+      "level": 0,
+      "chapter_number": 1,
+      "source_document": "monografia_timeseries_benchmarks.typ",
+      "description": "Introducción, principios de diseño del repositorio, arquitectura de cuatro capas, taxonomía de los ocho datasets, mapa de ruta de modelos, preguntas de investigación, metodología del estudio de caso, declaración de posicionamiento (CCT) y declaración de ética/integridad/uso de IA. No tiene notebook propio: es el capítulo de fundamentos que antecede a las semanas 1–8 (json_cap01..json_cap08)."
+    },
+    {
+      "id": "declaracion_cct_capitulo_01",
+      "label": "Sección 1.12 — Declaración de posicionamiento y madurez de la evidencia",
+      "type": "positioning_statement",
+      "group": 1,
+      "level": 1,
+      "section": "1.12",
+      "content": {
+        "nivel_de_analisis": "Organizacional/operacional: sistemas socio-técnicos concretos (tráfico urbano, energía residencial, calidad del aire, movilidad en bicicleta, consumo eléctrico industrial, carga nacional, sensores viales, benchmark de competencia). No es un aporte metodológico nuevo a la teoría del forecasting.",
+        "madurez_de_la_evidencia": "Evidencia verificada en entorno relevante (datos y estructura de cada problema real), no piloto de laboratorio ni despliegue en producción viva. Los experimentos multi-fold (Capítulos 4, 5 y 7) y multi-dominio (síntesis del Capítulo 10) alcanzan el escalón inmediatamente superior al replicar el hallazgo bajo distintas condiciones de datos.",
+        "audiencia_primaria": "Profesionales de industria (data scientists, analistas de operaciones, product owners de forecasting) que deciden cuándo un baseline basta, cuándo migrar a un modelo estadístico o de ML tabular, y cuándo se justifica deep learning o forecasting probabilístico.",
+        "limites_de_inferencia": "Los hallazgos de un capítulo no se extrapolan automáticamente a otro dominio; cada capítulo declara su propio contrato de datos, protocolo de validación y métrica. Ninguna afirmación de la monografía es causal — las relaciones descritas son asociativas, verificadas bajo el protocolo declarado en cada capítulo."
+      },
+      "added_in_revision": true
+    },
+    {
+      "id": "etica_ia_capitulo_01",
+      "label": "Sección 1.13 — Ética, integridad y declaración de uso de IA",
+      "type": "integrity_statement",
+      "group": 1,
+      "level": 1,
+      "section": "1.13",
+      "content": {
+        "origen_y_licencias": "Los ocho datasets provienen de fuentes públicas o de competencia: UCI Machine Learning Repository, Open Power System Data, y el archivo de la M3-Competition en Zenodo. Licencias documentadas en la Tabla A.1 (Apéndice A) y en la Bibliografía (Apéndice F). Ninguno contiene datos personales sensibles ni identificables.",
+        "uso_de_ia": "La redacción, edición y revisión editorial de la monografía se realizó con asistencia de un modelo de lenguaje (Claude, Anthropic) bajo supervisión humana. Ninguna métrica, tabla de resultados o número-tótem del cuerpo del documento fue generado o inferido por el asistente de IA: todos provienen de la ejecución real de los ocho notebooks del repositorio, verificables contra receipts JSON, registry.yaml y MANIFEST.sha256 (Apéndice C).",
+        "conflictos_e_financiamiento": "No se declaran conflictos de interés. Sin financiamiento externo específico; trabajo integrador del curso course-timeseries-benchmarks-pro.",
+        "resultados_no_ejecutados": "DeepAR (Capítulo 9), split completo 770/193 de PeMS-SF (Capítulo 8) y el escenario few-shot intermedio (Capítulo 6) se declaran explícitamente como deudas administradas en la Tabla 10.2 y en las secciones 'Deudas abiertas' de cada capítulo. Ninguno aparece como resultado, métrica o veredicto."
+      },
+      "added_in_revision": true
+    },
+    {
+      "id": "portada_presentacion",
+      "label": "Portada de la presentación",
+      "type": "slide",
+      "group": 2,
+      "level": 1,
+      "slide_number": 1,
+      "title": "Forecasting de Series Temporales en Ocho Dominios Industriales",
+      "content": [
+        "Subtítulo: La asimetría de palancas: 44 % máximo por modelo vs. 2 900 % por régimen de datos.",
+        "Advertencia in situ: magnitudes de naturaleza distinta — ver Anexo de incomparabilidad, diapositiva 28.",
+        "Autor y fecha de defensa: pendientes de confirmación.",
+        "Nivel de análisis: socio-técnico / operacional. No se afirma causalidad física ni biológica.",
+        "Audiencia primaria: profesionales de industria (ML engineers, planificación, supply chain)."
+      ],
+      "notes": "El subtítulo original no llevaba advertencia; se agregó tras revisión CCT porque compara una mejora relativa (%) con un ratio de régimen de datos (29x = 2900%), magnitudes ontológicamente distintas.",
+      "added_in_revision": [
+        "advertencia_subtitulo",
+        "declaracion_nivel_analisis",
+        "declaracion_audiencia"
+      ]
+    },
+    {
+      "id": "slide_agenda",
+      "label": "Slide 2 (footer 1) - Agenda",
+      "type": "slide",
+      "group": 2,
+      "level": 1,
+      "slide_number": 2,
+      "title": "Ocho dominios, una ruta de complejidad",
+      "content": [
+        "Capítulos 2–9: un experimento por dominio sobre datos reales, del baseline ingenuo al forecasting probabilístico.",
+        "Capítulo 10: síntesis, jerarquía de complejidad y recomendación productiva.",
+        "Cierre: limitaciones del estudio y trabajo futuro."
+      ]
+    },
+    {
+      "id": "slide_como_leer",
+      "label": "Slide 3 (footer 2) - Cómo leer esta presentación",
+      "type": "slide",
+      "group": 2,
+      "level": 1,
+      "slide_number": 3,
+      "title": "Cuatro rutas de lectura, según tu rol",
+      "content": [
+        "Si eres ML Engineer: Capítulos 2–9 (método + decisión ejecutiva de cada slide 'Resultados'/'Método y lección').",
+        "Si eres Stakeholder / Decisor: diapositiva 22 (Jerarquía de palancas) + diapositiva 25 (Cuatro acciones) + Anexos.",
+        "Si evalúas rigor metodológico: diapositiva 24 (Honestidad como política) + Anexos 26–28.",
+        "Regla de lectura: los números-tótem con asterisco (*) llevan una condición de validez explícita — compárense palancas entre capítulos, no métricas.",
+        "Nota de trazabilidad: repositorio course-timeseries-benchmarks-pro v1.1.0, integridad verificable con MANIFEST.sha256, SEED=42 en los ocho notebooks, entorno acotado en requirements.txt."
+      ],
+      "is_new_slide": true,
+      "added_in_revision": true,
+      "notes": "Slide nueva insertada después de Agenda durante la revisión CCT de la presentación. No existía en la versión previa del deck."
+    },
+    {
+      "id": "slide_cap1_intro",
+      "label": "Slide 4 (footer 3) - Capítulo 1 · Introducción",
+      "type": "slide",
+      "group": 2,
+      "level": 1,
+      "slide_number": 4,
+      "title": "Ocho experimentos reales, una pregunta transversal",
+      "content": [
+        "Headline: 8 datasets · 8 notebooks ejecutados — sin resultados simulados, sin covariables inventadas.",
+        "6 principios: reproducibilidad, autocontenido, transparencia, realismo, progresión, gobierno.",
+        "Ruta de modelado: naive → ARIMA → SARIMAX → ML tabular → global → LSTM → arquitecturas modernas → probabilístico.",
+        "3 preguntas de investigación organizan los ocho capítulos técnicos + la síntesis del Cap. 10.",
+        "Decisión: ocho experimentos, un protagonista recurrente (LightGBM, cuatro encarnaciones) y una tesis — dónde se invierte la complejidad importa más que cuánta."
+      ]
+    },
+    {
+      "id": "slide_cap1_datasets",
+      "label": "Slide 5 (footer 4) - Capítulo 1 · Datasets",
+      "type": "slide",
+      "group": 2,
+      "level": 1,
+      "slide_number": 5,
+      "title": "Taxonomía de los ocho datasets",
+      "content": [
+        "Tabla de 8 filas: Semana, Dataset, Frecuencia, Desafío principal.",
+        "1 Metro Traffic (horaria) — duplicados y gaps en timestamps.",
+        "2 Appliances Energy (10 min) — exceso de covariables, target ruidoso.",
+        "3 Beijing PM2.5 (horaria) — nulos interiores; exógenas oracle.",
+        "4 Bike Sharing (horaria) — fuga directa (cnt = casual + registered).",
+        "5 Electricity (horaria) — escala 9.7M filas; cold-start.",
+        "6 OPSD Germany (horaria) — 43 columnas, cobertura desigual.",
+        "7 PeMS-SF (10 min) — sin fechas calendario; 963 sensores.",
+        "8 M3 Monthly (mensual) — 1,428 series cortas (66–144 obs.)."
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source": "capitulo_00",
+      "target": "declaracion_cct_capitulo_01",
+      "relation": "contains"
+    },
+    {
+      "source": "capitulo_00",
+      "target": "etica_ia_capitulo_01",
+      "relation": "contains"
+    },
+    {
+      "source": "capitulo_00",
+      "target": "portada_presentacion",
+      "relation": "presented_in"
+    },
+    {
+      "source": "capitulo_00",
+      "target": "slide_agenda",
+      "relation": "presented_in"
+    },
+    {
+      "source": "capitulo_00",
+      "target": "slide_como_leer",
+      "relation": "presented_in"
+    },
+    {
+      "source": "capitulo_00",
+      "target": "slide_cap1_intro",
+      "relation": "presented_in"
+    },
+    {
+      "source": "capitulo_00",
+      "target": "slide_cap1_datasets",
+      "relation": "presented_in"
+    },
+    {
+      "source": "slide_como_leer",
+      "target": "declaracion_cct_capitulo_01",
+      "relation": "references"
+    },
+    {
+      "source": "portada_presentacion",
+      "target": "declaracion_cct_capitulo_01",
+      "relation": "summarizes"
+    },
+    {
+      "source": "capitulo_00",
+      "target": "capitulo_01",
+      "relation": "precedes",
+      "cross_file": true,
+      "target_file": "json_cap01.json"
+    }
+  ]
+}

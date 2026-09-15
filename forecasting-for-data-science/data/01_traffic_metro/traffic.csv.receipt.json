@@ -1,0 +1,31 @@
+{
+  "created_at_utc": "2026-08-05T21:55:16.146438+00:00",
+  "source": {
+    "url": "https://archive.ics.uci.edu/static/public/492/metro+interstate+traffic+volume.zip",
+    "downloaded_bytes": 405547,
+    "source_sha256": "b99aeabcbd6cc86f642da3a79d90883425798f58abd3b3302da2fa19dda73768"
+  },
+  "output": {
+    "path": "traffic.csv",
+    "bytes": 3188983,
+    "sha256": "d127adc2ebec4ca9c2da1ad4a9dd7742f6560903fcfc2712f0576eb2da506393"
+  },
+  "details": {
+    "target": "y",
+    "frequency": "hourly",
+    "cleaning": "decompressed nested gzip; standardized date_time->ds and traffic_volume->y",
+    "rows": 48204,
+    "columns": [
+      "holiday",
+      "temp",
+      "rain_1h",
+      "snow_1h",
+      "clouds_all",
+      "weather_main",
+      "weather_description",
+      "ds",
+      "y"
+    ],
+    "nulls": 0
+  }
+}
