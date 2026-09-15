@@ -1,10 +1,9 @@
 # Plan de migración a GitHub (Windows / Linux / macOS)
 
-> **Estado: Fases 1–5 completas, Fase 6 completa, commit inicial hecho
-> (`bb2b25b`).** Identidad configurada localmente
-> (`jlincovilc-pe` / email noreply de GitHub). Autenticado en GitHub como
-> `jlincovilc-pe` vía `gh auth login`. Falta ejecutar Fase 7 (crear el
-> repo remoto y hacer push) — ver sección 4.
+> **Estado: PUBLICADO.** Las 8 fases están completas. Repositorio en
+> https://github.com/jlincovilc-pe/repositorio_pronostico_series_temporales_estudiante
+> (público), CI en verde en Ubuntu/Windows/macOS, verificado con un clon
+> limpio. Ver sección 4 para el registro completo de lo ejecutado.
 
 Este documento define el plan para convertir el directorio actual (todavía sin
 `git init`) en un repositorio de GitHub que, al clonarse en cualquiera de las
@@ -361,9 +360,35 @@ Ejecutado en esta sesión, en orden:
     `gh auth login --web` (flujo de device code, confirmado por el autor en
     el navegador).
 
-**Pendiente:** Fase 7 (crear el repo remoto bajo `jlincovilc-pe` y hacer
-`git push`), confirmada por el autor ("subimos lo que se puede para que el
-repositorio no tenga problemas").
+11. **Fase 7 (publicar):** `gh` CLI instalado, autenticado como
+    `jlincovilc-pe` vía `gh auth login --web` (device code, confirmado por
+    el autor en el navegador). Repo creado con `gh repo create` (público).
+    Primer intento de `git push` rechazado por GitHub: el token no tenía el
+    scope `workflow`, necesario para subir `.github/workflows/ci.yml`
+    (protección estándar de GitHub contra apps que modifican Actions sin
+    permiso explícito). Se pidió el scope adicional con `gh auth refresh -s
+    workflow` (segunda autorización por device code, confirmada por el
+    autor) y el push se completó.
+12. **Bug encontrado post-push:** el workflow de CI (`.github/workflows/
+    ci.yml`) estaba configurado para disparar en la rama `main`, pero
+    `git init` había creado la rama como `master` — nunca se ejecutó tras
+    el primer push. Corregido (`branches: [master]`), commiteado y
+    empujado.
+13. **Fase 6/8 (CI + verificación):** los tres jobs de la matriz
+    (`ubuntu-latest`, `windows-latest`, `macos-latest`, Python 3.11)
+    corrieron y pasaron en verde (`validate_repository.py` + `pytest -q`,
+    13 tests) — confirmación real de que el repo funciona en las tres
+    plataformas, no solo una afirmación del README.
+14. **Fase 8 (verificación con clon limpio):** `gh repo clone` a un
+    directorio temporal: 68 MB, 89 archivos, los dos CSV grandes ausentes
+    (solo sus `.receipt.json`), y los cuatro enlaces corregidos
+    (`silabo/silabo.pdf`, `Forecasting_monograph/
+    monografia_timeseries_benchmarks.pdf`, `html_presentation/
+    monografia_interactiva.html`, `LICENSE`) resuelven a archivos reales.
+    Clon temporal eliminado tras la verificación.
+
+**Repositorio publicado:**
+https://github.com/jlincovilc-pe/repositorio_pronostico_series_temporales_estudiante
 
 ---
 
